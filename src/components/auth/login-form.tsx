@@ -1,0 +1,132 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+
+import { loginSchema, type LoginInput } from "@/lib/validations/auth";
+
+type ResponseBody = { success: boolean; message: string };
+
+export function LoginForm() {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+
+  async function onSubmit(values: LoginInput) {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const body = (await response.json()) as ResponseBody;
+      if (!response.ok) {
+        setError("root", { message: body.message });
+        return;
+      }
+      router.replace("/admin");
+      router.refresh();
+    } catch {
+      setError("root", { message: "Unable to sign in. Please try again." });
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+      {errors.root && (
+        <p
+          role="alert"
+          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          {errors.root.message}
+        </p>
+      )}
+      <div>
+        <label htmlFor="email" className="text-sm font-semibold text-slate-800">
+          Email address
+        </label>
+        <input
+          id="email"
+          type="email"
+          autoComplete="email"
+          aria-invalid={Boolean(errors.email)}
+          aria-describedby={errors.email ? "email-error" : undefined}
+          {...register("email")}
+          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+        />
+        {errors.email && (
+          <p
+            id="email-error"
+            role="alert"
+            className="mt-1.5 text-sm text-red-600"
+          >
+            {errors.email.message}
+          </p>
+        )}
+      </div>
+      <div>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="password"
+            className="text-sm font-semibold text-slate-800"
+          >
+            Password
+          </label>
+          <Link
+            href="/admin/forgot-password"
+            className="text-sm font-semibold text-cyan-700 hover:text-cyan-600"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <div className="relative mt-2">
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            aria-invalid={Boolean(errors.password)}
+            aria-describedby={errors.password ? "password-error" : undefined}
+            {...register("password")}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-11 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((value) => !value)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            className="absolute inset-y-0 right-0 grid w-11 place-items-center text-slate-500 hover:text-slate-800"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        {errors.password && (
+          <p
+            id="password-error"
+            role="alert"
+            className="mt-1.5 text-sm text-red-600"
+          >
+            {errors.password.message}
+          </p>
+        )}
+      </div>
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 py-3 font-bold text-slate-950 hover:bg-cyan-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {isSubmitting && (
+          <LoaderCircle size={18} className="animate-spin" aria-hidden="true" />
+        )}
+        {isSubmitting ? "Signing in…" : "Sign in"}
+      </button>
+    </form>
+  );
+}
