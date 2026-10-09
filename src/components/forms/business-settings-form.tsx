@@ -69,7 +69,7 @@ function TextField({
         placeholder={placeholder}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : helper ? helperId : undefined}
-        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
       />
       {helper && !error && (
         <p id={helperId} className="mt-1.5 text-xs leading-5 text-slate-500">
@@ -156,7 +156,7 @@ export function BusinessSettingsForm({
           aria-live="polite"
           className={
             notice.kind === "success"
-              ? "rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"
+              ? "rounded-lg border border-success-200 bg-success-50 p-3 text-sm text-success-800"
               : "rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
           }
         >
@@ -201,7 +201,7 @@ export function BusinessSettingsForm({
               aria-describedby={
                 errors.description ? "description-error" : undefined
               }
-              className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+              className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
             />
             {errors.description && (
               <p
@@ -360,7 +360,7 @@ export function BusinessSettingsForm({
           aria-describedby={
             errors.businessHours ? "business-hours-error" : undefined
           }
-          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
         />
         {errors.businessHours && (
           <p
@@ -421,6 +421,49 @@ export function BusinessSettingsForm({
           />
         </div>
       </Section>
+      <Section
+        title="Search and social sharing"
+        description="Optional public metadata. Use factual descriptions and verification tokens only; never enter secrets. The canonical origin comes from NEXT_PUBLIC_APP_URL."
+      >
+        <div className="grid gap-5 sm:grid-cols-2">
+          <TextField
+            name="seoDefaultTitle"
+            label="Default SEO title"
+            register={register}
+            error={errors.seoDefaultTitle}
+          />
+          <TextField
+            name="seoDefaultDescription"
+            label="Default SEO description"
+            register={register}
+            error={errors.seoDefaultDescription}
+          />
+          <TextField
+            name="ogImageUrl"
+            label="Social sharing image URL"
+            register={register}
+            error={errors.ogImageUrl}
+          />
+          <TextField
+            name="twitterHandle"
+            label="X / Twitter handle"
+            register={register}
+            error={errors.twitterHandle}
+          />
+          <TextField
+            name="googleSiteVerification"
+            label="Google verification token"
+            register={register}
+            error={errors.googleSiteVerification}
+          />
+          <TextField
+            name="bingSiteVerification"
+            label="Bing verification token"
+            register={register}
+            error={errors.bingSiteVerification}
+          />
+        </div>
+      </Section>
       <div className="sticky bottom-4 flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur">
         <p className="hidden text-sm text-slate-500 sm:block">
           {isDirty ? "You have unsaved changes." : "All changes are saved."}
@@ -428,7 +471,7 @@ export function BusinessSettingsForm({
         <button
           type="submit"
           disabled={isSubmitting || !isDirty}
-          className="ml-auto inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="ml-auto inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 font-bold text-white hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? (
             <LoaderCircle size={18} className="animate-spin" />

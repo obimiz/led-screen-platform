@@ -1,0 +1,3 @@
+"use client";
+import {useState} from "react";
+export function PayButton({token}:{token:string}){const [busy,setBusy]=useState(false);const [error,setError]=useState("");return <div>{error&&<p className="mb-2 text-sm text-red-700">{error}</p>}<button disabled={busy} onClick={async()=>{setBusy(true);setError("");try{const r=await fetch("/api/payments/initialize",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({orderPublicToken:token})});const d=await r.json();if(!r.ok)throw new Error(d.message);window.location.href=d.data.authorizationUrl;}catch(e){setError(e instanceof Error?e.message:"Unable to start payment.");setBusy(false);}}} className="rounded-lg bg-primary px-5 py-3 font-bold">{busy?"Starting payment…":"Pay Now"}</button></div>}

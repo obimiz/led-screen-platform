@@ -45,13 +45,13 @@ export function ResetPasswordForm({ token }: { token: string }) {
   if (complete)
     return (
       <div aria-live="polite">
-        <p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
+        <p className="rounded-lg bg-success-50 p-3 text-sm text-success-800">
           Your password has been changed and existing sessions have been
           invalidated.
         </p>
         <Link
           href="/admin/login"
-          className="mt-6 inline-block rounded-lg bg-cyan-500 px-4 py-3 font-bold text-slate-950"
+          className="mt-6 inline-block rounded-lg bg-primary px-4 py-3 font-bold text-white"
         >
           Continue to sign in
         </Link>
@@ -85,7 +85,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
             errors.password ? "new-password-error" : "password-help"
           }
           {...register("password")}
-          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
         />
         <p id="password-help" className="mt-1.5 text-xs text-slate-500">
           At least 8 characters with one letter and one number.
@@ -116,7 +116,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
             errors.confirmPassword ? "confirm-password-error" : undefined
           }
           {...register("confirmPassword")}
-          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
         />
         {errors.confirmPassword && (
           <p
@@ -131,7 +131,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 py-3 font-bold text-slate-950 hover:bg-cyan-400 disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-white hover:bg-primary-hover disabled:opacity-60"
       >
         {isSubmitting && <LoaderCircle size={18} className="animate-spin" />}
         {isSubmitting ? "Changing password…" : "Change password"}

@@ -8,6 +8,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { siteConfig } from "@/lib/config/site";
 import { adminNavigation } from "@/lib/constants/navigation";
 import type { SafeAdmin } from "@/types/auth";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export function AdminTopbar({ admin }: { admin: SafeAdmin }) {
   const [open, setOpen] = useState(false);
@@ -15,6 +16,7 @@ export function AdminTopbar({ admin }: { admin: SafeAdmin }) {
   return (
     <header className="relative flex h-18 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
       <div className="flex items-center gap-3">
+        <NotificationBell />
         <button
           type="button"
           onClick={() => setOpen((current) => !current)}
@@ -38,7 +40,7 @@ export function AdminTopbar({ admin }: { admin: SafeAdmin }) {
         </span>
         <Link
           href="/"
-          className="hidden text-sm font-semibold text-cyan-700 hover:text-cyan-600 sm:inline"
+          className="hidden text-sm font-semibold text-brand-700 hover:text-brand-600 sm:inline"
         >
           View site
         </Link>

@@ -5,6 +5,13 @@ export type BusinessSettings = BusinessSettingsValues & {
 };
 
 export type PublicBusinessSettings = {
+  seoDefaultTitle?: string;
+  seoDefaultDescription?: string;
+  ogImageUrl?: string;
+  twitterHandle?: string;
+  googleSiteVerification?: string;
+  bingSiteVerification?: string;
+  hasPhysicalAddress?: boolean;
   businessName: string;
   shortName: string;
   tagline: string;

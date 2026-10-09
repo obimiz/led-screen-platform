@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { staticPageMetadata } from "@/lib/seo/pages";
+import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
 import { ProductCard } from "@/components/products/product-card";
 import { Container } from "@/components/ui/container";
@@ -6,11 +7,7 @@ import { indoorOutdoorOptions } from "@/lib/constants/products";
 import { productQuerySchema } from "@/lib/validations/product";
 import { getLedProducts, getProductCategories } from "@/services/products";
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "LED Screens",
-  description:
-    "Explore professional indoor, outdoor, rental, and fine-pitch LED display solutions.",
-};
+
 type Search = Promise<Record<string, string | string[] | undefined>>;
 export default async function LedScreensPage({
   searchParams,
@@ -30,10 +27,10 @@ export default async function LedScreensPage({
     getProductCategories(),
   ]);
   return (
-    <>
-      <section className="bg-slate-950 py-16 text-white">
+    <main>
+      <section className="bg-brand-900 py-16 text-white">
         <Container>
-          <p className="text-sm font-bold tracking-widest text-cyan-300 uppercase">
+          <p className="text-brand-300 text-sm font-bold tracking-widest uppercase">
             Product catalogue
           </p>
           <h1 className="mt-3 text-4xl font-black sm:text-5xl">
@@ -73,10 +70,12 @@ export default async function LedScreensPage({
             >
               <option value="">Indoor and outdoor</option>
               {indoorOutdoorOptions.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {item === "not-specified" ? "To be confirmed" : item}
+                </option>
               ))}
             </select>
-            <button className="rounded-lg bg-cyan-500 p-2.5 font-bold">
+            <button className="bg-primary rounded-lg p-2.5 font-bold">
               Apply filters
             </button>
           </form>
@@ -84,7 +83,7 @@ export default async function LedScreensPage({
             {total} LED screens found
           </p>
           {products.length ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -96,7 +95,7 @@ export default async function LedScreensPage({
               </h2>
               <Link
                 href="/led-screens"
-                className="mt-3 inline-block font-semibold text-cyan-700"
+                className="text-brand-700 mt-3 inline-block font-semibold"
               >
                 Clear filters
               </Link>
@@ -122,6 +121,14 @@ export default async function LedScreensPage({
           )}
         </Container>
       </section>
-    </>
+    </main>
   );
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchValues>;
+}) {
+  return staticPageMetadata("/led-screens", await searchParams);
 }

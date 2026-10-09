@@ -44,6 +44,14 @@ const defaults: AccessoryFormInput = {
   priceType: "contact",
   stockStatus: "in-stock",
   quantity: 0,
+  isPurchasableOnline: false,
+  minOrderQuantity: 1,
+  maxOrderQuantity: null,
+  allowBackorder: false,
+  trackInventory: true,
+  lowStockThreshold: 1,
+  shippingRequired: true,
+  orderNotes: "",
   featured: false,
   status: "draft",
   seoTitle: "",
@@ -72,7 +80,7 @@ function Input({
         type={type}
         {...register(name)}
         aria-invalid={Boolean(error)}
-        className="mt-2 w-full rounded-lg border border-slate-300 p-2.5 outline-none focus:border-cyan-600"
+        className="mt-2 w-full rounded-lg border border-slate-300 p-2.5 outline-none focus:border-brand-600"
       />
       {error && (
         <p role="alert" className="mt-1 text-sm text-red-600">
@@ -112,7 +120,7 @@ function List({
         <button
           type="button"
           onClick={() => change([...values, ""])}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-cyan-700"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700"
         >
           <Plus size={15} /> Add
         </button>
@@ -328,7 +336,7 @@ export function AccessoryForm({
           <button
             type="button"
             onClick={() => specs.append({ label: "", value: "" })}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-cyan-700"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700"
           >
             <Plus size={15} /> Add specification
           </button>
@@ -384,7 +392,7 @@ export function AccessoryForm({
             ))}
           </select>
         </div>
-        {priceType === "fixed" && (
+        {["fixed", "from", "per_sqm"].includes(priceType) && (
           <Input
             name="price"
             label="Price"
@@ -454,7 +462,7 @@ export function AccessoryForm({
       </Section>
       <button
         disabled={isSubmitting}
-        className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-5 py-3 font-bold disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 font-bold disabled:opacity-50"
       >
         {isSubmitting ? (
           <LoaderCircle size={18} className="animate-spin" />

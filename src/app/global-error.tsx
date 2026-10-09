@@ -9,7 +9,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <main className="grid min-h-dvh place-items-center bg-slate-950 px-6 text-center text-white">
+        <main className="grid min-h-dvh place-items-center bg-brand-900 px-6 text-center text-white">
           <div>
             <h1 className="text-3xl font-black">Something went wrong</h1>
             <p className="mt-3 text-slate-300">
@@ -18,7 +18,7 @@ export default function GlobalError({
             <button
               type="button"
               onClick={reset}
-              className="mt-7 rounded-lg bg-cyan-400 px-5 py-3 font-bold text-slate-950"
+              className="mt-7 rounded-lg bg-primary px-5 py-3 font-bold text-white"
             >
               Try again
             </button>

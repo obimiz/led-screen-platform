@@ -1,0 +1,1 @@
+import {apiSuccess} from "@/lib/api/responses"; import {salesApi,salesBody} from "@/lib/sales/api"; import {updateTestimonial} from "@/services/gallery"; export async function PUT(r:Request,c:{params:Promise<{id:string}>}){return salesApi(async a=>apiSuccess("Updated",await updateTestimonial((await c.params).id,await salesBody(r),a.id)))}

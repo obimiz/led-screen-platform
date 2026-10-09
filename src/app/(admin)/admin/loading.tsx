@@ -5,7 +5,7 @@ export default function Loading() {
         role="status"
         className="flex items-center gap-3 text-sm font-semibold text-slate-600"
       >
-        <span className="size-5 animate-spin rounded-full border-2 border-slate-300 border-t-cyan-600" />
+        <span className="size-5 animate-spin rounded-full border-2 border-slate-300 border-t-brand-600" />
         Loading…
       </div>
     </div>

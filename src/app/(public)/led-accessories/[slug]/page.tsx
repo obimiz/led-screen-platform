@@ -1,33 +1,22 @@
+import { buildProductMetadata } from "@/lib/seo/metadata";
+import { buildProductJsonLd } from "@/lib/seo/structured-data";
+import { JsonLd } from "@/components/seo/json-ld";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AccessoryCard } from "@/components/products/accessory-card";
 import { PriceDisplay } from "@/components/products/price-display";
 import { ProductImage } from "@/components/products/product-media";
 import { Container } from "@/components/ui/container";
-import { siteConfig } from "@/lib/config/site";
+
 import { createWhatsAppUrl } from "@/lib/utils/contact";
 import { getVideoEmbedUrl } from "@/lib/utils/video";
 import { getPublicBusinessSettings } from "@/services/business-settings";
 import { getAccessoryBySlug, getRelatedAccessories } from "@/services/products";
+import { AddToCartButton } from "@/components/cart/cart-controls";
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ slug: string }> };
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const item = await getAccessoryBySlug((await params).slug);
-  if (!item) return { title: "Accessory not found" };
-  const title = item.seoTitle || item.name;
-  const description = item.seoDescription || item.shortDescription;
-  return {
-    title,
-    description,
-    alternates: { canonical: `/led-accessories/${item.slug}` },
-    openGraph: {
-      title,
-      description,
-      url: `${siteConfig.url}/led-accessories/${item.slug}`,
-      images: item.featuredImageUrl ? [item.featuredImageUrl] : [],
-    },
-  };
-}
 export default async function AccessoryPublicDetail({ params }: Props) {
   const item = await getAccessoryBySlug((await params).slug);
   if (!item) notFound();
@@ -42,10 +31,17 @@ export default async function AccessoryPublicDetail({ params }: Props) {
   const video = getVideoEmbedUrl(item.videoUrl);
   const gallery = [item.featuredImageUrl, ...item.imageUrls].filter(Boolean);
   return (
-    <article>
-      <section className="bg-slate-950 py-12 text-white">
+    <main>
+      <Breadcrumbs
+        items={[
+          { name: "LED Accessories", path: "/led-accessories" },
+          { name: item.name, path: `/led-accessories/${item.slug}` },
+        ]}
+      />
+      <JsonLd data={buildProductJsonLd(item)} />
+      <section className="bg-brand-900 py-12 text-white">
         <Container>
-          <p className="text-sm font-bold tracking-wider text-cyan-300 uppercase">
+          <p className="text-sm font-bold tracking-wider text-brand-300 uppercase">
             {item.category.name}
           </p>
           <h1 className="mt-3 text-4xl font-black sm:text-5xl">{item.name}</h1>
@@ -60,6 +56,7 @@ export default async function AccessoryPublicDetail({ params }: Props) {
         <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
           <div>
             <ProductImage
+              priority
               url={item.featuredImageUrl}
               name={item.name}
               className="aspect-video rounded-2xl"
@@ -87,13 +84,39 @@ export default async function AccessoryPublicDetail({ params }: Props) {
                 ? ` · ${item.quantity} available`
                 : ""}
             </p>
-            <div className="mt-6">
+            <div className="mt-6 space-y-3">
+              {item.priceType === "fixed" &&
+                item.isPurchasableOnline &&
+                item.price !== null &&
+                item.stockStatus !== "out-of-stock" && (
+                  <AddToCartButton
+                    item={{
+                      productId: item.id,
+                      productName: item.name,
+                      slug: item.slug,
+                      productType: item.productType,
+                      sku: item.sku,
+                      imageUrl: item.featuredImageUrl,
+                      quantity: item.minOrderQuantity || 1,
+                      displayedUnitPrice: item.price,
+                      currency: item.currency,
+                      minOrderQuantity: item.minOrderQuantity,
+                      maxOrderQuantity: item.maxOrderQuantity,
+                    }}
+                  />
+                )}
+              <Link
+                href={`/request-quote?product=${item.slug}`}
+                className="block rounded-lg bg-primary px-5 py-3 text-center font-bold text-white"
+              >
+                Request Quote
+              </Link>
               {whatsapp && (
                 <a
                   href={whatsapp}
                   target="_blank"
                   rel="noreferrer"
-                  className="block rounded-lg bg-emerald-500 px-5 py-3 text-center font-bold text-white"
+                  className="block rounded-lg bg-success-500 px-5 py-3 text-center font-bold text-brand-900"
                 >
                   Enquire on WhatsApp
                 </a>
@@ -130,7 +153,7 @@ export default async function AccessoryPublicDetail({ params }: Props) {
               {item.compatibility.map((value) => (
                 <span
                   key={value}
-                  className="rounded-full bg-cyan-50 px-4 py-2 text-sm font-semibold"
+                  className="rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold"
                 >
                   {value}
                 </span>
@@ -158,6 +181,7 @@ export default async function AccessoryPublicDetail({ params }: Props) {
           <section className="mt-10">
             <h2 className="mb-4 text-2xl font-black">Product video</h2>
             <iframe
+              loading="lazy"
               src={video}
               title={`${item.name} video`}
               allowFullScreen
@@ -180,6 +204,12 @@ export default async function AccessoryPublicDetail({ params }: Props) {
           </section>
         )}
       </Container>
-    </article>
+    </main>
   );
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const item = await getAccessoryBySlug((await params).slug);
+  if (!item) notFound();
+  return buildProductMetadata(item, await getPublicBusinessSettings());
 }

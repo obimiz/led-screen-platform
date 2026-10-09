@@ -1,0 +1,1 @@
+Place the genuine production video here as image-grant-hero.mp4. Use an optimized H.264 MP4, roughly 10–20 seconds, 1080p, without audio, ideally under 8 MB with fast-start metadata. No video is supplied or generated. Redeploy after adding the asset. Small screens, reduced motion and data-saving connections use the existing poster.

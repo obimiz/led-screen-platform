@@ -49,20 +49,20 @@ export function ForgotPasswordForm() {
   if (result)
     return (
       <div aria-live="polite">
-        <p className="rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">
+        <p className="rounded-lg bg-success-50 p-3 text-sm leading-6 text-success-800">
           {result.message}
         </p>
         {result.data?.resetUrl && (
           <a
             href={result.data.resetUrl}
-            className="mt-4 block text-sm font-semibold break-all text-cyan-700 underline"
+            className="mt-4 block text-sm font-semibold break-all text-brand-700 underline"
           >
             Development reset link
           </a>
         )}
         <Link
           href="/admin/login"
-          className="mt-6 inline-block text-sm font-semibold text-cyan-700"
+          className="mt-6 inline-block text-sm font-semibold text-brand-700"
         >
           Return to sign in
         </Link>
@@ -90,7 +90,7 @@ export function ForgotPasswordForm() {
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "email-error" : undefined}
           {...register("email")}
-          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
         />
         {errors.email && (
           <p
@@ -105,14 +105,14 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 py-3 font-bold text-slate-950 hover:bg-cyan-400 disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-white hover:bg-primary-hover disabled:opacity-60"
       >
         {isSubmitting && <LoaderCircle size={18} className="animate-spin" />}
         {isSubmitting ? "Submitting…" : "Send reset instructions"}
       </button>
       <Link
         href="/admin/login"
-        className="block text-center text-sm font-semibold text-cyan-700"
+        className="block text-center text-sm font-semibold text-brand-700"
       >
         Return to sign in
       </Link>

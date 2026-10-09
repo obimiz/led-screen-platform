@@ -1,0 +1,1 @@
+import {requireGalleryAdmin} from "@/lib/gallery/access"; import {GalleryItemForm} from "@/components/gallery/item-form"; export default async function Page(){await requireGalleryAdmin();return <main className="p-6"><h1 className="mb-6 text-3xl font-black">Edit gallery item</h1><GalleryItemForm/></main>}

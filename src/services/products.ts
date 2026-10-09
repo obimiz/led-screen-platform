@@ -74,6 +74,20 @@ function accessoryDto(
     priceType: product.priceType,
     stockStatus: product.stockStatus,
     quantity: product.quantity,
+    isPurchasableOnline: product.isPurchasableOnline,
+    minOrderQuantity: product.minOrderQuantity,
+    maxOrderQuantity: product.maxOrderQuantity ?? null,
+    allowBackorder: product.allowBackorder,
+    trackInventory: product.trackInventory,
+    lowStockThreshold: product.lowStockThreshold,
+    shippingRequired: product.shippingRequired,
+    orderNotes: product.orderNotes,
+    isRentable: product.isRentable,
+    rentalQuantityAvailable: product.rentalQuantityAvailable,
+    rentalDailyRate: product.rentalDailyRate ?? null,
+    rentalHourlyRate: product.rentalHourlyRate ?? null,
+    minimumRentalDays: product.minimumRentalDays,
+    rentalDepositAmount: product.rentalDepositAmount,
     featured: product.featured,
     status: product.status,
     seoTitle: product.seoTitle,
@@ -125,12 +139,27 @@ function productDto(
     features: [...product.features],
     imageUrls: [...product.imageUrls],
     featuredImageUrl: product.featuredImageUrl,
+    imageFit: product.imageFit ?? "cover",
     videoUrl: product.videoUrl,
     price: product.price ?? null,
     currency: product.currency,
     priceType: product.priceType,
     stockStatus: product.stockStatus,
     quantity: product.quantity,
+    isPurchasableOnline: product.isPurchasableOnline,
+    minOrderQuantity: product.minOrderQuantity,
+    maxOrderQuantity: product.maxOrderQuantity ?? null,
+    allowBackorder: product.allowBackorder,
+    trackInventory: product.trackInventory,
+    lowStockThreshold: product.lowStockThreshold,
+    shippingRequired: product.shippingRequired,
+    orderNotes: product.orderNotes,
+    isRentable: product.isRentable,
+    rentalQuantityAvailable: product.rentalQuantityAvailable,
+    rentalDailyRate: product.rentalDailyRate ?? null,
+    rentalHourlyRate: product.rentalHourlyRate ?? null,
+    minimumRentalDays: product.minimumRentalDays,
+    rentalDepositAmount: product.rentalDepositAmount,
     featured: product.featured,
     status: product.status,
     seoTitle: product.seoTitle,
@@ -172,7 +201,7 @@ export async function getProductCategories(includeInactive = false) {
 }
 
 export async function getCategoriesByType(
-  productType: "led-screen" | "led-accessory",
+  productType: ProductCategoryValues["productType"],
   includeInactive = false,
 ) {
   await connectToDatabase();
@@ -185,7 +214,7 @@ export async function getCategoriesByType(
 
 async function uniqueCategorySlugByType(
   name: string,
-  productType: "led-screen" | "led-accessory",
+  productType: ProductCategoryValues["productType"],
   excludeId?: string,
 ) {
   const base = createSlug(name) || "category";

@@ -1,0 +1,2 @@
+import {MessageCircle} from "lucide-react"; import {createWhatsAppUrl} from "@/lib/utils/contact";
+export function WhatsAppFloating({number}:{number:string}){const href=createWhatsAppUrl(number,"Hello, I would like to know more about your services.");if(!href)return null;return <a href={href} target="_blank" rel="noreferrer" aria-label="Chat with us on WhatsApp" className="fixed right-4 bottom-4 z-40 grid size-14 place-items-center rounded-full bg-success-500 text-brand-900 shadow-lg transition hover:bg-success-600"><MessageCircle size={25}/></a>}

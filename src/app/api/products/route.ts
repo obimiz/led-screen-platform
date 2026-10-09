@@ -8,6 +8,7 @@ import {
 import { getCurrentAdmin } from "@/lib/auth/current-admin";
 import {
   accessorySchema,
+  bellAlarmSchema,
   productQuerySchema,
   productSchema,
 } from "@/lib/validations/product";
@@ -17,6 +18,7 @@ import {
   getAccessories,
   getLedProducts,
 } from "@/services/products";
+import { createBellAlarmProduct, getBellAlarmProducts } from "@/services/bell-alarm";
 import type { ApiError } from "@/types/api";
 
 export async function GET(request: NextRequest) {
@@ -26,9 +28,10 @@ export async function GET(request: NextRequest) {
     );
     if (!parsed.success) return apiValidationError(parsed.error);
     const admin = await getCurrentAdmin();
-    const result =
-      parsed.data.productType === "led-accessory"
-        ? await getAccessories(parsed.data, Boolean(admin))
+    const result = parsed.data.productType === "led-accessory"
+      ? await getAccessories(parsed.data, Boolean(admin))
+      : parsed.data.productType === "bell-alarm-system" || parsed.data.productType === "bell-alarm-accessory"
+        ? { products: await getBellAlarmProducts(parsed.data.productType, Boolean(admin)), page: 1, pages: 1, total: await (await import("@/models/product")).Product.countDocuments({ productType: parsed.data.productType, ...(admin ? {} : { status: "published" }) }) }
         : await getLedProducts(parsed.data, Boolean(admin));
     return apiSuccess("Products loaded", result);
   } catch (error) {
@@ -47,6 +50,9 @@ export async function POST(request: NextRequest) {
     );
   try {
     const body: unknown = await request.json();
+    if (typeof body === "object" && body !== null && "productType" in body && (body.productType === "bell-alarm-system" || body.productType === "bell-alarm-accessory")) {
+      const parsed = bellAlarmSchema.safeParse(body); if (!parsed.success) return apiValidationError(parsed.error); return apiSuccess("Bell/alarm product created", await createBellAlarmProduct(parsed.data, admin.id), 201);
+    }
     if (
       typeof body === "object" &&
       body !== null &&

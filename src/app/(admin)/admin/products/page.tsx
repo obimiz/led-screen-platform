@@ -47,7 +47,7 @@ export default async function AdminProductsPage({
           </Link>
           <Link
             href="/admin/products/new"
-            className="rounded-lg bg-cyan-500 px-4 py-2.5 font-bold"
+            className="rounded-lg bg-primary px-4 py-2.5 font-bold"
           >
             New product
           </Link>
@@ -102,7 +102,7 @@ export default async function AdminProductsPage({
             <option key={item}>{item}</option>
           ))}
         </select>
-        <button className="rounded-lg bg-slate-900 px-4 py-2.5 font-bold text-white">
+        <button className="rounded-lg bg-primary hover:bg-primary-hover px-4 py-2.5 font-bold text-white">
           Filter
         </button>
       </form>
@@ -140,7 +140,7 @@ export default async function AdminProductsPage({
                     <div>
                       <p className="font-bold">{product.name}</p>
                       {product.featured && (
-                        <span className="text-xs text-cyan-700">Featured</span>
+                        <span className="text-xs text-brand-700">Featured</span>
                       )}
                     </div>
                   </div>
@@ -160,7 +160,7 @@ export default async function AdminProductsPage({
                   <div className="flex gap-3">
                     <Link
                       href={`/admin/products/${product.id}`}
-                      className="font-semibold text-cyan-700"
+                      className="font-semibold text-brand-700"
                     >
                       View
                     </Link>
@@ -186,7 +186,7 @@ export default async function AdminProductsPage({
             </p>
             <Link
               href="/admin/products/new"
-              className="mt-3 inline-block font-semibold text-cyan-700"
+              className="mt-3 inline-block font-semibold text-brand-700"
             >
               Create the first product
             </Link>

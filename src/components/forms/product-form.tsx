@@ -56,12 +56,27 @@ const defaults: ProductFormInput = {
   features: [],
   imageUrls: [],
   featuredImageUrl: "",
+  imageFit: "cover",
   videoUrl: "",
   price: null,
   currency: defaultCurrency,
   priceType: "quote",
   stockStatus: "made-to-order",
   quantity: 0,
+  isPurchasableOnline: false,
+  minOrderQuantity: 1,
+  maxOrderQuantity: null,
+  allowBackorder: false,
+  trackInventory: true,
+  lowStockThreshold: 1,
+  shippingRequired: true,
+  orderNotes: "",
+  isRentable: false,
+  rentalQuantityAvailable: 0,
+  rentalDailyRate: null,
+  rentalHourlyRate: null,
+  minimumRentalDays: 1,
+  rentalDepositAmount: 0,
   featured: false,
   status: "draft",
   seoTitle: "",
@@ -91,7 +106,7 @@ function Input({
         type={type}
         {...register(name)}
         aria-invalid={Boolean(error)}
-        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+        className="focus:border-brand-600 focus:ring-brand-100 mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-2"
       />
       {error && (
         <p role="alert" className="mt-1 text-sm text-red-600">
@@ -131,7 +146,7 @@ function StringList({
         <button
           type="button"
           onClick={() => onChange([...values, ""])}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-cyan-700"
+          className="text-brand-700 inline-flex items-center gap-1 text-sm font-semibold"
         >
           <Plus size={15} /> Add
         </button>
@@ -148,7 +163,7 @@ function StringList({
                   ),
                 )
               }
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-cyan-600"
+              className="focus:border-brand-600 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none"
             />
             <button
               type="button"
@@ -185,7 +200,14 @@ export function ProductForm({
   } = useForm<ProductFormInput, unknown, ProductValues>({
     resolver: zodResolver(productSchema),
     defaultValues: product
-      ? { ...product, category: product.category.id }
+      ? (Object.fromEntries(
+          Object.keys(defaults).map((name) => [
+            name,
+            name === "category"
+              ? product.category.id
+              : (product[name as keyof LedProduct] ?? defaults[name as Name]),
+          ]),
+        ) as ProductFormInput)
       : defaults,
   });
   const specs = useFieldArray({ control, name: "specifications" });
@@ -193,6 +215,7 @@ export function ProductForm({
   const applications = useWatch({ control, name: "usageApplications" }) ?? [];
   const inputs = useWatch({ control, name: "supportedInputs" }) ?? [];
   const images = useWatch({ control, name: "imageUrls" }) ?? [];
+  const imageFit = useWatch({ control, name: "imageFit" }) ?? "cover";
   const featuredImage = useWatch({ control, name: "featuredImageUrl" }) ?? "";
   const priceType = useWatch({ control, name: "priceType" });
 
@@ -231,6 +254,10 @@ export function ProductForm({
         </p>
       )}
       <Section title="Basic information">
+        <label className="flex items-center gap-2 text-sm font-semibold sm:col-span-2">
+          <input type="checkbox" {...register("isPurchasableOnline")} />{" "}
+          Available for online purchase (fixed-price products only)
+        </label>
         <Input
           name="name"
           label="Product name"
@@ -303,7 +330,9 @@ export function ProductForm({
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           >
             {indoorOutdoorOptions.map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>
+                {value === "not-specified" ? "To be confirmed" : value}
+              </option>
             ))}
           </select>
         </div>
@@ -411,6 +440,8 @@ export function ProductForm({
                 key={`${image}-${index}`}
                 url={image}
                 name={`Product image preview ${index + 1}`}
+                fit={imageFit}
+                neutralFallback
                 className="aspect-square rounded-lg border border-slate-200"
               />
             ))}
@@ -445,19 +476,39 @@ export function ProductForm({
           <button
             type="button"
             onClick={() => specs.append({ label: "", value: "" })}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-cyan-700"
+            className="text-brand-700 inline-flex items-center gap-1 text-sm font-semibold"
           >
             <Plus size={15} /> Add specification
           </button>
         </div>
       </Section>
       <Section title="Media">
+        <div>
+          <label htmlFor="imageFit" className="text-sm font-semibold">
+            Image presentation
+          </label>
+          <select
+            id="imageFit"
+            {...register("imageFit")}
+            className="mt-2 w-full rounded-lg border border-slate-300 p-3"
+          >
+            <option value="cover">
+              Installation / environment photo (fill frame)
+            </option>
+            <option value="contain">
+              Isolated product photo (show entire product)
+            </option>
+          </select>
+        </div>
+        <p className="text-sm text-slate-500">
+          Use a local /images/products/ path or an https:// image URL.
+        </p>
         <Input
           name="featuredImageUrl"
           label="Featured image URL"
           register={register}
           error={errors.featuredImageUrl}
-          type="url"
+          type="text"
         />
         <Input
           name="videoUrl"
@@ -489,7 +540,7 @@ export function ProductForm({
             ))}
           </select>
         </div>
-        {priceType === "fixed" && (
+        {["fixed", "from", "per_sqm"].includes(priceType) && (
           <Input
             name="price"
             label="Price"
@@ -524,6 +575,45 @@ export function ProductForm({
           type="number"
           register={register}
           error={errors.quantity as FieldError}
+        />
+        <label className="flex items-center gap-2 pt-8 text-sm font-semibold">
+          <input type="checkbox" {...register("isRentable")} /> Available for
+          rental
+        </label>
+        <Input
+          name="rentalQuantityAvailable"
+          label="Rental quantity available"
+          type="number"
+          register={register}
+          error={errors.rentalQuantityAvailable as FieldError}
+        />
+        <Input
+          name="rentalDailyRate"
+          label="Rental daily rate"
+          type="number"
+          register={register}
+          error={errors.rentalDailyRate as FieldError}
+        />
+        <Input
+          name="rentalHourlyRate"
+          label="Rental hourly rate"
+          type="number"
+          register={register}
+          error={errors.rentalHourlyRate as FieldError}
+        />
+        <Input
+          name="minimumRentalDays"
+          label="Minimum rental days"
+          type="number"
+          register={register}
+          error={errors.minimumRentalDays as FieldError}
+        />
+        <Input
+          name="rentalDepositAmount"
+          label="Default rental deposit"
+          type="number"
+          register={register}
+          error={errors.rentalDepositAmount as FieldError}
         />
       </Section>
       <Section title="Publishing and SEO">
@@ -560,7 +650,7 @@ export function ProductForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-5 py-3 font-bold text-slate-950 disabled:opacity-50"
+        className="bg-primary inline-flex items-center gap-2 rounded-lg px-5 py-3 font-bold text-white disabled:opacity-50"
       >
         {isSubmitting ? (
           <LoaderCircle className="animate-spin" size={18} />

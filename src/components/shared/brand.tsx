@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { siteConfig } from "@/lib/config/site";
 import { cn } from "@/lib/utils/cn";
@@ -14,26 +15,16 @@ export function Brand({
   shortName?: string;
   logoUrl?: string;
 }) {
-  const mark =
-    (shortName || businessName).trim().charAt(0).toUpperCase() || "L";
-
+  void businessName;
+  void shortName;
+  void logoUrl;
   return (
     <Link href="/" className={cn("inline-flex items-center gap-2", className)}>
-      <span
-        aria-hidden="true"
-        style={
-          logoUrl
-            ? {
-                backgroundImage: `url(${JSON.stringify(logoUrl).slice(1, -1)})`,
-              }
-            : undefined
-        }
-        className="grid size-9 shrink-0 place-items-center rounded-lg bg-cyan-400 bg-contain bg-center bg-no-repeat font-black text-slate-950"
-      >
-        {logoUrl ? <span className="sr-only">Logo</span> : mark}
+      <span className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-white/20">
+        <Image src="/branding/image-grant-technology-logo.jpeg" alt="Image Grant Technology logo" fill sizes="44px" className="object-contain p-0.5" priority />
       </span>
-      <span className="max-w-48 text-sm font-bold tracking-wide text-white sm:text-base">
-        {shortName || businessName}
+      <span className="max-w-52 text-sm font-extrabold leading-tight tracking-tight text-white sm:text-base">
+        Image Grant Technology
       </span>
     </Link>
   );

@@ -53,3 +53,10 @@ export function apiRateLimitError(retryAfter: number) {
     { status: 429, headers: { "Retry-After": String(retryAfter) } },
   );
 }
+
+export function apiPrivateNoStore<T>(body: T, status = 200) {
+  return NextResponse.json(body, {
+    status,
+    headers: { "Cache-Control": "private, no-store, max-age=0" },
+  });
+}

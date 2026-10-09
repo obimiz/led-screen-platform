@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { staticPageMetadata } from "@/lib/seo/pages";
+import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
 import { AccessoryCard } from "@/components/products/accessory-card";
 import { Container } from "@/components/ui/container";
@@ -7,11 +8,13 @@ import { productQuerySchema } from "@/lib/validations/product";
 import { getPublicBusinessSettings } from "@/services/business-settings";
 import { getAccessories, getCategoriesByType } from "@/services/products";
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "LED Accessories & Spare Parts",
-  description:
-    "Browse LED modules, controllers, power supplies, receiving cards, cables, and replacement parts.",
-};
+const demoAccessories = [
+  ["LED Video Processor", "Signal processing and seamless switching for display walls"],
+  ["Receiving Card", "Reliable control hardware for modular LED cabinets"],
+  ["LED Power Supply", "Stable power conversion for professional installations"],
+  ["Spare LED Module", "Replacement module for fast field servicing"],
+];
+
 export default async function AccessoriesCatalogue({
   searchParams,
 }: {
@@ -28,17 +31,23 @@ export default async function AccessoriesCatalogue({
     ...simple,
     productType: "led-accessory",
   });
-  const [{ products, page, pages, total }, categories, settings] =
-    await Promise.all([
-      getAccessories(query),
-      getCategoriesByType("led-accessory"),
-      getPublicBusinessSettings(),
-    ]);
+  let products: Awaited<ReturnType<typeof getAccessories>>["products"] = [];
+  let page = 1, pages = 1, total = 0;
+  let categories: Awaited<ReturnType<typeof getCategoriesByType>> = [];
+  const settings = await getPublicBusinessSettings();
+  let databaseUnavailable = false;
+  try {
+    const result = await Promise.all([getAccessories(query), getCategoriesByType("led-accessory")]);
+    ({ products, page, pages, total } = result[0]);
+    categories = result[1];
+  } catch {
+    databaseUnavailable = true;
+  }
   return (
-    <>
-      <section className="bg-slate-950 py-16 text-white">
+    <main>
+      <section className="bg-brand-900 py-16 text-white">
         <Container>
-          <p className="text-sm font-bold tracking-widest text-cyan-300 uppercase">
+          <p className="text-sm font-bold tracking-widest text-brand-300 uppercase">
             Accessories and parts
           </p>
           <h1 className="mt-3 text-4xl font-black sm:text-5xl">
@@ -91,7 +100,7 @@ export default async function AccessoriesCatalogue({
                 <option key={item}>{item}</option>
               ))}
             </select>
-            <button className="rounded-lg bg-cyan-500 font-bold">
+            <button className="rounded-lg bg-primary font-bold">
               Apply filters
             </button>
           </form>
@@ -108,6 +117,10 @@ export default async function AccessoriesCatalogue({
                 />
               ))}
             </div>
+          ) : databaseUnavailable ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {demoAccessories.map(([name, description], index) => <article key={name} className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><div className={`grid aspect-[4/3] place-items-center bg-gradient-to-br ${index % 2 ? "from-brand-700 to-slate-950" : "from-brand-700 to-slate-950"}`}><span className="text-5xl text-white transition group-hover:scale-110">▦</span></div><div className="p-5"><h2 className="font-bold">{name}</h2><p className="mt-2 text-sm leading-6 text-slate-600">{description}</p><Link className="mt-4 inline-block text-sm font-bold text-brand-700" href="/request-quote">Ask about this part →</Link></div></article>)}
+            </div>
           ) : (
             <div className="rounded-2xl border border-dashed p-14 text-center">
               <h2 className="text-xl font-bold">
@@ -115,7 +128,7 @@ export default async function AccessoriesCatalogue({
               </h2>
               <Link
                 href="/led-accessories"
-                className="mt-3 inline-block font-semibold text-cyan-700"
+                className="mt-3 inline-block font-semibold text-brand-700"
               >
                 Clear filters
               </Link>
@@ -139,6 +152,14 @@ export default async function AccessoriesCatalogue({
           )}
         </Container>
       </section>
-    </>
+    </main>
   );
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchValues>;
+}) {
+  return staticPageMetadata("/led-accessories", await searchParams);
 }

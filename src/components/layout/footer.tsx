@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Brand } from "@/components/shared/brand";
 import { Container } from "@/components/ui/container";
 import {
@@ -16,7 +17,7 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
   return (
     <footer
       id="contact"
-      className="border-t border-white/10 bg-slate-950 py-10 text-slate-300"
+      className="border-t border-white/10 bg-brand-900 py-10 text-slate-300"
     >
       <Container className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
         <div className="space-y-3">
@@ -35,7 +36,7 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
             <p>
               <a
                 href={createEmailUrl(settings.primaryEmail)}
-                className="hover:text-cyan-300"
+                className="hover:text-brand-300"
               >
                 {settings.primaryEmail}
               </a>
@@ -45,7 +46,7 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
             <p>
               <a
                 href={createPhoneUrl(settings.primaryPhone)}
-                className="hover:text-cyan-300"
+                className="hover:text-brand-300"
               >
                 {settings.primaryPhone}
               </a>
@@ -57,7 +58,7 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-cyan-300"
+                className="hover:text-brand-300"
               >
                 Chat on WhatsApp
               </a>
@@ -68,6 +69,22 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
           )}
         </div>
         <div className="text-sm">
+          <nav aria-label="Footer">
+            <h2 className="mb-3 font-bold text-white">Explore</h2>
+            <div className="mb-6 flex flex-wrap gap-x-4 gap-y-2">
+              {[
+                ["Services", "/services"],
+                ["LED Rental", "/rent-led-screen"],
+                ["Projects", "/projects"],
+                ["Testimonials", "/testimonials"],
+                ["Contact", "/contact"],
+              ].map(([name, href]) => (
+                <Link key={href} href={href} className="hover:text-brand-300">
+                  {name}
+                </Link>
+              ))}
+            </div>
+          </nav>
           <h2 className="mb-3 font-bold text-white">Connect</h2>
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             {settings.socialLinks.map((social) => (
@@ -76,7 +93,7 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
                 href={social.url}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-cyan-300"
+                className="hover:text-brand-300"
               >
                 {social.label}
               </a>

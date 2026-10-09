@@ -1,0 +1,3 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {requireInstallationAdmin} from "@/lib/installations/access"; import {getUpcomingInstallations} from "@/services/installations";
+export const dynamic="force-dynamic"; export default async function Schedule(){await requireInstallationAdmin();const rows=await getUpcomingInstallations();return <main className="p-6"><h1 className="text-3xl font-black">Installation schedule</h1>{rows.length===0?<p className="mt-8">No upcoming installations.</p>:<div className="mt-6 space-y-3">{rows.map((x:any)=><div key={x.id} className="rounded-xl border p-4"><b>{x.scheduledStartDate||"Date to be scheduled"}</b> · {x.projectName||x.projectNumber} · {x.venueName||"Location pending"}</div>)}</div>}</main>}

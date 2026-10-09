@@ -1,0 +1,2 @@
+import { getOrderByPublicToken } from "@/services/orders"; import { apiSuccess, apiNotFound } from "@/lib/api/responses";
+export async function GET(_:Request,{params}:{params:Promise<{token:string}>}){const order=await getOrderByPublicToken((await params).token);const response=order?apiSuccess("Order loaded",order):apiNotFound("Order not found.");response.headers.set("Cache-Control","private, no-store, max-age=0");return response;}

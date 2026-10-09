@@ -24,6 +24,10 @@ const optionalUrl = z
       ),
   ])
   .default("");
+// LED media can use existing public assets as well as external image URLs.
+const ledImageUrl = optionalUrl.removeDefault().or(
+  z.string().trim().regex(/^\/(?!\/)[^\\\s?#]+$/, "Use a local path or http(s) URL"),
+);
 const stringList = (maxItems: number, maxLength: number) =>
   z.array(z.string().trim().min(1).max(maxLength)).max(maxItems).default([]);
 const sharedFields = {
@@ -66,6 +70,30 @@ const sharedFields = {
   priceType: z.enum(priceTypes),
   stockStatus: z.enum(stockStatuses),
   quantity: z.coerce.number().int().min(0).default(0),
+  isPurchasableOnline: z.boolean().default(false),
+  minOrderQuantity: z.coerce.number().int().min(1).default(1),
+  maxOrderQuantity: z.preprocess((v) => (v === "" || v === undefined ? null : v), z.coerce.number().int().min(1).nullable()).default(null),
+  allowBackorder: z.boolean().default(false),
+  trackInventory: z.boolean().default(true),
+  lowStockThreshold: z.coerce.number().int().min(0).default(1),
+  shippingRequired: z.boolean().default(true),
+  orderNotes: text(500),
+  isRentable: z.boolean().default(false),
+  rentalQuantityAvailable: z.coerce.number().int().min(0).default(0),
+  rentalDailyRate: z
+    .preprocess(
+      (v) => (v === "" || v === undefined ? null : v),
+      z.coerce.number().min(0).nullable(),
+    )
+    .default(null),
+  rentalHourlyRate: z
+    .preprocess(
+      (v) => (v === "" || v === undefined ? null : v),
+      z.coerce.number().min(0).nullable(),
+    )
+    .default(null),
+  minimumRentalDays: z.coerce.number().int().min(1).max(365).default(1),
+  rentalDepositAmount: z.coerce.number().min(0).default(0),
   featured: z.boolean().default(false),
   status: z.enum(productStatuses).default("draft"),
   seoTitle: text(160),
@@ -75,17 +103,20 @@ function priceRule(
   value: { priceType: string; price: number | null },
   context: z.RefinementCtx,
 ) {
-  if (value.priceType === "fixed" && value.price === null)
+  if (["fixed", "from", "per_sqm"].includes(value.priceType) && value.price === null)
     context.addIssue({
       code: "custom",
       path: ["price"],
-      message: "Price is required for fixed-price products",
+      message: "Price is required for this price type",
     });
 }
 
 export const productSchema = z
   .object({
     ...sharedFields,
+    featuredImageUrl: ledImageUrl.default(""),
+    imageUrls: z.array(ledImageUrl.refine((value) => Boolean(value), "Image URL is required")).max(20).default([]),
+    imageFit: z.enum(["cover", "contain"]).default("cover"),
     indoorOutdoor: z.enum(indoorOutdoorOptions),
     pixelPitch: text(50),
     displayTechnology: text(100),
@@ -129,6 +160,7 @@ export const accessorySchema = z
   })
   .strict()
   .superRefine(priceRule);
+export const bellAlarmSchema = z.object({ ...sharedFields, productType: z.enum(["bell-alarm-system","bell-alarm-accessory"]), brand: text(100), modelNumber: text(100), sku: z.string().trim().toUpperCase().max(80).regex(/^[A-Z0-9._-]*$/).default(""), compatibility: stringList(50,200), bellSystemType:text(120), applicationType:text(120), operatingMode:text(80), programmable:z.boolean().default(false), numberOfSchedules:z.coerce.number().int().min(0).default(0), outputZones:z.coerce.number().int().min(0).default(0), audioOutput:text(120), speakerSupport:z.boolean().default(false), sirenSupport:z.boolean().default(false), amplifierRequired:z.boolean().default(false), timerIncluded:z.boolean().default(false), controllerIncluded:z.boolean().default(false), batteryBackupSupported:z.boolean().default(false), remoteControlSupported:z.boolean().default(false), networkSupported:z.boolean().default(false), wifiSupported:z.boolean().default(false), gsmSupported:z.boolean().default(false), powerRequirement:text(120), coverageDescription:text(500), installationRequired:z.boolean().default(false), recommendedFor:stringList(30,120), includedComponents:stringList(50,200), optionalComponents:stringList(50,200) }).strict().superRefine(priceRule);
 
 export const productCategorySchema = z
   .object({

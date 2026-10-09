@@ -1,3 +1,4 @@
+import { getRobotsMetadata } from "@/lib/seo/metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -8,7 +9,7 @@ import { getCurrentAdmin } from "@/lib/auth/current-admin";
 
 export const metadata: Metadata = {
   title: "Administration",
-  robots: { index: false, follow: false },
+  robots: getRobotsMetadata({ index: false, follow: false }),
 };
 
 export default async function AdminLayout({
@@ -20,7 +21,7 @@ export default async function AdminLayout({
   if (!admin) redirect("/admin/login");
 
   return (
-    <div className="flex min-h-dvh bg-slate-100">
+    <div className="admin-shell flex min-h-dvh bg-white">
       <AdminSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminTopbar admin={admin} />

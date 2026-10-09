@@ -11,7 +11,21 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "seed:admin": "node --import tsx scripts/seed-admin.ts",
-    "seed:accessory-categories": "node --import tsx scripts/seed-accessory-categories.ts"
+    "seed:accessory-categories": "node --import tsx scripts/seed-accessory-categories.ts",
+    "test:sales": "node --import tsx --test tests/sales.test.ts",
+    "test:rentals": "node --import tsx --test tests/rentals.test.ts",
+    "test:maintenance": "node --import tsx --test tests/maintenance.test.ts",
+    "test:music": "node --import tsx --test tests/music.test.ts",
+    "test:gallery": "node --import tsx --test tests/gallery.test.ts",
+    "test:orders": "node --import tsx --test tests/orders.test.ts",
+    "test:contact": "node --import tsx --test tests/contact.test.ts",
+    "test:sales:integration": "node --import tsx tests/sales.integration.ts",
+    "test:seo": "node --import tsx --test tests/seo.test.ts",
+    "test:security": "node --import tsx --test tests/security.test.ts",
+    "test:seo:integration": "node --import tsx tests/seo.integration.ts",
+    "seed:organisations": "node --import tsx scripts/seed-organisations.ts",
+    "test:homepage": "node --import tsx --test tests/homepage.test.ts",
+    "test:homepage:integration": "node --import tsx tests/homepage.integration.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -31,12 +45,14 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
+    "mongodb-memory-server": "^11.2.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",

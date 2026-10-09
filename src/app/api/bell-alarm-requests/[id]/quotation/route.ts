@@ -1,0 +1,1 @@
+import {apiSuccess} from "@/lib/api/responses"; import {salesApi} from "@/lib/sales/api"; import {createBellAlarmQuotation} from "@/services/bell-alarm-requests"; export async function POST(_:Request,c:{params:Promise<{id:string}>}){return salesApi(async a=>apiSuccess("Quotation created",await createBellAlarmQuotation((await c.params).id,a.id),201))}

@@ -1,0 +1,1 @@
+Place supplied official organisation logos here. Enter their case-sensitive public paths in Admin → Organisations (for example /Images/clients/madonna-university.png). The on-disk parent folder is `Images`: `/images/clients/` URLs return 404 even on a case-insensitive Mac filesystem. No logos are fabricated. Missing or failed logos use initials.

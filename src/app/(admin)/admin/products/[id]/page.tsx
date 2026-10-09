@@ -18,7 +18,7 @@ export default async function AdminProductDetail({
     <article className="mx-auto max-w-6xl">
       <div className="flex flex-wrap justify-between gap-4">
         <div>
-          <p className="text-sm font-bold tracking-wider text-cyan-700 uppercase">
+          <p className="text-sm font-bold tracking-wider text-brand-700 uppercase">
             {product.category.name}
           </p>
           <h1 className="mt-2 text-3xl font-black">{product.name}</h1>
@@ -26,7 +26,7 @@ export default async function AdminProductDetail({
         <div className="flex items-center gap-3">
           <Link
             href={`/admin/products/${product.id}/edit`}
-            className="rounded-lg bg-cyan-500 px-4 py-2.5 font-bold"
+            className="rounded-lg bg-primary px-4 py-2.5 font-bold"
           >
             Edit product
           </Link>

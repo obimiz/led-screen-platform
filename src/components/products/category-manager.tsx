@@ -77,7 +77,7 @@ export function CategoryManager({
         <h2 className="text-lg font-bold">
           {editing ? "Edit category" : "New category"}
         </h2>
-        {message && <p className="text-sm text-emerald-700">{message}</p>}
+        {message && <p className="text-sm text-success-700">{message}</p>}
         {errors.root && (
           <p className="text-sm text-red-700">{errors.root.message}</p>
         )}
@@ -121,7 +121,7 @@ export function CategoryManager({
         <div className="flex gap-2">
           <button
             disabled={isSubmitting}
-            className="rounded-lg bg-cyan-500 px-4 py-2.5 font-bold"
+            className="rounded-lg bg-primary px-4 py-2.5 font-bold"
           >
             {isSubmitting ? "Saving…" : "Save category"}
           </button>
@@ -161,7 +161,7 @@ export function CategoryManager({
                   <button
                     type="button"
                     onClick={() => edit(category)}
-                    className="font-semibold text-cyan-700"
+                    className="font-semibold text-brand-700"
                   >
                     Edit
                   </button>

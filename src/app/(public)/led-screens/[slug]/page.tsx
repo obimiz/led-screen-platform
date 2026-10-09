@@ -1,33 +1,21 @@
+import { buildProductMetadata } from "@/lib/seo/metadata";
+import { buildProductJsonLd } from "@/lib/seo/structured-data";
+import { JsonLd } from "@/components/seo/json-ld";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PriceDisplay } from "@/components/products/price-display";
 import { ProductImage } from "@/components/products/product-media";
 import { Container } from "@/components/ui/container";
-import { siteConfig } from "@/lib/config/site";
+
 import { createWhatsAppUrl } from "@/lib/utils/contact";
 import { getVideoEmbedUrl } from "@/lib/utils/video";
 import { getPublicBusinessSettings } from "@/services/business-settings";
 import { getLedProductBySlug } from "@/services/products";
+import { AddToCartButton } from "@/components/cart/cart-controls";
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ slug: string }> };
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = await getLedProductBySlug((await params).slug);
-  if (!product) return { title: "LED screen not found" };
-  const title = product.seoTitle || product.name;
-  const description = product.seoDescription || product.shortDescription;
-  return {
-    title,
-    description,
-    alternates: { canonical: `/led-screens/${product.slug}` },
-    openGraph: {
-      title,
-      description,
-      url: `${siteConfig.url}/led-screens/${product.slug}`,
-      images: product.featuredImageUrl ? [product.featuredImageUrl] : [],
-    },
-  };
-}
 export default async function LedProductPage({ params }: Props) {
   const product = await getLedProductBySlug((await params).slug);
   if (!product) notFound();
@@ -47,15 +35,22 @@ export default async function LedProductPage({ params }: Props) {
     ["Refresh rate", product.refreshRate],
     ["Resolution", product.resolution],
     ["Maintenance", product.maintenanceType],
-  ].filter(([, value]) => Boolean(value));
+  ].filter(([, value]) => Boolean(value) && value !== "not-specified");
   return (
-    <article>
-      <section className="bg-slate-950 py-12 text-white">
+    <main>
+      <Breadcrumbs
+        items={[
+          { name: "LED Screens", path: "/led-screens" },
+          { name: product.name, path: `/led-screens/${product.slug}` },
+        ]}
+      />
+      <JsonLd data={buildProductJsonLd(product)} />
+      <section className="bg-brand-900 py-12 text-white">
         <Container>
-          <p className="text-sm font-bold tracking-wider text-cyan-300 uppercase">
+          <p className="text-brand-300 text-sm font-bold tracking-wider uppercase">
             {product.category.name}
           </p>
-          <h1 className="mt-3 max-w-4xl text-4xl font-black sm:text-5xl">
+          <h1 className="mt-3 max-w-4xl text-4xl font-black break-words sm:text-5xl">
             {product.name}
           </h1>
           <p className="mt-4 max-w-2xl text-slate-300">
@@ -67,8 +62,11 @@ export default async function LedProductPage({ params }: Props) {
         <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
           <div>
             <ProductImage
+              priority
               url={product.featuredImageUrl}
               name={product.name}
+              fit={product.imageFit}
+              neutralFallback
               className="aspect-video rounded-2xl"
             />
             {gallery.length > 1 && (
@@ -78,6 +76,8 @@ export default async function LedProductPage({ params }: Props) {
                     key={image}
                     url={image}
                     name={`${product.name} gallery image ${index + 2}`}
+                    fit={product.imageFit}
+                    neutralFallback
                     className="aspect-square rounded-lg"
                   />
                 ))}
@@ -92,24 +92,44 @@ export default async function LedProductPage({ params }: Props) {
               Availability: {product.stockStatus}
             </p>
             <div className="mt-6 flex flex-col gap-3">
+              {product.priceType === "fixed" &&
+                product.isPurchasableOnline &&
+                product.price !== null &&
+                product.stockStatus !== "out-of-stock" && (
+                  <AddToCartButton
+                    item={{
+                      productId: product.id,
+                      productName: product.name,
+                      slug: product.slug,
+                      productType: product.productType,
+                      sku: "",
+                      imageUrl: product.featuredImageUrl,
+                      quantity: product.minOrderQuantity || 1,
+                      displayedUnitPrice: product.price,
+                      currency: product.currency,
+                      minOrderQuantity: product.minOrderQuantity,
+                      maxOrderQuantity: product.maxOrderQuantity,
+                    }}
+                  />
+                )}
               {whatsapp && (
                 <a
                   href={whatsapp}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-lg bg-emerald-500 px-5 py-3 text-center font-bold text-white"
+                  className="bg-success-500 text-brand-900 rounded-lg px-5 py-3 text-center font-bold"
                 >
                   Enquire on WhatsApp
                 </a>
               )}
-              {product.priceType === "quote" && (
+              {
                 <Link
                   href={`/request-quote?product=${product.slug}`}
-                  className="rounded-lg bg-cyan-500 px-5 py-3 text-center font-bold text-slate-950"
+                  className="bg-primary rounded-lg px-5 py-3 text-center font-bold text-white"
                 >
                   Request Quote
                 </Link>
-              )}
+              }
               <a
                 href={`mailto:${settings.primaryEmail}?subject=${encodeURIComponent(`Enquiry: ${product.name}`)}`}
                 className="rounded-lg border px-5 py-3 text-center font-bold"
@@ -157,7 +177,7 @@ export default async function LedProductPage({ params }: Props) {
               {product.usageApplications.map((application) => (
                 <span
                   key={application}
-                  className="rounded-full bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-900"
+                  className="bg-brand-50 text-brand-900 rounded-full px-4 py-2 text-sm font-semibold"
                 >
                   {application}
                 </span>
@@ -185,6 +205,7 @@ export default async function LedProductPage({ params }: Props) {
           <section className="mt-12">
             <h2 className="mb-5 text-2xl font-black">Product video</h2>
             <iframe
+              loading="lazy"
               src={video}
               title={`${product.name} video`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -194,6 +215,21 @@ export default async function LedProductPage({ params }: Props) {
           </section>
         )}
       </Container>
-    </article>
+      <nav
+        aria-label="Product support"
+        className="text-brand-700 mx-auto flex max-w-7xl flex-wrap gap-5 px-4 pb-10"
+      >
+        <Link href="/led-installation">Installation</Link>
+        <Link href="/rent-led-screen">Rental</Link>
+        <Link href="/led-maintenance">Maintenance</Link>
+        <Link href="/led-accessories">Accessories</Link>
+      </nav>
+    </main>
   );
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const item = await getLedProductBySlug((await params).slug);
+  if (!item) notFound();
+  return buildProductMetadata(item, await getPublicBusinessSettings());
 }

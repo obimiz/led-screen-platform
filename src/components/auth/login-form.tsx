@@ -61,7 +61,7 @@ export function LoginForm() {
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "email-error" : undefined}
           {...register("email")}
-          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
         />
         {errors.email && (
           <p
@@ -83,7 +83,7 @@ export function LoginForm() {
           </label>
           <Link
             href="/admin/forgot-password"
-            className="text-sm font-semibold text-cyan-700 hover:text-cyan-600"
+            className="text-sm font-semibold text-brand-700 hover:text-brand-600"
           >
             Forgot password?
           </Link>
@@ -96,7 +96,7 @@ export function LoginForm() {
             aria-invalid={Boolean(errors.password)}
             aria-describedby={errors.password ? "password-error" : undefined}
             {...register("password")}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-11 outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-11 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
           />
           <button
             type="button"
@@ -120,7 +120,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 py-3 font-bold text-slate-950 hover:bg-cyan-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-white hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting && (
           <LoaderCircle size={18} className="animate-spin" aria-hidden="true" />

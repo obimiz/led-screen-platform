@@ -26,7 +26,20 @@ export async function connectToDatabase(): Promise<Mongoose> {
     );
   }
 
-  cache.promise ??= mongoose.connect(uri, { bufferCommands: false });
+  const selectionTimeout = Number(
+    process.env.MONGODB_SERVER_SELECTION_TIMEOUT_MS ?? 5000,
+  );
+  const timeout = Number.isFinite(selectionTimeout) && selectionTimeout > 0
+    ? Math.min(selectionTimeout, 30000)
+    : 5000;
+
+  // Atlas outages should fail a request promptly instead of holding a public
+  // page open for the driver's default 30-second selection window.
+  cache.promise ??= mongoose.connect(uri, {
+    bufferCommands: false,
+    serverSelectionTimeoutMS: timeout,
+    connectTimeoutMS: timeout,
+  });
 
   try {
     cache.connection = await cache.promise;

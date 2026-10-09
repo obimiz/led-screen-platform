@@ -2,10 +2,36 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #28146B;
+  --igt-red: #DD2421;
+  --igt-green: #84C221;
+  --igt-purple: #28146B;
 }
 
 @theme inline {
+  --color-primary: var(--igt-red);
+  --color-primary-hover: #B91E1C;
+  --color-brand-50: #F4F2FA;
+  --color-brand-100: #E9E5F4;
+  --color-brand-200: #D2CAE9;
+  --color-brand-300: #B6A9DA;
+  --color-brand-400: #9480C7;
+  --color-brand-500: #7155AD;
+  --color-brand-600: #52368F;
+  --color-brand-700: var(--igt-purple);
+  --color-brand-800: var(--igt-purple);
+  --color-brand-900: var(--igt-purple);
+  --color-brand-950: #1B0D49;
+  --color-success-50: #F5FAE9;
+  --color-success-100: #E9F4CF;
+  --color-success-200: #D4E99F;
+  --color-success-300: #BBDD70;
+  --color-success-400: #9FCF46;
+  --color-success-500: var(--igt-green);
+  --color-success-600: #699B1A;
+  --color-success-700: #4E7413;
+  --color-success-800: #3C590F;
+  --color-success-900: #2B400B;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: "Inter", "Segoe UI", Arial, sans-serif;
@@ -19,13 +45,200 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+@keyframes pulse-soft { 0%,100% { opacity:.65; transform: scale(.98) } 50% { opacity:1; transform: scale(1) } }
+@media (prefers-reduced-motion: reduce) { .animate-float, .animate-pulse-soft { animation: none; } }
 ::selection {
-  background: #67e8f9;
-  color: #0f172a;
+  background: #84C221;
+  color: #28146B;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+}
+
+.organisation-section {
+  min-width: 0;
+  overflow: hidden;
+}
+.organisation-row {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  overflow: hidden;
+  padding-block: 2px;
+  mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+}
+.organisation-row:focus-visible {
+  outline: 2px solid var(--igt-purple);
+  outline-offset: -2px;
+}
+.organisation-track {
+  display: flex;
+  width: max-content;
+  animation: organisation-scroll 50s linear infinite;
+  will-change: transform;
+}
+/* Equal sequences include their trailing gap, so -50% lands on the next copy. */
+.organisation-group {
+  display: flex;
+  flex-shrink: 0;
+  min-width: min(100vw, 1200px);
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 16px;
+  padding-right: 16px;
+}
+.organisation-card {
+  display: flex;
+  flex: 0 0 180px;
+  width: 180px;
+  height: 150px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e9e5f4;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgb(40 20 107 / 3%);
+  text-align: center;
+}
+.organisation-logo {
+  position: relative;
+  display: flex;
+  flex: 0 0 70px;
+  width: 100%;
+  height: 70px;
+  max-height: 80px;
+  min-width: 0;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+}
+.organisation-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100px;
+  max-height: 65px;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+  object-position: center;
+}
+.organisation-logo-wide img {
+  max-width: 130px;
+  max-height: 65px;
+}
+.organisation-name {
+  color: var(--igt-purple);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.organisation-row:active .organisation-track,
+.organisation-row:focus-visible .organisation-track,
+.organisation-section:has(.organisation-pause:checked) .organisation-track {
+  animation-play-state: paused;
+}
+@media (hover: hover) {
+  .organisation-row:hover .organisation-track { animation-play-state: paused; }
+}
+@keyframes organisation-scroll {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@media (min-width: 640px) {
+  .organisation-track { animation-duration: 45s; }
+  .organisation-row {
+    mask-image: linear-gradient(to right, transparent, black 48px, black calc(100% - 48px), transparent);
+  }
+  .organisation-card {
+    flex-basis: 205px;
+    width: 205px;
+    height: 158px;
+  }
+  .organisation-logo { flex-basis: 75px; height: 75px; }
+  .organisation-logo img { max-width: 110px; max-height: 75px; }
+  .organisation-logo-wide img { max-width: 140px; max-height: 70px; }
+}
+@media (min-width: 1024px) {
+  .organisation-card { flex-basis: 230px; width: 230px; height: 166px; padding-block: 10px; }
+  .organisation-logo { flex-basis: 80px; height: 80px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .organisation-row {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #b6a9da transparent;
+    mask-image: none;
+  }
+  .organisation-track { animation: none; will-change: auto; }
+  .organisation-group { padding: 0 16px 8px; }
+  .organisation-group[aria-hidden="true"] { display: none; }
+  .organisation-section label:has(.organisation-pause) { display: none; }
+}
+
+/* A dedicated document view hides the shell on screen as well as on paper. */
+.admin-shell:has(.quotation-print-view) > aside,
+.admin-shell:has(.quotation-print-view) > div > header {
+  display: none;
+}
+@page {
+  size: A4;
+  margin: 14mm;
+}
+@media print {
+  .admin-shell > aside,
+  .admin-shell > div > header,
+  .no-print {
+    display: none !important;
+  }
+  body,
+  .admin-shell,
+  .admin-shell > div,
+  .admin-shell main {
+    display: block !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+  .quotation-document {
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    box-shadow: none !important;
+    font-size: 10pt;
+  }
+  .quotation-document .overflow-x-auto {
+    overflow: visible !important;
+  }
+  .quotation-document table {
+    font-size: 9pt;
+  }
+  .quotation-document thead {
+    display: table-header-group;
+  }
+  .quotation-document tr,
+  .quotation-document header,
+  .quotation-document dl {
+    break-inside: avoid;
+  }
+  .quotation-document p {
+    overflow-wrap: anywhere;
+  }
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
   }
 }

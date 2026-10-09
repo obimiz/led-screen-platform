@@ -46,6 +46,17 @@ export const businessSettingsSchema = z
     description: optionalText(2000),
     logoUrl: optionalUrl,
     faviconUrl: optionalUrl,
+    seoDefaultTitle: optionalText(180),
+    seoDefaultDescription: optionalText(500),
+    ogImageUrl: optionalUrl,
+    twitterHandle: z
+      .string()
+      .trim()
+      .regex(/^(@[A-Za-z0-9_]{1,15})?$/, "Use @ followed by your handle")
+      .default(""),
+    googleSiteVerification: optionalText(200),
+    bingSiteVerification: optionalText(200),
+
     primaryEmail: optionalEmail,
     secondaryEmail: optionalEmail,
     primaryPhone: optionalPhone,

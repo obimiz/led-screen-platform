@@ -15,15 +15,21 @@ import type {
 } from "@/types/business-settings";
 
 export const defaultBusinessSettings: BusinessSettingsValues = {
-  businessName: "LED Screen Platform",
+  businessName: siteConfig.name,
+  seoDefaultTitle: "",
+  seoDefaultDescription: "",
+  ogImageUrl: "",
+  twitterHandle: "",
+  googleSiteVerification: "",
+  bingSiteVerification: "",
   shortName: "",
   tagline: "",
   description: "",
-  logoUrl: "",
+  logoUrl: "/branding/image-grant-technology-logo.jpeg",
   faviconUrl: "",
   primaryEmail: "",
   secondaryEmail: "",
-  primaryPhone: "",
+  primaryPhone: "+234 803 930 8982",
   secondaryPhone: "",
   whatsappNumber: "",
   addressLine1: "",
@@ -46,32 +52,44 @@ function toSettings(
   document: BusinessSettingsDocument & { updatedAt: Date },
 ): BusinessSettings {
   return {
-    businessName: document.businessName,
-    shortName: document.shortName,
-    tagline: document.tagline,
-    description: document.description,
-    logoUrl: document.logoUrl,
-    faviconUrl: document.faviconUrl,
-    primaryEmail: document.primaryEmail,
-    secondaryEmail: document.secondaryEmail,
-    primaryPhone: document.primaryPhone,
-    secondaryPhone: document.secondaryPhone,
-    whatsappNumber: document.whatsappNumber,
-    addressLine1: document.addressLine1,
-    addressLine2: document.addressLine2,
-    city: document.city,
-    state: document.state,
-    country: document.country,
-    postalCode: document.postalCode,
-    businessHours: document.businessHours,
-    googleMapsUrl: document.googleMapsUrl,
-    facebookUrl: document.facebookUrl,
-    instagramUrl: document.instagramUrl,
-    youtubeUrl: document.youtubeUrl,
-    linkedinUrl: document.linkedinUrl,
-    xUrl: document.xUrl,
-    tiktokUrl: document.tiktokUrl,
-    updatedAt: document.updatedAt.toISOString(),
+    seoDefaultTitle: document.seoDefaultTitle ?? "",
+    seoDefaultDescription: document.seoDefaultDescription ?? "",
+    ogImageUrl: document.ogImageUrl ?? "",
+    twitterHandle: document.twitterHandle ?? "",
+    googleSiteVerification: document.googleSiteVerification ?? "",
+    bingSiteVerification: document.bingSiteVerification ?? "",
+    businessName: document.businessName ?? defaultBusinessSettings.businessName,
+    shortName: document.shortName ?? defaultBusinessSettings.shortName,
+    tagline: document.tagline ?? defaultBusinessSettings.tagline,
+    description: document.description ?? defaultBusinessSettings.description,
+    logoUrl: document.logoUrl ?? defaultBusinessSettings.logoUrl,
+    faviconUrl: document.faviconUrl ?? defaultBusinessSettings.faviconUrl,
+    primaryEmail: document.primaryEmail ?? defaultBusinessSettings.primaryEmail,
+    secondaryEmail:
+      document.secondaryEmail ?? defaultBusinessSettings.secondaryEmail,
+    primaryPhone: document.primaryPhone ?? defaultBusinessSettings.primaryPhone,
+    secondaryPhone:
+      document.secondaryPhone ?? defaultBusinessSettings.secondaryPhone,
+    whatsappNumber:
+      document.whatsappNumber ?? defaultBusinessSettings.whatsappNumber,
+    addressLine1: document.addressLine1 ?? defaultBusinessSettings.addressLine1,
+    addressLine2: document.addressLine2 ?? defaultBusinessSettings.addressLine2,
+    city: document.city ?? defaultBusinessSettings.city,
+    state: document.state ?? defaultBusinessSettings.state,
+    country: document.country ?? defaultBusinessSettings.country,
+    postalCode: document.postalCode ?? defaultBusinessSettings.postalCode,
+    businessHours:
+      document.businessHours ?? defaultBusinessSettings.businessHours,
+    googleMapsUrl:
+      document.googleMapsUrl ?? defaultBusinessSettings.googleMapsUrl,
+    facebookUrl: document.facebookUrl ?? defaultBusinessSettings.facebookUrl,
+    instagramUrl: document.instagramUrl ?? defaultBusinessSettings.instagramUrl,
+    youtubeUrl: document.youtubeUrl ?? defaultBusinessSettings.youtubeUrl,
+    linkedinUrl: document.linkedinUrl ?? defaultBusinessSettings.linkedinUrl,
+    xUrl: document.xUrl ?? defaultBusinessSettings.xUrl,
+    tiktokUrl: document.tiktokUrl ?? defaultBusinessSettings.tiktokUrl,
+    updatedAt:
+      document.updatedAt instanceof Date ? document.updatedAt.toISOString() : "",
   };
 }
 
@@ -123,6 +141,13 @@ function toPublicSettings(settings: BusinessSettings): PublicBusinessSettings {
     { label: "TikTok", url: settings.tiktokUrl },
   ].filter((item) => Boolean(item.url));
   return {
+    seoDefaultTitle: settings.seoDefaultTitle,
+    seoDefaultDescription: settings.seoDefaultDescription,
+    ogImageUrl: settings.ogImageUrl,
+    twitterHandle: settings.twitterHandle,
+    googleSiteVerification: settings.googleSiteVerification,
+    bingSiteVerification: settings.bingSiteVerification,
+    hasPhysicalAddress: Boolean(settings.addressLine1 && settings.city),
     businessName: settings.businessName,
     shortName: settings.shortName,
     tagline: settings.tagline,
@@ -141,6 +166,12 @@ function toPublicSettings(settings: BusinessSettings): PublicBusinessSettings {
   };
 }
 
+// Formal documents must fail visibly if settings cannot be loaded, rather than
+// printing fallback example contact information.
+export async function getDocumentBusinessSettings(): Promise<PublicBusinessSettings> {
+  return toPublicSettings(await getBusinessSettings());
+}
+
 export const getPublicBusinessSettings = cache(
   async (): Promise<PublicBusinessSettings> => {
     try {
@@ -149,11 +180,18 @@ export const getPublicBusinessSettings = cache(
       if (process.env.NODE_ENV === "development")
         console.warn("Using fallback business settings:", error);
       return {
+        seoDefaultTitle: "",
+        seoDefaultDescription: "",
+        ogImageUrl: "",
+        twitterHandle: "",
+        googleSiteVerification: "",
+        bingSiteVerification: "",
+        hasPhysicalAddress: false,
         businessName: siteConfig.name,
         shortName: "",
         tagline: "",
         description: siteConfig.description,
-        logoUrl: "",
+        logoUrl: "/branding/image-grant-technology-logo.jpeg",
         faviconUrl: "",
         primaryEmail: siteConfig.contact.email,
         secondaryEmail: "",

@@ -11,6 +11,9 @@ const store =
 globalForRateLimit.authRateLimits = store;
 
 export function getRequestIdentifier(request: NextRequest) {
+  // Forwarded headers are authoritative only when the deployment proxy is
+  // configured to overwrite them. Set TRUST_PROXY_HEADERS=false otherwise.
+  if (process.env.TRUST_PROXY_HEADERS === "false") return "unknown";
   return (
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
