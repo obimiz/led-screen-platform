@@ -242,3 +242,14 @@ body {
     text-decoration: none !important;
   }
 }
+
+/* Public brand-red actions always use white text, including inherited icon colour. */
+.public-site :is(a, button, [role="button"]).bg-primary {
+  color: #fff;
+}
+.public-site :is(a, button, [role="button"]).bg-primary svg {
+  color: inherit;
+}
+.public-site [id] {
+  scroll-margin-top: 5.5rem;
+}

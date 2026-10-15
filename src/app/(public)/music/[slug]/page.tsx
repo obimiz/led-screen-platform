@@ -1,3 +1,4 @@
+import { MusicPlayer } from "@/components/music/audio-player";
 import Link from "next/link";
 import { getMusicArtistBySlug, getMusicCategories } from "@/services/music";
 import { buildMusicMetadata } from "@/lib/seo/metadata";
@@ -19,10 +20,12 @@ export default async function Page({
   const artist = item.artistSlug
     ? await getMusicArtistBySlug(item.artistSlug)
     : null;
-  const category = (await getMusicCategories()).find(
+  const category = (await getMusicCategories(true)).find(
     (c: { slug: string }) => c.slug === item.categoryId?.slug,
   );
-  const embed = item.embedUrl || normalizeMusicSourceUrl(item.sourceUrl);
+  const embed =
+    normalizeMusicSourceUrl(item.sourceUrl) ||
+    normalizeMusicSourceUrl(item.embedUrl);
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
       <Breadcrumbs
@@ -31,7 +34,7 @@ export default async function Page({
           { name: item.title, path: `/music/${item.slug}` },
         ]}
       />
-      <p className="text-sm font-bold text-brand-700 uppercase">
+      <p className="text-brand-700 text-sm font-bold uppercase">
         {item.contentType}
       </p>
       <h1 className="mt-2 text-4xl font-black">{item.title}</h1>
@@ -46,13 +49,16 @@ export default async function Page({
       </p>
       {category && (
         <Link
-          className="mt-3 inline-block text-brand-700 underline"
+          className="text-brand-700 mt-3 inline-block underline"
           href={`/music/category/${category.slug}`}
         >
           {category.name}
         </Link>
       )}
-      {embed && (
+      {item.sourcePlatform === "owned" && item.audioUrl && (
+        <MusicPlayer src={item.audioUrl} title={item.title} />
+      )}
+      {item.sourcePlatform !== "owned" && embed && (
         <div className="mt-8 aspect-video overflow-hidden rounded-xl bg-black">
           <iframe
             className="h-full w-full"
@@ -64,9 +70,9 @@ export default async function Page({
           />
         </div>
       )}
-      {!embed && item.sourceUrl && (
+      {item.sourcePlatform !== "owned" && !embed && item.sourceUrl && (
         <a
-          className="mt-8 inline-block rounded-lg bg-primary px-5 py-3 font-bold text-white"
+          className="bg-primary mt-8 inline-block rounded-lg px-5 py-3 font-bold text-white"
           href={item.sourceUrl}
           target="_blank"
           rel="noreferrer"

@@ -15,7 +15,7 @@ export default async function PublicLayout({
   const settings = await getPublicBusinessSettings();
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="public-site flex min-h-dvh flex-col">
       <Header settings={settings} />
       <div className="flex-1">{children}</div>
       <Footer settings={settings} />

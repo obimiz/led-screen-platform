@@ -2,4 +2,69 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { salesFetch } from "@/components/sales/client-api";
-export function GalleryCategoryForm() { const [name,setName]=useState(""); const [error,setError]=useState(""); const router=useRouter(); return <form className="mt-8 flex max-w-xl gap-3" onSubmit={async e=>{e.preventDefault();setError("");try{await salesFetch("/api/gallery/categories","POST",{name,slug:"",description:"",isActive:true,sortOrder:0});setName("");router.refresh();}catch(x){setError(x instanceof Error?x.message:"Unable to save category");}}}><input name="name" value={name} onChange={e=>setName(e.target.value)} required placeholder="Category name" className="flex-1 rounded-lg border px-3 py-2" /><button className="rounded-lg bg-primary px-4 py-2 font-bold">Add category</button>{error&&<span className="text-sm text-red-700">{error}</span>}</form>; }
+const suggestions = [
+  "LED Screen Products",
+  "LED Screen Installations",
+  "LED Screen Rentals",
+  "Events & Projects",
+  "Electronic Bell & Alarm Systems",
+  "Accessories & Components",
+  "Other Projects",
+];
+export function GalleryCategoryForm() {
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+  return (
+    <form
+      className="mt-8 max-w-xl space-y-3"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        setMessage("");
+        try {
+          await salesFetch("/api/gallery/categories", "POST", { name });
+          setName("");
+          setMessage("Category added");
+          router.refresh();
+        } catch (e) {
+          setMessage((e as Error).message);
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <label className="block font-semibold">
+        New category name
+        <input
+          name="name"
+          list="gallery-category-suggestions"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          minLength={2}
+          maxLength={120}
+          placeholder="Choose a suggestion or enter a name"
+          className="mt-2 w-full rounded border p-3"
+        />
+      </label>
+      <datalist id="gallery-category-suggestions">
+        {suggestions.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
+      <p className="text-sm text-slate-600">
+        Deactivating a category prevents new selections and preserves existing
+        items.
+      </p>
+      <button
+        disabled={busy}
+        className="bg-primary rounded-lg px-4 py-2 font-bold text-white"
+      >
+        {busy ? "Adding…" : "Add category"}
+      </button>
+      {message && <p role="status">{message}</p>}
+    </form>
+  );
+}

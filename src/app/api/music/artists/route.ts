@@ -1,1 +1,15 @@
-import {apiSuccess} from "@/lib/api/responses"; import {salesApi,salesBody} from "@/lib/sales/api"; import {createMusicArtist,getFeaturedArtists} from "@/services/music"; export async function GET(){return apiSuccess("Artists loaded",await getFeaturedArtists())} export async function POST(r:Request){return salesApi(async()=>apiSuccess("Artist created",await createMusicArtist(await salesBody(r)),201))}
+import { apiSuccess } from "@/lib/api/responses";
+import { salesApi, salesBody } from "@/lib/sales/api";
+import { createMusicArtist, getFeaturedArtists } from "@/services/music";
+export async function GET() {
+  return apiSuccess("Artists loaded", await getFeaturedArtists());
+}
+export async function POST(r: Request) {
+  return salesApi(async () =>
+    apiSuccess(
+      "Artist created",
+      await createMusicArtist(await salesBody(r)),
+      201,
+    ),
+  );
+}

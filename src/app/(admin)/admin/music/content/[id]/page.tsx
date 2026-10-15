@@ -1,1 +1,8 @@
-import Link from "next/link"; import {notFound} from "next/navigation"; import {requireMusicAdmin} from "@/lib/music/access"; import {getMusicById} from "@/services/music"; export const dynamic="force-dynamic"; export default async function Page({params}:{params:Promise<{id:string}>}){await requireMusicAdmin();const x=await getMusicById((await params).id);if(!x)return notFound();return <main className="p-6"><p className="text-sm text-slate-500">{x.sourcePlatform} · {x.status}</p><h1 className="mt-2 text-3xl font-black">{x.title}</h1><p className="mt-2">{x.artistName}</p><p className="mt-6 max-w-2xl whitespace-pre-wrap">{x.description}</p><div className="mt-6 flex gap-3"><Link className="rounded-lg border px-4 py-2" href={`/admin/music/content/${x.id}/edit`}>Edit</Link>{x.status==='published'&&<Link className="rounded-lg border px-4 py-2" href={`/music/${x.slug}`}>Open public page</Link>}</div></main>}
+import { redirect } from "next/navigation";
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  redirect(`/admin/music/${(await params).id}/edit`);
+}

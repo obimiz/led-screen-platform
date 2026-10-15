@@ -33,6 +33,15 @@ export default async function AdminProductsPage({
   ]);
   return (
     <section className="mx-auto max-w-7xl">
+      {simple.archived === "1" && (
+        <p
+          role="status"
+          className="mb-5 rounded-lg bg-green-50 p-3 text-green-800"
+        >
+          Product archived. Historical records and image associations have been
+          retained.
+        </p>
+      )}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black">LED products</h1>
@@ -47,20 +56,22 @@ export default async function AdminProductsPage({
           </Link>
           <Link
             href="/admin/products/new"
-            className="rounded-lg bg-primary px-4 py-2.5 font-bold"
+            className="bg-primary rounded-lg px-4 py-2.5 font-bold"
           >
-            New product
+            Add Product
           </Link>
         </div>
       </div>
       <form className="my-6 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-6">
         <input
+          aria-label="Search products"
           name="search"
           defaultValue={query.search}
           placeholder="Search products"
           className="rounded-lg border p-2.5"
         />
         <select
+          aria-label="Filter by category"
           name="category"
           defaultValue={query.category}
           className="rounded-lg border p-2.5"
@@ -73,6 +84,7 @@ export default async function AdminProductsPage({
           ))}
         </select>
         <select
+          aria-label="Filter by environment"
           name="indoorOutdoor"
           defaultValue={query.indoorOutdoor}
           className="rounded-lg border p-2.5"
@@ -83,6 +95,7 @@ export default async function AdminProductsPage({
           ))}
         </select>
         <select
+          aria-label="Filter by publication status"
           name="status"
           defaultValue={query.status}
           className="rounded-lg border p-2.5"
@@ -93,6 +106,7 @@ export default async function AdminProductsPage({
           ))}
         </select>
         <select
+          aria-label="Filter by stock status"
           name="stockStatus"
           defaultValue={query.stockStatus}
           className="rounded-lg border p-2.5"
@@ -102,7 +116,7 @@ export default async function AdminProductsPage({
             <option key={item}>{item}</option>
           ))}
         </select>
-        <button className="rounded-lg bg-primary hover:bg-primary-hover px-4 py-2.5 font-bold text-white">
+        <button className="bg-primary hover:bg-primary-hover rounded-lg px-4 py-2.5 font-bold text-white">
           Filter
         </button>
       </form>
@@ -133,14 +147,17 @@ export default async function AdminProductsPage({
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <ProductImage
-                      url={product.featuredImageUrl}
+                      url={
+                        product.featuredImageUrl || product.imageUrls[0] || ""
+                      }
+                      fit={product.imageFit}
                       name={product.name}
                       className="size-12 rounded-lg"
                     />
                     <div>
                       <p className="font-bold">{product.name}</p>
                       {product.featured && (
-                        <span className="text-xs text-brand-700">Featured</span>
+                        <span className="text-brand-700 text-xs">Featured</span>
                       )}
                     </div>
                   </div>
@@ -160,7 +177,7 @@ export default async function AdminProductsPage({
                   <div className="flex gap-3">
                     <Link
                       href={`/admin/products/${product.id}`}
-                      className="font-semibold text-brand-700"
+                      className="text-brand-700 font-semibold"
                     >
                       View
                     </Link>
@@ -182,13 +199,13 @@ export default async function AdminProductsPage({
         {products.length === 0 && (
           <div className="p-12 text-center">
             <p className="text-slate-500">
-              No LED products have been created yet.
+              No products match these filters. Clear filters or add a product.
             </p>
             <Link
               href="/admin/products/new"
-              className="mt-3 inline-block font-semibold text-brand-700"
+              className="text-brand-700 mt-3 inline-block font-semibold"
             >
-              Create the first product
+              Add Product
             </Link>
           </div>
         )}

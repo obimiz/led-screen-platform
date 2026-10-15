@@ -4,6 +4,11 @@ export function normalizeMusicSourceUrl(value: string) {
     const u = new URL(value);
     if (u.protocol !== "https:" && u.protocol !== "http:") return null;
     const host = u.hostname.toLowerCase().replace(/^www\./, "");
+    if (
+      (host === "youtube-nocookie.com" || host === "youtube.com") &&
+      /^\/embed\/[\w-]+$/.test(u.pathname)
+    )
+      return `https://www.youtube-nocookie.com${u.pathname}`;
     if (host === "youtube.com" || host === "m.youtube.com") {
       const id = u.searchParams.get("v");
       return id
@@ -13,7 +18,10 @@ export function normalizeMusicSourceUrl(value: string) {
     if (host === "youtu.be")
       return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(u.pathname.slice(1))}`;
     if (host === "open.spotify.com") {
-      const p = u.pathname.split("/").filter(Boolean);
+      const p = u.pathname
+        .split("/")
+        .filter(Boolean)
+        .filter((part) => part !== "embed");
       return p.length >= 2
         ? `https://open.spotify.com/embed/${p[0]}/${p[1]}`
         : null;

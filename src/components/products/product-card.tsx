@@ -1,13 +1,15 @@
+import { getProductDisplayImages } from "@/lib/media/product-primary-image";
 import Link from "next/link";
 import { PriceDisplay } from "@/components/products/price-display";
 import { ProductImage } from "@/components/products/product-media";
 import type { LedProduct } from "@/types/product";
 import { AddToCartButton } from "@/components/cart/cart-controls";
 export function ProductCard({ product }: { product: LedProduct }) {
+  const imageUrl = getProductDisplayImages(product)[0] || "";
   return (
     <article className="group hover:border-brand-300 flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:shadow-md">
       <ProductImage
-        url={product.featuredImageUrl}
+        url={imageUrl}
         name={product.name}
         fit={product.imageFit}
         neutralFallback
@@ -64,7 +66,7 @@ export function ProductCard({ product }: { product: LedProduct }) {
                   slug: product.slug,
                   productType: product.productType,
                   sku: "",
-                  imageUrl: product.featuredImageUrl,
+                  imageUrl,
                   quantity: product.minOrderQuantity || 1,
                   displayedUnitPrice: product.price,
                   currency: product.currency,

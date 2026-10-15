@@ -1,3 +1,4 @@
+import { getProductDisplayImages } from "@/lib/media/product-primary-image";
 import { buildProductMetadata } from "@/lib/seo/metadata";
 import { buildProductJsonLd } from "@/lib/seo/structured-data";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -25,9 +26,8 @@ export default async function LedProductPage({ params }: Props) {
     `Hello, I am interested in the ${product.name} listed on your website. Please provide more information.`,
   );
   const video = getVideoEmbedUrl(product.videoUrl);
-  const gallery = [product.featuredImageUrl, ...product.imageUrls].filter(
-    Boolean,
-  );
+  const gallery = getProductDisplayImages(product);
+  const imageUrl = gallery[0] || "";
   const keySpecs = [
     ["Pixel pitch", product.pixelPitch],
     ["Environment", product.indoorOutdoor],
@@ -63,7 +63,7 @@ export default async function LedProductPage({ params }: Props) {
           <div>
             <ProductImage
               priority
-              url={product.featuredImageUrl}
+              url={imageUrl}
               name={product.name}
               fit={product.imageFit}
               neutralFallback
@@ -103,7 +103,7 @@ export default async function LedProductPage({ params }: Props) {
                       slug: product.slug,
                       productType: product.productType,
                       sku: "",
-                      imageUrl: product.featuredImageUrl,
+                      imageUrl,
                       quantity: product.minOrderQuantity || 1,
                       displayedUnitPrice: product.price,
                       currency: product.currency,

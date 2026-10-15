@@ -1,3 +1,6 @@
+import { revalidatePath } from "next/cache";
+import { Product } from "@/models/product";
+import { SalesError } from "@/lib/sales/calculations";
 import { cache } from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */ import "server-only";
 import { Types } from "mongoose";
@@ -37,7 +40,11 @@ export async function getPublishedGalleryItems(limit = 100) {
 export async function getFeaturedGalleryItems(limit = 8) {
   await connectToDatabase();
   return (
-    await GalleryItem.find({ status: "published", featured: true })
+    await GalleryItem.find({
+      status: "published",
+      featured: true,
+      mediaType: "image",
+    })
       .sort({ sortOrder: 1 })
       .limit(limit)
   ).map(plain);
@@ -64,14 +71,16 @@ export async function createGalleryItem(raw: unknown, adminId: string) {
   if (i.mediaType === "video" && !normalizeGalleryVideoUrl(i.videoUrl))
     throw new Error("Unsupported video provider");
   await connectToDatabase();
-  return plain(
+  await validateGalleryReferences(i);
+  const created = plain(
     await GalleryItem.create({
       ...i,
       videoUrl: i.videoUrl
         ? normalizeGalleryVideoUrl(i.videoUrl) || i.videoUrl
         : "",
       slug: i.slug || (await unique(i.title, GalleryItem)),
-      categoryId: Types.ObjectId.isValid(i.categoryId) ? i.categoryId : null,
+      categoryId: i.categoryId || null,
+      productId: i.productId || null,
       portfolioProjectId: Types.ObjectId.isValid(i.portfolioProjectId)
         ? i.portfolioProjectId
         : null,
@@ -79,34 +88,140 @@ export async function createGalleryItem(raw: unknown, adminId: string) {
       updatedBy: adminId,
     }),
   );
+  refreshGallery();
+  return created;
 }
 export async function updateGalleryItem(
   id: string,
   raw: unknown,
   adminId: string,
 ) {
-  const i = galleryItemSchema.parse(raw);
+  const existing = await getGalleryItemById(id);
+  if (!existing) throw new SalesError("Gallery item not found", 404);
+  const merged = { ...existing, ...(raw as object) };
+  for (const key of ["categoryId", "productId", "portfolioProjectId"])
+    merged[key] ??= "";
+  const i = galleryItemSchema.parse(merged);
   if (i.mediaType === "video" && !normalizeGalleryVideoUrl(i.videoUrl))
-    throw new Error("Unsupported video provider");
-  await connectToDatabase();
+    throw new SalesError("Unsupported video provider", 400);
+  await validateGalleryReferences(i, existing.categoryId);
   const d = await GalleryItem.findByIdAndUpdate(
     id,
     {
       $set: {
         ...i,
+        categoryId: i.categoryId || null,
+        productId: i.productId || null,
+        portfolioProjectId: i.portfolioProjectId || null,
         videoUrl: i.videoUrl
           ? normalizeGalleryVideoUrl(i.videoUrl) || i.videoUrl
           : "",
         updatedBy: adminId,
       },
     },
-    { new: true },
+    { returnDocument: "after", runValidators: true },
   );
+  refreshGallery();
   return d ? plain(d) : null;
+}
+function refreshGallery() {
+  for (const path of ["/", "/gallery", "/admin/gallery"]) revalidatePath(path);
+  revalidatePath("/gallery/[slug]", "page");
+}
+async function validateGalleryReferences(
+  i: { categoryId: string; productId: string },
+  previousCategory?: string,
+) {
+  for (const [key, value, model] of [
+    ["category", i.categoryId, GalleryCategory],
+    ["product", i.productId, Product],
+  ] as const) {
+    if (
+      value &&
+      (!Types.ObjectId.isValid(value) || !(await model.exists({ _id: value })))
+    )
+      throw new SalesError(`Choose a valid ${key}`, 400);
+  }
+  if (
+    i.categoryId &&
+    i.categoryId !== previousCategory &&
+    !(await GalleryCategory.exists({ _id: i.categoryId, isActive: true }))
+  )
+    throw new SalesError("Choose an active category", 400);
+}
+export async function getGalleryPage(
+  query: { q?: string; category?: string; status?: string; page?: string },
+  publicOnly = false,
+) {
+  await connectToDatabase();
+  const filter: Record<string, unknown> = publicOnly
+    ? { status: "published" }
+    : {};
+  if (
+    !publicOnly &&
+    ["draft", "published", "archived"].includes(query.status || "")
+  )
+    filter.status = query.status;
+  if (query.category && Types.ObjectId.isValid(query.category))
+    filter.categoryId = query.category;
+  if (query.q)
+    filter.title = {
+      $regex: escapeRegExp(query.q.slice(0, 100)),
+      $options: "i",
+    };
+  const total = await GalleryItem.countDocuments(filter);
+  const pages = Math.max(1, Math.ceil(total / 24));
+  const page = Math.min(
+    pages,
+    Math.max(1, Math.floor(Number(query.page) || 1)),
+  );
+  const rows = await GalleryItem.find(filter)
+    .sort({ sortOrder: 1, createdAt: -1 })
+    .skip((page - 1) * 24)
+    .limit(24);
+  return { rows: rows.map(plain), total, page, pages };
+}
+export async function getGalleryFormOptions() {
+  await connectToDatabase();
+  const products = await Product.find().select("name").sort({ name: 1 }).lean();
+  return {
+    categories: await getGalleryCategories(true),
+    products: products.map((p) => ({ id: String(p._id), name: p.name })),
+  };
+}
+export async function updateGalleryCategory(id: string, raw: unknown) {
+  if (!Types.ObjectId.isValid(id))
+    throw new SalesError("Invalid category", 400);
+  const existing = await GalleryCategory.findById(id);
+  if (!existing) throw new SalesError("Category not found", 404);
+  const i = galleryCategorySchema.parse({
+    ...existing.toObject(),
+    ...(raw as object),
+  });
+  if (
+    await GalleryCategory.exists({
+      _id: { $ne: id },
+      name: { $regex: `^${escapeRegExp(i.name)}$`, $options: "i" },
+    })
+  )
+    throw new SalesError("Category already exists", 409);
+  const result = await GalleryCategory.findByIdAndUpdate(
+    id,
+    { $set: i },
+    { returnDocument: "after", runValidators: true },
+  );
+  refreshGallery();
+  return plain(result);
 }
 export async function createGalleryCategory(raw: unknown) {
   const i = galleryCategorySchema.parse(raw);
   await connectToDatabase();
+  if (
+    await GalleryCategory.exists({
+      name: { $regex: `^${escapeRegExp(i.name)}$`, $options: "i" },
+    })
+  )
+    throw new SalesError("Category already exists", 409);
   return plain(
     await GalleryCategory.create({
       ...i,
@@ -114,10 +229,10 @@ export async function createGalleryCategory(raw: unknown) {
     }),
   );
 }
-export async function getGalleryCategories() {
+export async function getGalleryCategories(includeInactive = false) {
   await connectToDatabase();
   return (
-    await GalleryCategory.find({ isActive: true }).sort({
+    await GalleryCategory.find(includeInactive ? {} : { isActive: true }).sort({
       sortOrder: 1,
       name: 1,
     })

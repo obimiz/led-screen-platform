@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
   buildOrganizationJsonLd,
@@ -7,7 +8,6 @@ import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
-import { ProductImage } from "@/components/products/product-media";
 import { ProductCard } from "@/components/products/product-card";
 import { MusicCard } from "@/components/music/music-card";
 import { getPublicBusinessSettings } from "@/services/business-settings";
@@ -214,12 +214,10 @@ export default async function Home() {
                 <p className="text-brand-700 text-sm font-bold tracking-widest uppercase">
                   Our work
                 </p>
-                <h2 className="mt-2 text-3xl font-black">
-                  Featured projects and events
-                </h2>
+                <h2 className="mt-2 text-3xl font-black">Featured gallery</h2>
               </div>
               <Link href="/gallery" className="text-brand-700 font-bold">
-                View gallery
+                View Full Gallery
               </Link>
             </div>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -229,11 +227,18 @@ export default async function Home() {
                   href={item.slug ? `/gallery/${item.slug}` : "/gallery"}
                   className="overflow-hidden rounded-2xl border bg-white"
                 >
-                  <div className="aspect-[4/3] bg-slate-200">
-                    <ProductImage
-                      url={item.thumbnailUrl || item.imageUrl || ""}
-                      name={item.altText || item.title}
-                      className="h-full w-full"
+                  <div className="relative aspect-[4/3] bg-slate-200">
+                    <Image
+                      src={item.thumbnailUrl || item.imageUrl}
+                      alt={item.altText || item.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      unoptimized={
+                        !(item.thumbnailUrl || item.imageUrl).startsWith("/")
+                      }
+                      className={
+                        item.productId ? "object-contain" : "object-cover"
+                      }
                     />
                   </div>
                   <div className="p-4">

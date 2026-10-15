@@ -1,58 +1,65 @@
 import Link from "next/link";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
-/* eslint-disable @typescript-eslint/no-explicit-any */ import { getPublishedGalleryItems } from "@/services/gallery";
+import { GalleryGrid } from "@/components/gallery/public-grid";
+import { getGalleryPage, getGalleryCategories } from "@/services/gallery";
 export const dynamic = "force-dynamic";
-export default async function Page() {
-  const rows = await getPublishedGalleryItems();
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; page?: string }>;
+}) {
+  const query = await searchParams;
+  const [{ rows, page, pages }, categories] = await Promise.all([
+    getGalleryPage(query, true),
+    getGalleryCategories(true),
+  ]);
+  const href = (p: number) =>
+    `/gallery?${new URLSearchParams({ category: query.category || "", page: String(p) })}`;
   return (
     <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-      <p className="text-sm font-bold tracking-widest text-brand-700 uppercase">
-        Our work
-      </p>
-      <h1 className="mt-3 text-4xl font-black">Gallery</h1>
+      <h1 className="text-4xl font-black">Gallery</h1>
       <p className="mt-3 text-slate-600">
-        A visual selection of installations, events, products and service work.
+        Explore our products, equipment, installations and events. Each caption
+        describes the image shown.
       </p>
-      {rows.length === 0 ? (
-        <p className="mt-10 rounded-xl border border-dashed p-8">
-          No gallery items have been published yet.
-        </p>
+      <form className="mt-6 flex flex-wrap gap-3">
+        <label>
+          Gallery category
+          <select
+            name="category"
+            defaultValue={query.category || ""}
+            className="ml-3 rounded border p-3"
+          >
+            <option value="">All categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button className="bg-primary rounded px-4 py-2 text-white">
+          Filter
+        </button>
+      </form>
+      {rows.length ? (
+        <GalleryGrid items={rows} />
       ) : (
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((x: any) => (
-            <article key={x.id} className="overflow-hidden rounded-xl border">
-              <div className="aspect-video bg-slate-100">
-                {x.mediaType === "image" && x.imageUrl ? (
-                  <img
-                    src={x.thumbnailUrl || x.imageUrl}
-                    loading="lazy"
-                    decoding="async"
-                    alt={x.altText || x.title}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-400">
-                    Video
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h2 className="font-bold">
-                  <Link href={`/gallery/${x.slug}`}>{x.title}</Link>
-                </h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  {x.caption || x.description}
-                </p>
-                <p className="mt-2 text-xs text-brand-700 uppercase">
-                  {x.serviceType} ·{" "}
-                  {[x.city, x.state].filter(Boolean).join(", ")}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
+        <p className="mt-10 rounded-xl border border-dashed p-8">
+          No published gallery items match this category.
+        </p>
       )}
+      <nav
+        aria-label="Gallery pagination"
+        className="mt-8 flex items-center gap-6"
+      >
+        {page > 1 && <Link href={href(page - 1)}>← Previous page</Link>}
+        <span>
+          Page {page} of {pages}
+        </span>
+        {page < pages && <Link href={href(page + 1)}>Next page →</Link>}
+      </nav>
     </main>
   );
 }

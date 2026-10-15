@@ -1,3 +1,4 @@
+import { getProductDisplayImages } from "@/lib/media/product-primary-image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArchiveProductButton } from "@/components/products/archive-product-button";
@@ -8,17 +9,35 @@ import { getLedProductById } from "@/services/products";
 export const dynamic = "force-dynamic";
 export default async function AdminProductDetail({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   if (!(await getCurrentAdmin())) redirect("/admin/login");
   const product = await getLedProductById((await params).id);
   if (!product) notFound();
+  const saved = (await searchParams).saved === "1";
   return (
     <article className="mx-auto max-w-6xl">
+      {saved && (
+        <p
+          role="status"
+          className="mb-5 rounded-lg bg-green-50 p-3 text-green-800"
+        >
+          Product saved successfully
+          {product.status === "draft" ? " as draft" : ""}.
+        </p>
+      )}
+      <Link
+        href="/admin/products"
+        className="text-brand-700 mb-4 inline-block font-semibold"
+      >
+        Back to Products
+      </Link>
       <div className="flex flex-wrap justify-between gap-4">
         <div>
-          <p className="text-sm font-bold tracking-wider text-brand-700 uppercase">
+          <p className="text-brand-700 text-sm font-bold tracking-wider uppercase">
             {product.category.name}
           </p>
           <h1 className="mt-2 text-3xl font-black">{product.name}</h1>
@@ -26,7 +45,7 @@ export default async function AdminProductDetail({
         <div className="flex items-center gap-3">
           <Link
             href={`/admin/products/${product.id}/edit`}
-            className="rounded-lg bg-primary px-4 py-2.5 font-bold"
+            className="bg-primary rounded-lg px-4 py-2.5 font-bold"
           >
             Edit product
           </Link>
@@ -37,12 +56,15 @@ export default async function AdminProductDetail({
       </div>
       <div className="mt-7 grid gap-7 lg:grid-cols-2">
         <ProductImage
-          url={product.featuredImageUrl}
+          url={getProductDisplayImages(product)[0] || ""}
           name={product.name}
+          fit={product.imageFit}
           className="aspect-video rounded-2xl"
         />
         <div className="rounded-2xl border bg-white p-6">
           <dl className="grid grid-cols-2 gap-4 text-sm">
+            <dt>Featured</dt>
+            <dd>{product.featured ? "Yes" : "No"}</dd>
             <dt>Status</dt>
             <dd className="font-semibold">{product.status}</dd>
             <dt>Price</dt>

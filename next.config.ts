@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async headers() {
+    const isDevelopment = process.env.NODE_ENV === "development";
     const productionHttps =
       process.env.NODE_ENV === "production" &&
       process.env.NEXT_PUBLIC_APP_URL?.startsWith("https://");
@@ -11,7 +12,7 @@ const nextConfig: NextConfig = {
       "form-action 'self'",
       "object-src 'none'",
       "frame-ancestors 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https:",

@@ -1,27 +1,66 @@
 import Link from "next/link";
-export function MusicCard({ item }: { item: any }) {
+import Image from "next/image";
+import { MusicPlayer } from "./audio-player";
+export type MusicCardItem = {
+  id: string;
+  slug?: string;
+  title: string;
+  artistName?: string;
+  coverImageUrl?: string;
+  contentType?: string;
+  sourcePlatform?: string;
+  audioUrl?: string;
+  categoryId?: string | { name?: string; slug?: string };
+  shortDescription?: string;
+  description?: string;
+  releaseYear?: number;
+};
+export function MusicCard({ item }: { item: MusicCardItem }) {
+  const category =
+    typeof item.categoryId === "object" ? item.categoryId?.name : "";
   return (
-    <article className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-lg">
-      <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-brand-950 via-brand-900 to-slate-950 text-4xl text-brand-200">
+    <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="from-brand-950 via-brand-900 text-brand-200 relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br to-slate-950 text-4xl">
         {item.coverImageUrl ? (
-          <img
+          <Image
             src={item.coverImageUrl}
             alt={`${item.title} cover`}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full rounded-lg object-cover"
+            fill
+            sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
+            className="object-cover"
+            unoptimized={!item.coverImageUrl.startsWith("/")}
           />
         ) : (
-          <><span className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(216,180,254,.45),transparent_25%)]" />♫</>
+          <span aria-hidden="true">♫</span>
         )}
       </div>
-      <h2 className="mt-4 font-bold">
-        <Link href={item.slug ? `/music/${item.slug}` : "/music"}>{item.title}</Link>
+      <h2 className="mt-4 font-bold break-words">
+        <Link href={item.slug ? `/music/${item.slug}` : "/music"}>
+          {item.title}
+        </Link>
       </h2>
       <p className="mt-1 text-sm text-slate-600">
-        {item.artistName || "Curated audio"}
+        {item.artistName || "Artist not specified"}
       </p>
-      <p className="mt-1 text-xs text-brand-700 uppercase">{item.contentType}</p>
+      <p className="text-brand-700 mt-1 text-xs">
+        {category || item.contentType?.replaceAll("-", " ")}
+        {item.releaseYear ? ` · ${item.releaseYear}` : ""}
+      </p>
+      {(item.shortDescription || item.description) && (
+        <p className="mt-3 text-sm text-slate-600">
+          {(item.shortDescription || item.description || "").slice(0, 300)}
+        </p>
+      )}
+      {item.sourcePlatform === "owned" && item.audioUrl ? (
+        <MusicPlayer src={item.audioUrl} title={item.title} />
+      ) : (
+        <Link
+          className="text-brand-700 mt-4 inline-block font-semibold underline"
+          href={item.slug ? `/music/${item.slug}` : "/music"}
+        >
+          Listen / view details
+        </Link>
+      )}
     </article>
   );
 }

@@ -1,1 +1,2 @@
-import {requireMusicAdmin} from "@/lib/music/access"; import {MusicContentForm} from "@/components/music/content-form"; export default async function Page(){await requireMusicAdmin();return <main className="p-6"><h1 className="mb-6 text-3xl font-black">New music content</h1><p className="mb-5 rounded-lg bg-amber-50 p-3 text-sm">Only upload or self-host audio that you own or are licensed to distribute. Prefer official source links and embeds.</p><MusicContentForm/></main>}
+export const dynamic = "force-dynamic";
+export { default } from "@/app/(admin)/admin/music/new/page";

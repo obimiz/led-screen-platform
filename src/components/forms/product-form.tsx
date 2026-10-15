@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Plus, Save, Trash2 } from "lucide-react";
+import { useEffect, useLayoutEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   useFieldArray,
@@ -11,6 +12,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 
+import { ProductImagePicker } from "@/components/products/product-image-picker";
 import { ProductImage } from "@/components/products/product-media";
 import {
   defaultCurrency,
@@ -96,20 +98,26 @@ function Input({
   error?: FieldError;
   type?: string;
 }) {
+  const id = useId();
   return (
     <div>
-      <label htmlFor={name} className="text-sm font-semibold text-slate-800">
+      <label htmlFor={id} className="text-sm font-semibold text-slate-800">
         {label}
       </label>
       <input
-        id={name}
+        id={id}
         type={type}
         {...register(name)}
         aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
         className="focus:border-brand-600 focus:ring-brand-100 mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-2"
       />
       {error && (
-        <p role="alert" className="mt-1 text-sm text-red-600">
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="mt-1 text-sm text-red-600"
+        >
           {error.message}
         </p>
       )}
@@ -155,6 +163,7 @@ function StringList({
         {values.map((value, index) => (
           <div key={index} className="flex gap-2">
             <input
+              aria-label={`${label} item ${index + 1}`}
               value={value}
               onChange={(event) =>
                 onChange(
@@ -190,13 +199,15 @@ export function ProductForm({
   product?: LedProduct;
 }) {
   const router = useRouter();
+  const formId = useId();
   const {
     register,
     control,
     handleSubmit,
     setValue,
     setError,
-    formState: { errors, isSubmitting },
+    reset,
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<ProductFormInput, unknown, ProductValues>({
     resolver: zodResolver(productSchema),
     defaultValues: product
@@ -210,6 +221,40 @@ export function ProductForm({
         ) as ProductFormInput)
       : defaults,
   });
+  const saved = useRef(false);
+  const [savedSuccessfully, setSavedSuccessfully] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const editing = Boolean(product);
+  useLayoutEffect(
+    () => () => {
+      // Next.js may retain hidden routes for back/forward navigation.
+      if (saved.current) {
+        saved.current = false;
+        setSavedSuccessfully(false);
+      }
+    },
+    [],
+  );
+  useEffect(() => {
+    if (!isDirty && !uploading) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      if (!saved.current) event.preventDefault();
+    };
+    const guard = (event: MouseEvent) => {
+      const link = (event.target as Element).closest?.("a[href]");
+      if (saved.current || !link) return;
+      if (!window.confirm("Discard unsaved product changes?")) {
+        event.preventDefault();
+        event.stopPropagation();
+      } else reset();
+    };
+    window.addEventListener("beforeunload", warn);
+    document.addEventListener("click", guard, true);
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+      document.removeEventListener("click", guard, true);
+    };
+  }, [isDirty, uploading, reset]);
   const specs = useFieldArray({ control, name: "specifications" });
   const features = useWatch({ control, name: "features" }) ?? [];
   const applications = useWatch({ control, name: "usageApplications" }) ?? [];
@@ -220,6 +265,7 @@ export function ProductForm({
   const priceType = useWatch({ control, name: "priceType" });
 
   async function submit(values: ProductValues) {
+    if (saved.current || uploading) return;
     const endpoint = product ? `/api/products/${product.id}` : "/api/products";
     try {
       const response = await fetch(endpoint, {
@@ -231,10 +277,17 @@ export function ProductForm({
         success: boolean;
         message: string;
         data?: LedProduct;
+        errors?: Record<string, string[]>;
       };
-      if (!response.ok || !body.data)
+      if (!response.ok || !body.data) {
+        for (const [field, messages] of Object.entries(body.errors ?? {}))
+          setError(field as Name, { message: messages[0] });
         return setError("root", { message: body.message });
-      router.push(`/admin/products/${body.data.id}`);
+      }
+      saved.current = true;
+      setSavedSuccessfully(true);
+      reset(editing ? values : defaults);
+      router.push(`/admin/products/${body.data.id}?saved=1`);
       router.refresh();
     } catch {
       setError("root", {
@@ -244,7 +297,26 @@ export function ProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(submit)} noValidate className="space-y-6">
+    <form
+      onSubmit={(event) => {
+        const button = (event.nativeEvent as SubmitEvent)
+          .submitter as HTMLButtonElement | null;
+        if (button?.value === "draft")
+          setValue("status", "draft", { shouldDirty: true });
+        void handleSubmit(submit, () =>
+          setError("root", {
+            message: "Please correct the highlighted fields before saving.",
+          }),
+        )(event);
+      }}
+      noValidate
+      className="space-y-6"
+    >
+      {isDirty && (
+        <p role="status" className="text-sm text-amber-700">
+          You have unsaved changes.
+        </p>
+      )}
       {errors.root && (
         <p
           role="alert"
@@ -265,17 +337,20 @@ export function ProductForm({
           error={errors.name}
         />
         <div>
-          <label htmlFor="category" className="text-sm font-semibold">
+          <label
+            htmlFor={`${formId}-category`}
+            className="text-sm font-semibold"
+          >
             Category
           </label>
           <select
-            id="category"
+            id={`${formId}-category`}
             {...register("category")}
             className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5"
           >
             <option value="">Select category</option>
             {categories
-              .filter((item) => item.active)
+              .filter((item) => item.active || item.id === product?.category.id)
               .map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
@@ -289,11 +364,14 @@ export function ProductForm({
           )}
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor="shortDescription" className="text-sm font-semibold">
+          <label
+            htmlFor={`${formId}-shortDescription`}
+            className="text-sm font-semibold"
+          >
             Short description
           </label>
           <textarea
-            id="shortDescription"
+            id={`${formId}-shortDescription`}
             rows={3}
             {...register("shortDescription")}
             className="mt-2 w-full rounded-lg border border-slate-300 p-3"
@@ -305,11 +383,14 @@ export function ProductForm({
           )}
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor="description" className="text-sm font-semibold">
+          <label
+            htmlFor={`${formId}-description`}
+            className="text-sm font-semibold"
+          >
             Full description
           </label>
           <textarea
-            id="description"
+            id={`${formId}-description`}
             rows={7}
             {...register("description")}
             className="mt-2 w-full rounded-lg border border-slate-300 p-3"
@@ -321,11 +402,14 @@ export function ProductForm({
       </Section>
       <Section title="Display information">
         <div>
-          <label htmlFor="indoorOutdoor" className="text-sm font-semibold">
+          <label
+            htmlFor={`${formId}-indoorOutdoor`}
+            className="text-sm font-semibold"
+          >
             Environment
           </label>
           <select
-            id="indoorOutdoor"
+            id={`${formId}-indoorOutdoor`}
             {...register("indoorOutdoor")}
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           >
@@ -387,11 +471,14 @@ export function ProductForm({
       </Section>
       <Section title="Installation and maintenance">
         <div>
-          <label htmlFor="maintenanceType" className="text-sm font-semibold">
+          <label
+            htmlFor={`${formId}-maintenanceType`}
+            className="text-sm font-semibold"
+          >
             Maintenance type
           </label>
           <select
-            id="maintenanceType"
+            id={`${formId}-maintenanceType`}
             {...register("maintenanceType")}
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           >
@@ -433,25 +520,14 @@ export function ProductForm({
             setValue("supportedInputs", value, { shouldDirty: true })
           }
         />
-        {(featuredImage || images.some(Boolean)) && (
-          <div className="grid grid-cols-3 gap-3 sm:col-span-2">
-            {[featuredImage, ...images].filter(Boolean).map((image, index) => (
-              <ProductImage
-                key={`${image}-${index}`}
-                url={image}
-                name={`Product image preview ${index + 1}`}
-                fit={imageFit}
-                neutralFallback
-                className="aspect-square rounded-lg border border-slate-200"
-              />
-            ))}
-          </div>
-        )}
       </Section>
       <Section title="Additional specifications">
         <div className="space-y-2 sm:col-span-2">
           {specs.fields.map((field, index) => (
-            <div key={field.id} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+            <div
+              key={field.id}
+              className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]"
+            >
               <input
                 aria-label={`Specification ${index + 1} label`}
                 {...register(`specifications.${index}.label`)}
@@ -483,12 +559,55 @@ export function ProductForm({
         </div>
       </Section>
       <Section title="Media">
+        {(featuredImage || images.some(Boolean)) && (
+          <div className="grid grid-cols-3 gap-3 sm:col-span-2">
+            {[featuredImage, ...images].filter(Boolean).map((image, index) => (
+              <ProductImage
+                key={`${image}-${index}`}
+                url={image}
+                name={`Product image preview ${index + 1}`}
+                fit={imageFit}
+                neutralFallback
+                className="aspect-square rounded-lg border border-slate-200"
+              />
+            ))}
+          </div>
+        )}
+        <ProductImagePicker
+          hasFeaturedImage={Boolean(featuredImage)}
+          galleryFull={images.filter(Boolean).length >= 20}
+          onBusyChange={setUploading}
+          onSelect={(url, featured) => {
+            if (featured)
+              setValue("featuredImageUrl", url, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            else if (!images.includes(url) && images.length < 20)
+              setValue("imageUrls", [...images.filter(Boolean), url], {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+          }}
+        />
+        <button
+          type="button"
+          onClick={() =>
+            setValue("featuredImageUrl", "", { shouldDirty: true })
+          }
+          className="text-sm font-semibold text-red-600"
+        >
+          Remove featured image
+        </button>
         <div>
-          <label htmlFor="imageFit" className="text-sm font-semibold">
+          <label
+            htmlFor={`${formId}-imageFit`}
+            className="text-sm font-semibold"
+          >
             Image presentation
           </label>
           <select
-            id="imageFit"
+            id={`${formId}-imageFit`}
             {...register("imageFit")}
             className="mt-2 w-full rounded-lg border border-slate-300 p-3"
           >
@@ -501,7 +620,8 @@ export function ProductForm({
           </select>
         </div>
         <p className="text-sm text-slate-500">
-          Use a local /images/products/ path or an https:// image URL.
+          Select a local image, upload an image, or enter an existing image URL.
+          Removing an image here removes its product association when you save.
         </p>
         <Input
           name="featuredImageUrl"
@@ -527,16 +647,25 @@ export function ProductForm({
       </Section>
       <Section title="Pricing and availability">
         <div>
-          <label htmlFor="priceType" className="text-sm font-semibold">
+          <label
+            htmlFor={`${formId}-priceType`}
+            className="text-sm font-semibold"
+          >
             Price type
           </label>
           <select
-            id="priceType"
+            id={`${formId}-priceType`}
             {...register("priceType")}
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           >
             {priceTypes.map((value) => (
-              <option key={value}>{value}</option>
+              <option key={value} value={value}>
+                {value === "contact"
+                  ? "Price on Request"
+                  : value === "quote"
+                    ? "Request Quote"
+                    : value}
+              </option>
             ))}
           </select>
         </div>
@@ -556,11 +685,14 @@ export function ProductForm({
           error={errors.currency}
         />
         <div>
-          <label htmlFor="stockStatus" className="text-sm font-semibold">
+          <label
+            htmlFor={`${formId}-stockStatus`}
+            className="text-sm font-semibold"
+          >
             Stock status
           </label>
           <select
-            id="stockStatus"
+            id={`${formId}-stockStatus`}
             {...register("stockStatus")}
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           >
@@ -616,19 +748,44 @@ export function ProductForm({
           error={errors.rentalDepositAmount as FieldError}
         />
       </Section>
+      {Object.entries(errors).filter(([name]) => name !== "root").length >
+        0 && (
+        <div
+          role="alert"
+          className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+        >
+          {Object.entries(errors)
+            .filter(([name]) => name !== "root")
+            .map(([name, error]) => (
+              <p key={name}>
+                {name.replace(/([A-Z])/g, " $1")}:{" "}
+                {error &&
+                "message" in error &&
+                typeof error.message === "string"
+                  ? error.message
+                  : "Check each item for a valid value."}
+              </p>
+            ))}
+        </div>
+      )}
       <Section title="Publishing and SEO">
         <div>
-          <label htmlFor="status" className="text-sm font-semibold">
+          <label htmlFor={`${formId}-status`} className="text-sm font-semibold">
             Publication status
           </label>
           <select
-            id="status"
+            id={`${formId}-status`}
             {...register("status")}
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           >
-            {productStatuses.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
+            {productStatuses
+              .filter(
+                (value) =>
+                  value !== "archived" || product?.status === "archived",
+              )
+              .map((value) => (
+                <option key={value}>{value}</option>
+              ))}
           </select>
         </div>
         <label className="flex items-center gap-2 pt-8 text-sm font-semibold">
@@ -649,7 +806,7 @@ export function ProductForm({
       </Section>
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || uploading || savedSuccessfully}
         className="bg-primary inline-flex items-center gap-2 rounded-lg px-5 py-3 font-bold text-white disabled:opacity-50"
       >
         {isSubmitting ? (
@@ -657,7 +814,16 @@ export function ProductForm({
         ) : (
           <Save size={18} />
         )}
-        {isSubmitting ? "Saving…" : "Save product"}
+        {isSubmitting ? "Saving…" : "Save Product"}
+      </button>
+      <button
+        type="submit"
+        name="action"
+        value="draft"
+        disabled={isSubmitting || uploading || savedSuccessfully}
+        className="ml-3 rounded-lg border border-slate-300 px-5 py-3 font-bold disabled:opacity-50"
+      >
+        Save as Draft
       </button>
     </form>
   );

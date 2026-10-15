@@ -1,1 +1,2 @@
-import {requireMusicAdmin} from "@/lib/music/access"; import {MusicContentForm} from "@/components/music/content-form"; export default async function Page(){await requireMusicAdmin();return <main className="p-6"><h1 className="mb-6 text-3xl font-black">Edit music content</h1><MusicContentForm/></main>}
+export const dynamic = "force-dynamic";
+export { default } from "@/app/(admin)/admin/music/[id]/edit/page";

@@ -1,3 +1,5 @@
+import { Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/whatsapp-icon";
 import Link from "next/link";
 import { Brand } from "@/components/shared/brand";
 import { Container } from "@/components/ui/container";
@@ -9,15 +11,12 @@ import {
 import type { PublicBusinessSettings } from "@/types/business-settings";
 
 export function Footer({ settings }: { settings: PublicBusinessSettings }) {
-  const whatsappUrl = createWhatsAppUrl(
-    settings.whatsappNumber,
-    "Hello, I would like to enquire about your services.",
-  );
+  const whatsappUrl = createWhatsAppUrl(settings.whatsappNumber);
 
   return (
     <footer
       id="contact"
-      className="border-t border-white/10 bg-brand-900 py-10 text-slate-300"
+      className="bg-brand-900 border-t border-white/10 pt-10 pb-24 text-slate-300"
     >
       <Container className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
         <div className="space-y-3">
@@ -46,9 +45,10 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
             <p>
               <a
                 href={createPhoneUrl(settings.primaryPhone)}
-                className="hover:text-brand-300"
+                className="hover:text-brand-300 inline-flex items-center gap-2"
               >
-                {settings.primaryPhone}
+                <Phone size={18} aria-hidden="true" />
+                <span>Call: {settings.primaryPhone}</span>
               </a>
             </p>
           )}
@@ -57,10 +57,11 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
               <a
                 href={whatsappUrl}
                 target="_blank"
-                rel="noreferrer"
-                className="hover:text-brand-300"
+                rel="noopener noreferrer"
+                className="hover:text-brand-300 inline-flex items-center gap-2"
               >
-                Chat on WhatsApp
+                <WhatsAppIcon />
+                <span>WhatsApp: {settings.primaryPhone}</span>
               </a>
             </p>
           )}

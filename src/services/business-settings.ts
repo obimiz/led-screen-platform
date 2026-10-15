@@ -1,3 +1,4 @@
+import { officialContact } from "@/lib/constants/contact";
 import "server-only";
 
 import { cache } from "react";
@@ -89,17 +90,25 @@ function toSettings(
     xUrl: document.xUrl ?? defaultBusinessSettings.xUrl,
     tiktokUrl: document.tiktokUrl ?? defaultBusinessSettings.tiktokUrl,
     updatedAt:
-      document.updatedAt instanceof Date ? document.updatedAt.toISOString() : "",
+      document.updatedAt instanceof Date
+        ? document.updatedAt.toISOString()
+        : "",
   };
 }
 
 export async function getBusinessSettings(): Promise<BusinessSettings> {
   await connectToDatabase();
-  const document = await BusinessSettingsModel.findOneAndUpdate(
-    { singletonKey: "primary" },
-    { $setOnInsert: { ...defaultBusinessSettings, singletonKey: "primary" } },
-    { new: true, upsert: true, setDefaultsOnInsert: true },
-  ).lean();
+  // Reading settings must not update timestamps or issue a deprecated update query.
+  let document = await BusinessSettingsModel.findOne({
+    singletonKey: "primary",
+  }).lean();
+  if (!document) {
+    document = await BusinessSettingsModel.findOneAndUpdate(
+      { singletonKey: "primary" },
+      { $setOnInsert: { ...defaultBusinessSettings, singletonKey: "primary" } },
+      { returnDocument: "after", upsert: true, setDefaultsOnInsert: true },
+    ).lean();
+  }
   if (!document) throw new Error("Business settings could not be loaded.");
   return toSettings(document);
 }
@@ -175,7 +184,11 @@ export async function getDocumentBusinessSettings(): Promise<PublicBusinessSetti
 export const getPublicBusinessSettings = cache(
   async (): Promise<PublicBusinessSettings> => {
     try {
-      return toPublicSettings(await getBusinessSettings());
+      return {
+        ...toPublicSettings(await getBusinessSettings()),
+        primaryPhone: officialContact.displayNumber,
+        whatsappNumber: officialContact.number,
+      };
     } catch (error) {
       if (process.env.NODE_ENV === "development")
         console.warn("Using fallback business settings:", error);
@@ -195,9 +208,9 @@ export const getPublicBusinessSettings = cache(
         faviconUrl: "",
         primaryEmail: siteConfig.contact.email,
         secondaryEmail: "",
-        primaryPhone: siteConfig.contact.phone,
+        primaryPhone: officialContact.displayNumber,
         secondaryPhone: "",
-        whatsappNumber: "",
+        whatsappNumber: officialContact.number,
         address: siteConfig.contact.address,
         businessHours: "",
         googleMapsUrl: "",

@@ -1,3 +1,5 @@
+import { Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/whatsapp-icon";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
 import { getPublicBusinessSettings } from "@/services/business-settings";
@@ -10,13 +12,10 @@ import { ContactForm } from "@/components/contact/contact-form";
 export const dynamic = "force-dynamic";
 export default async function Page() {
   const b = await getPublicBusinessSettings();
-  const wa = createWhatsAppUrl({
-    phone: b.whatsappNumber,
-    message: "Hello, I would like to contact your team.",
-  });
+  const wa = createWhatsAppUrl(b.whatsappNumber);
   return (
     <main className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-      <p className="text-sm font-bold tracking-widest text-brand-700 uppercase">
+      <p className="text-brand-700 text-sm font-bold tracking-widest uppercase">
         Contact
       </p>
       <h1 className="mt-3 text-4xl font-black">
@@ -32,15 +31,16 @@ export default async function Page() {
           <div className="mt-4 space-y-3">
             {b.primaryPhone && (
               <a
-                className="block text-brand-700"
+                className="text-brand-700 flex items-center gap-2"
                 href={createPhoneUrl(b.primaryPhone)}
               >
-                Call us: {b.primaryPhone}
+                <Phone size={20} aria-hidden="true" />
+                <span>Call us: {b.primaryPhone}</span>
               </a>
             )}
             {b.primaryEmail && (
               <a
-                className="block text-brand-700"
+                className="text-brand-700 block"
                 href={createEmailUrl(b.primaryEmail)}
               >
                 Email us: {b.primaryEmail}
@@ -48,12 +48,13 @@ export default async function Page() {
             )}
             {wa && (
               <a
-                className="block text-brand-700"
+                className="text-brand-700 flex items-center gap-2"
                 href={wa}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
-                WhatsApp us
+                <WhatsAppIcon />
+                <span>WhatsApp: {b.primaryPhone}</span>
               </a>
             )}
             {b.address && <p className="text-slate-600">{b.address}</p>}

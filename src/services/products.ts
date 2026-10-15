@@ -2,6 +2,14 @@ import "server-only";
 
 import { Types } from "mongoose";
 import { cache } from "react";
+import { revalidatePath } from "next/cache";
+
+function refreshLedCatalogue() {
+  revalidatePath("/led-screens");
+  revalidatePath("/led-screens/[slug]", "page");
+  revalidatePath("/");
+  revalidatePath("/admin/products");
+}
 
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { createSlug, escapeRegExp } from "@/lib/utils/slug";
@@ -360,6 +368,7 @@ export async function createLedProduct(input: ProductValues, adminId: string) {
     createdBy: adminId,
     updatedBy: adminId,
   });
+  refreshLedCatalogue();
   return getLedProductById(product.id);
 }
 
@@ -380,6 +389,7 @@ export async function updateLedProduct(
     { $set: { ...input, updatedBy: adminId } },
     { runValidators: true },
   );
+  refreshLedCatalogue();
   return getLedProductById(id);
 }
 
@@ -392,6 +402,7 @@ export async function archiveLedProduct(id: string, adminId: string) {
     { new: true },
   );
   if (!product) return null;
+  refreshLedCatalogue();
   return (await attachCategories([product]))[0] ?? null;
 }
 
