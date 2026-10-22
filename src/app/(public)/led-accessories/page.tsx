@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
@@ -9,9 +10,15 @@ import { getPublicBusinessSettings } from "@/services/business-settings";
 import { getAccessories, getCategoriesByType } from "@/services/products";
 export const dynamic = "force-dynamic";
 const demoAccessories = [
-  ["LED Video Processor", "Signal processing and seamless switching for display walls"],
+  [
+    "LED Video Processor",
+    "Signal processing and seamless switching for display walls",
+  ],
   ["Receiving Card", "Reliable control hardware for modular LED cabinets"],
-  ["LED Power Supply", "Stable power conversion for professional installations"],
+  [
+    "LED Power Supply",
+    "Stable power conversion for professional installations",
+  ],
   ["Spare LED Module", "Replacement module for fast field servicing"],
 ];
 
@@ -32,12 +39,17 @@ export default async function AccessoriesCatalogue({
     productType: "led-accessory",
   });
   let products: Awaited<ReturnType<typeof getAccessories>>["products"] = [];
-  let page = 1, pages = 1, total = 0;
+  let page = 1,
+    pages = 1,
+    total = 0;
   let categories: Awaited<ReturnType<typeof getCategoriesByType>> = [];
   const settings = await getPublicBusinessSettings();
   let databaseUnavailable = false;
   try {
-    const result = await Promise.all([getAccessories(query), getCategoriesByType("led-accessory")]);
+    const result = await Promise.all([
+      getAccessories(query),
+      getCategoriesByType("led-accessory"),
+    ]);
     ({ products, page, pages, total } = result[0]);
     categories = result[1];
   } catch {
@@ -45,20 +57,15 @@ export default async function AccessoriesCatalogue({
   }
   return (
     <main>
-      <section className="bg-brand-900 py-16 text-white">
-        <Container>
-          <p className="text-sm font-bold tracking-widest text-brand-300 uppercase">
-            Accessories and parts
-          </p>
-          <h1 className="mt-3 text-4xl font-black sm:text-5xl">
-            LED accessories & spare parts
-          </h1>
-          <p className="mt-4 max-w-2xl text-slate-300">
+      <PageHero
+        title={<>LED accessories & spare parts</>}
+        description={
+          <>
             Controllers, modules, power supplies, cables, and replacement
             equipment for professional LED systems.
-          </p>
-        </Container>
-      </section>
+          </>
+        }
+      />
       <section className="py-12">
         <Container>
           <form className="grid gap-3 rounded-2xl border bg-slate-50 p-4 md:grid-cols-5">
@@ -100,7 +107,7 @@ export default async function AccessoriesCatalogue({
                 <option key={item}>{item}</option>
               ))}
             </select>
-            <button className="rounded-lg bg-primary font-bold">
+            <button className="bg-primary rounded-lg font-bold">
               Apply filters
             </button>
           </form>
@@ -119,7 +126,32 @@ export default async function AccessoriesCatalogue({
             </div>
           ) : databaseUnavailable ? (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {demoAccessories.map(([name, description], index) => <article key={name} className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><div className={`grid aspect-[4/3] place-items-center bg-gradient-to-br ${index % 2 ? "from-brand-700 to-slate-950" : "from-brand-700 to-slate-950"}`}><span className="text-5xl text-white transition group-hover:scale-110">▦</span></div><div className="p-5"><h2 className="font-bold">{name}</h2><p className="mt-2 text-sm leading-6 text-slate-600">{description}</p><Link className="mt-4 inline-block text-sm font-bold text-brand-700" href="/request-quote">Ask about this part →</Link></div></article>)}
+              {demoAccessories.map(([name, description], index) => (
+                <article
+                  key={name}
+                  className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div
+                    className={`grid aspect-[4/3] place-items-center bg-gradient-to-br ${index % 2 ? "from-brand-700 to-slate-950" : "from-brand-700 to-slate-950"}`}
+                  >
+                    <span className="text-5xl text-white transition group-hover:scale-110">
+                      ▦
+                    </span>
+                  </div>
+                  <div className="p-5">
+                    <h2 className="font-bold">{name}</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {description}
+                    </p>
+                    <Link
+                      className="text-brand-700 mt-4 inline-block text-sm font-bold"
+                      href="/request-quote"
+                    >
+                      Ask about this part →
+                    </Link>
+                  </div>
+                </article>
+              ))}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed p-14 text-center">
@@ -128,7 +160,7 @@ export default async function AccessoriesCatalogue({
               </h2>
               <Link
                 href="/led-accessories"
-                className="mt-3 inline-block font-semibold text-brand-700"
+                className="text-brand-700 mt-3 inline-block font-semibold"
               >
                 Clear filters
               </Link>

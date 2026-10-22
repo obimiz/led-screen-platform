@@ -1,3 +1,4 @@
+import { effectiveProductPrice } from "@/lib/utils/product-price";
 import "server-only";
 import crypto from "node:crypto";
 import { Types, startSession } from "mongoose";
@@ -98,7 +99,7 @@ export async function createOrder(raw: unknown) {
       throw new SalesError(
         `${p.name} is no longer available in the requested quantity.`,
       );
-    const unit = majorToMinor(p.price ?? 0);
+    const unit = majorToMinor(effectiveProductPrice(p) ?? 0);
     return {
       productId: p._id,
       productName: p.name,

@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+import { ContentMediaManager } from "@/components/publishing/media-manager";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Plus, Save, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,7 +11,6 @@ import {
   type FieldError,
   type UseFormRegister,
 } from "react-hook-form";
-import { ProductImage } from "@/components/products/product-media";
 import {
   defaultCurrency,
   priceTypes,
@@ -78,9 +79,10 @@ function Input({
       <input
         id={name}
         type={type}
+        step={type === "number" ? "0.01" : undefined}
         {...register(name)}
         aria-invalid={Boolean(error)}
-        className="mt-2 w-full rounded-lg border border-slate-300 p-2.5 outline-none focus:border-brand-600"
+        className="focus:border-brand-600 mt-2 w-full rounded-lg border border-slate-300 p-2.5 outline-none"
       />
       {error && (
         <p role="alert" className="mt-1 text-sm text-red-600">
@@ -120,7 +122,7 @@ function List({
         <button
           type="button"
           onClick={() => change([...values, ""])}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700"
+          className="text-brand-700 inline-flex items-center gap-1 text-sm font-semibold"
         >
           <Plus size={15} /> Add
         </button>
@@ -164,6 +166,7 @@ export function AccessoryForm({
   accessory?: AccessoryProduct;
 }) {
   const router = useRouter();
+  const [uploading, setUploading] = useState(false);
   const {
     register,
     control,
@@ -174,7 +177,14 @@ export function AccessoryForm({
   } = useForm<AccessoryFormInput, unknown, AccessoryValues>({
     resolver: zodResolver(accessorySchema),
     defaultValues: accessory
-      ? { ...accessory, category: accessory.category.id }
+      ? (Object.fromEntries(
+          Object.keys(accessorySchema.shape).map((key) => [
+            key,
+            key === "category"
+              ? accessory.category.id
+              : accessory[key as keyof AccessoryProduct],
+          ]),
+        ) as AccessoryFormInput)
       : defaults,
   });
   const specs = useFieldArray({ control, name: "specifications" });
@@ -182,6 +192,8 @@ export function AccessoryForm({
   const compatibility = useWatch({ control, name: "compatibility" }) ?? [];
   const images = useWatch({ control, name: "imageUrls" }) ?? [];
   const featuredImage = useWatch({ control, name: "featuredImageUrl" }) ?? "";
+  const useWatchAlt = useWatch({ control, name: "imageAlt" }) ?? "";
+  const useWatchAlts = useWatch({ control, name: "imageAlts" }) ?? [];
   const priceType = useWatch({ control, name: "priceType" });
   async function submit(values: AccessoryValues) {
     try {
@@ -336,48 +348,44 @@ export function AccessoryForm({
           <button
             type="button"
             onClick={() => specs.append({ label: "", value: "" })}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700"
+            className="text-brand-700 inline-flex items-center gap-1 text-sm font-semibold"
           >
             <Plus size={15} /> Add specification
           </button>
         </div>
       </Section>
-      <Section title="Media">
-        <Input
-          name="featuredImageUrl"
-          label="Featured image URL"
-          type="url"
-          register={register}
-          error={errors.featuredImageUrl}
-        />
-        <Input
-          name="videoUrl"
-          label="Video URL"
-          type="url"
-          register={register}
-          error={errors.videoUrl}
-        />
-        <List
-          label="Additional image URLs"
-          values={images}
-          change={(value) =>
-            setValue("imageUrls", value, { shouldDirty: true })
-          }
-        />
-        {(featuredImage || images.some(Boolean)) && (
-          <div className="grid grid-cols-3 gap-3 sm:col-span-2">
-            {[featuredImage, ...images].filter(Boolean).map((image, index) => (
-              <ProductImage
-                key={`${image}-${index}`}
-                url={image}
-                name={`Accessory image preview ${index + 1}`}
-                className="aspect-square rounded-lg"
-              />
-            ))}
-          </div>
-        )}
-      </Section>
+      <ContentMediaManager
+        maxImages={20}
+        autoFeature
+        value={{
+          coverImageUrl: featuredImage,
+          coverAlt: useWatchAlt,
+          imageUrls: images,
+          imageAlts: useWatchAlts.map((v) => v || ""),
+        }}
+        onBusyChange={setUploading}
+        onChange={(m) => {
+          setValue("featuredImageUrl", m.coverImageUrl, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          setValue("imageAlt", m.coverAlt, { shouldDirty: true });
+          setValue("imageUrls", m.imageUrls, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          setValue("imageAlts", m.imageAlts, { shouldDirty: true });
+        }}
+      />
       <Section title="Pricing and stock">
+        <Input
+          name="promotionalPrice"
+          label="Promotional price (NGN, optional)"
+          type="number"
+          register={register}
+          error={errors.promotionalPrice as FieldError}
+        />
+
         <div>
           <label htmlFor="priceType" className="text-sm font-semibold">
             Price type
@@ -395,7 +403,7 @@ export function AccessoryForm({
         {["fixed", "from", "per_sqm"].includes(priceType) && (
           <Input
             name="price"
-            label="Price"
+            label="Regular price (NGN)"
             type="number"
             register={register}
             error={errors.price as FieldError}
@@ -430,6 +438,23 @@ export function AccessoryForm({
         </div>
       </Section>
       <Section title="Publishing and SEO">
+        <Input
+          name="slug"
+          label="Product slug (leave blank to generate)"
+          register={register}
+          error={errors.slug}
+        />
+        <label>
+          Homepage classification
+          <select
+            {...register("showcase")}
+            className="mt-2 w-full rounded-lg border p-3"
+          >
+            <option value="accessory">LED accessory</option>
+            <option value="camera">Camera / live video</option>
+          </select>
+        </label>
+
         <div>
           <label htmlFor="status" className="text-sm font-semibold">
             Status
@@ -461,8 +486,8 @@ export function AccessoryForm({
         />
       </Section>
       <button
-        disabled={isSubmitting}
-        className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 font-bold disabled:opacity-50"
+        disabled={isSubmitting || uploading}
+        className="bg-primary inline-flex items-center gap-2 rounded-lg px-5 py-3 font-bold text-white disabled:opacity-50"
       >
         {isSubmitting ? (
           <LoaderCircle size={18} className="animate-spin" />

@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildServiceJsonLd } from "@/lib/seo/structured-data";
 import { publicPages } from "@/lib/seo/pages";
@@ -26,40 +27,28 @@ export default async function RentLedScreenPage() {
           "/rent-led-screen",
         )}
       />
-      <section className="bg-brand-900 px-4 py-20 text-white sm:px-6">
-        <div className="mx-auto max-w-5xl">
-          <p className="text-sm font-bold tracking-widest text-brand-300 uppercase">
-            LED screen rental
-          </p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-black sm:text-6xl">
-            Make your event easy to see.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            We help event teams plan temporary LED screen rentals for
-            conferences, churches, weddings, concerts and other events. Tell us
-            your dates and requirements, and we will confirm suitable equipment
-            and support.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/rent-led-screen/request"
-              className="rounded-lg bg-primary px-5 py-3 font-bold text-white"
-            >
-              Request Rental Quote
-            </Link>
-            {whatsapp && (
-              <a
-                href={whatsapp}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-white/30 px-5 py-3 font-bold"
-              >
-                Ask on WhatsApp
-              </a>
-            )}
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="LED screen rental"
+        title="Make your event easy to see."
+        description="We help event teams plan temporary LED screen rentals for conferences, churches, weddings, concerts and other events. Tell us your dates and requirements, and we will confirm suitable equipment and support."
+      >
+        <Link
+          href="/rent-led-screen/request"
+          className="bg-primary rounded-lg px-5 py-3 font-bold text-white"
+        >
+          Request Rental Quote
+        </Link>
+        {whatsapp && (
+          <a
+            href={whatsapp}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-lg border border-white/30 px-5 py-3 font-bold"
+          >
+            Ask on WhatsApp
+          </a>
+        )}
+      </PageHero>
       <section className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {[
@@ -101,7 +90,7 @@ export default async function RentLedScreenPage() {
                   key={product.id}
                   className="rounded-xl border border-slate-200 p-5"
                 >
-                  <p className="text-xs font-bold text-brand-700 uppercase">
+                  <p className="text-brand-700 text-xs font-bold uppercase">
                     {product.indoorOutdoor}
                   </p>
                   <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
@@ -110,7 +99,7 @@ export default async function RentLedScreenPage() {
                   </p>
                   <Link
                     href={`/rent-led-screen/request?product=${product.slug}`}
-                    className="mt-5 inline-block font-semibold text-brand-800 underline"
+                    className="text-brand-800 mt-5 inline-block font-semibold underline"
                   >
                     Request this screen
                   </Link>
@@ -122,7 +111,7 @@ export default async function RentLedScreenPage() {
       </section>
       <nav
         aria-label="Related services"
-        className="mx-auto flex max-w-5xl flex-wrap gap-5 px-4 pb-10 text-brand-700"
+        className="text-brand-700 mx-auto flex max-w-5xl flex-wrap gap-5 px-4 pb-10"
       >
         <Link className="underline" href="/led-screens">
           Explore LED screens

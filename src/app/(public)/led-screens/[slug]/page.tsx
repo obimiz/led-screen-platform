@@ -1,3 +1,5 @@
+import { effectiveProductPrice } from "@/lib/utils/product-price";
+import { PageHero } from "@/components/layout/page-hero";
 import { getProductDisplayImages } from "@/lib/media/product-primary-image";
 import { buildProductMetadata } from "@/lib/seo/metadata";
 import { buildProductJsonLd } from "@/lib/seo/structured-data";
@@ -45,19 +47,10 @@ export default async function LedProductPage({ params }: Props) {
         ]}
       />
       <JsonLd data={buildProductJsonLd(product)} />
-      <section className="bg-brand-900 py-12 text-white">
-        <Container>
-          <p className="text-brand-300 text-sm font-bold tracking-wider uppercase">
-            {product.category.name}
-          </p>
-          <h1 className="mt-3 max-w-4xl text-4xl font-black break-words sm:text-5xl">
-            {product.name}
-          </h1>
-          <p className="mt-4 max-w-2xl text-slate-300">
-            {product.shortDescription}
-          </p>
-        </Container>
-      </section>
+      <PageHero
+        title={<>{product.name}</>}
+        description={<>{product.shortDescription}</>}
+      />
       <Container className="py-10">
         <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
           <div>
@@ -105,7 +98,8 @@ export default async function LedProductPage({ params }: Props) {
                       sku: "",
                       imageUrl,
                       quantity: product.minOrderQuantity || 1,
-                      displayedUnitPrice: product.price,
+                      displayedUnitPrice:
+                        effectiveProductPrice(product) ?? product.price,
                       currency: product.currency,
                       minOrderQuantity: product.minOrderQuantity,
                       maxOrderQuantity: product.maxOrderQuantity,

@@ -1,3 +1,4 @@
+import { validateImageReferences } from "@/lib/media/validate-references";
 import "server-only";
 
 import { Types } from "mongoose";
@@ -77,6 +78,10 @@ function accessoryDto(
     imageUrls: [...product.imageUrls],
     featuredImageUrl: product.featuredImageUrl,
     videoUrl: product.videoUrl,
+    promotionalPrice: product.promotionalPrice ?? null,
+    imageAlt: product.imageAlt ?? "",
+    imageAlts: [...(product.imageAlts ?? [])],
+    showcase: product.showcase ?? "accessory",
     price: product.price ?? null,
     currency: product.currency,
     priceType: product.priceType,
@@ -149,6 +154,10 @@ function productDto(
     featuredImageUrl: product.featuredImageUrl,
     imageFit: product.imageFit ?? "cover",
     videoUrl: product.videoUrl,
+    promotionalPrice: product.promotionalPrice ?? null,
+    imageAlt: product.imageAlt ?? "",
+    imageAlts: [...(product.imageAlts ?? [])],
+    showcase: product.showcase ?? "accessory",
     price: product.price ?? null,
     currency: product.currency,
     priceType: product.priceType,
@@ -361,9 +370,10 @@ export async function createLedProduct(input: ProductValues, adminId: string) {
     productType: "led-screen",
   });
   if (!category) throw new Error("INVALID_CATEGORY");
+  await validateImageReferences([input.featuredImageUrl, ...input.imageUrls]);
   const product = await Product.create({
     ...input,
-    slug: await uniqueProductSlug(input.name),
+    slug: input.slug || (await uniqueProductSlug(input.name)),
     productType: "led-screen",
     createdBy: adminId,
     updatedBy: adminId,
@@ -384,9 +394,18 @@ export async function updateLedProduct(
     productType: "led-screen",
   });
   if (!category) throw new Error("INVALID_CATEGORY");
+  await validateImageReferences([input.featuredImageUrl, ...input.imageUrls]);
   await Product.findOneAndUpdate(
     { _id: id, productType: "led-screen" },
-    { $set: { ...input, updatedBy: adminId } },
+    {
+      $set: {
+        ...input,
+        ...(input.slug
+          ? {}
+          : { slug: (await Product.findById(id).select("slug"))?.slug }),
+        updatedBy: adminId,
+      },
+    },
     { runValidators: true },
   );
   refreshLedCatalogue();
@@ -506,14 +525,15 @@ export const getAccessoryBySlug = cache(async (slug: string) => {
   return (await attachAccessoryCategories([product]))[0] ?? null;
 });
 
-export async function getFeaturedAccessories(limit = 6) {
+export async function getFeaturedAccessories(limit = 6, cameras = false) {
   await connectToDatabase();
   const products = await Product.find({
     productType: "led-accessory",
     status: "published",
     featured: true,
+    showcase: cameras ? "camera" : { $ne: "camera" },
   })
-    .sort({ updatedAt: -1 })
+    .sort({ updatedAt: -1, _id: 1 })
     .limit(limit);
   return attachAccessoryCategories(products);
 }
@@ -547,13 +567,16 @@ export async function createAccessory(input: AccessoryValues, adminId: string) {
     }))
   )
     throw new Error("INVALID_CATEGORY");
+  await validateImageReferences([input.featuredImageUrl, ...input.imageUrls]);
   const product = await Product.create({
     ...input,
     sku: input.sku || undefined,
-    slug: await uniqueProductSlug(input.name),
+    slug: input.slug || (await uniqueProductSlug(input.name)),
     createdBy: adminId,
     updatedBy: adminId,
   });
+  refreshLedCatalogue();
+  revalidatePath("/led-accessories", "layout");
   return getAccessoryById(product.id);
 }
 
@@ -571,7 +594,9 @@ export async function updateAccessory(
     }))
   )
     throw new Error("INVALID_CATEGORY");
-  const { sku, ...values } = input;
+  await validateImageReferences([input.featuredImageUrl, ...input.imageUrls]);
+  const { sku, slug, ...rest } = input;
+  const values = { ...rest, ...(slug ? { slug } : {}) };
   const update = sku
     ? { $set: { ...values, sku, updatedBy: adminId } }
     : { $set: { ...values, updatedBy: adminId }, $unset: { sku: 1 } };
@@ -580,6 +605,8 @@ export async function updateAccessory(
     update,
     { runValidators: true },
   );
+  refreshLedCatalogue();
+  revalidatePath("/led-accessories", "layout");
   return getAccessoryById(id);
 }
 
@@ -596,5 +623,7 @@ export async function setAccessoryArchived(
     { new: true },
   );
   if (!product) return null;
+  refreshLedCatalogue();
+  revalidatePath("/led-accessories", "layout");
   return (await attachAccessoryCategories([product]))[0] ?? null;
 }

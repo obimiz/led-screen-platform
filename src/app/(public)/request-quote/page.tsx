@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
 import { QuoteRequestForm } from "@/components/sales/quote-request-form";
@@ -18,13 +19,16 @@ export default async function RequestQuotePage({
   const business = await getPublicBusinessSettings();
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <h1 className="text-4xl font-bold">
-        Let&apos;s find the right LED solution
-      </h1>
-      <p className="mt-4 mb-8 text-lg text-slate-600">
-        Tell us what you have in mind. You don&apos;t need to know the technical
-        details — our team can help you choose.
-      </p>
+      <PageHero
+        title={<>Let&apos;s find the right LED solution</>}
+        description={
+          <>
+            {" "}
+            Tell us what you have in mind. You don&apos;t need to know the
+            technical details — our team can help you choose.{" "}
+          </>
+        }
+      />
       {slug && !product && (
         <p role="status" className="mb-6 rounded-lg bg-amber-50 p-4">
           The selected product is unavailable. You can still send a general

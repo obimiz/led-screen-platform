@@ -2,6 +2,10 @@ import { buildPageMetadata, listingSeo, type SearchValues } from "./metadata";
 import { getPublicBusinessSettings } from "@/services/business-settings";
 
 export const publicPages = {
+  "/blog": [
+    "Blog & Insights",
+    "News, practical insights and technology updates from Image Grant Technology.",
+  ],
   "/": [
     "LED screen sales, rental and support",
     "Explore LED screens, accessories, rental, installation and maintenance services, plus electronic bell systems and curated Christian music.",

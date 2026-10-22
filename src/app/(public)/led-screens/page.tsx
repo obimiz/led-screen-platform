@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
@@ -28,20 +29,15 @@ export default async function LedScreensPage({
   ]);
   return (
     <main>
-      <section className="bg-brand-900 py-16 text-white">
-        <Container>
-          <p className="text-brand-300 text-sm font-bold tracking-widest uppercase">
-            Product catalogue
-          </p>
-          <h1 className="mt-3 text-4xl font-black sm:text-5xl">
-            Professional LED screens
-          </h1>
-          <p className="mt-4 max-w-2xl text-slate-300">
+      <PageHero
+        title={<>Professional LED screens</>}
+        description={
+          <>
             Compare display solutions for commercial, worship, event, and
             advertising environments.
-          </p>
-        </Container>
-      </section>
+          </>
+        }
+      />
       <section className="py-12">
         <Container>
           <form className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-4">

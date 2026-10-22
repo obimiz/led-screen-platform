@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { Phone } from "lucide-react";
 import { WhatsAppIcon } from "@/components/shared/whatsapp-icon";
 import { staticPageMetadata } from "@/lib/seo/pages";
@@ -18,13 +19,16 @@ export default async function Page() {
       <p className="text-brand-700 text-sm font-bold tracking-widest uppercase">
         Contact
       </p>
-      <h1 className="mt-3 text-4xl font-black">
-        Let’s discuss your requirement.
-      </h1>
-      <p className="mt-4 max-w-2xl text-lg text-slate-600">
-        Reach us about LED sales, rentals, installation, maintenance,
-        accessories, bell and alarm systems, or general enquiries.
-      </p>
+      <PageHero
+        title={<>Let’s discuss your requirement.</>}
+        description={
+          <>
+            {" "}
+            Reach us about LED sales, rentals, installation, maintenance,
+            accessories, bell and alarm systems, or general enquiries.{" "}
+          </>
+        }
+      />
       <div className="mt-10 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
         <section className="rounded-2xl border p-6">
           <h2 className="text-xl font-bold">Contact details</h2>

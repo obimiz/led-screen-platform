@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Brand } from "@/components/shared/brand";
 import { Container } from "@/components/ui/container";
-import { publicNavigation } from "@/lib/constants/navigation";
+import {
+  mainPublicNavigation,
+  morePublicNavigation,
+} from "@/lib/constants/navigation";
 import type { PublicBusinessSettings } from "@/types/business-settings";
 import { MobileNavigation } from "./mobile-navigation";
 import { CartIndicator } from "@/components/cart/cart-controls";
@@ -56,9 +59,9 @@ function PublicNavigation() {
     >
       <nav
         aria-label="Main navigation"
-        className="hidden items-center gap-5 lg:flex"
+        className="hidden items-center gap-3 xl:flex 2xl:gap-5"
       >
-        {publicNavigation.slice(0, 5).map((item) => (
+        {mainPublicNavigation.map((item) => (
           <Link
             key={item.label}
             href={item.href}
@@ -83,7 +86,7 @@ function PublicNavigation() {
               id="public-more-navigation"
               className="absolute top-8 right-0 z-50 grid max-h-[calc(100dvh-6rem)] min-w-52 gap-1 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 p-2 shadow-2xl"
             >
-              {publicNavigation.slice(5).map((item) => (
+              {morePublicNavigation.map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}
@@ -122,7 +125,7 @@ export function Header({ settings }: { settings: PublicBusinessSettings }) {
     >
       <Container className="flex h-18 items-center justify-between">
         <Brand
-          className="min-w-0 pr-16 lg:pr-0"
+          className="min-w-0 pr-16 xl:pr-0"
           businessName={settings.businessName}
           shortName={settings.shortName}
           logoUrl={settings.logoUrl}

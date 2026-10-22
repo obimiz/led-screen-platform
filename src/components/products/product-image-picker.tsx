@@ -6,11 +6,13 @@ export function ProductImagePicker({
   onBusyChange,
   hasFeaturedImage = false,
   galleryFull = false,
+  featuredOnly = false,
 }: {
   onSelect: (url: string, featured: boolean) => void;
   onBusyChange?: (busy: boolean) => void;
   hasFeaturedImage?: boolean;
   galleryFull?: boolean;
+  featuredOnly?: boolean;
 }) {
   const libraryId = useId();
   const [images, setImages] = useState<{ url: string; name: string }[]>([]);
@@ -62,10 +64,12 @@ export function ProductImagePicker({
                 ...items,
               ]);
               setSelected(body.url);
-              if (!hasFeaturedImage) {
+              if (featuredOnly || !hasFeaturedImage) {
                 onSelect(body.url, true);
                 setMessage(
-                  "Image uploaded and selected as the featured image. Save the product to apply it.",
+                  featuredOnly
+                    ? "Image uploaded and selected. Save changes to apply it."
+                    : "Image uploaded and selected as the featured image. Save the product to apply it.",
                 );
               } else if (!galleryFull) {
                 onSelect(body.url, false);
@@ -117,16 +121,18 @@ export function ProductImagePicker({
           onClick={() => onSelect(selected, true)}
           className="rounded-lg border px-3 py-2 disabled:opacity-50"
         >
-          Use as featured image
+          {featuredOnly ? "Use selected image" : "Use as featured image"}
         </button>
-        <button
-          type="button"
-          disabled={!selected || busy || galleryFull}
-          onClick={() => onSelect(selected, false)}
-          className="rounded-lg border px-3 py-2 disabled:opacity-50"
-        >
-          Add to gallery
-        </button>
+        {!featuredOnly && (
+          <button
+            type="button"
+            disabled={!selected || busy || galleryFull}
+            onClick={() => onSelect(selected, false)}
+            className="rounded-lg border px-3 py-2 disabled:opacity-50"
+          >
+            Add to gallery
+          </button>
+        )}
       </div>
       {message && (
         <p role="status" className="text-sm">

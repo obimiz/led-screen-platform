@@ -253,3 +253,13 @@ body {
 .public-site [id] {
   scroll-margin-top: 5.5rem;
 }
+
+.publishing-editor .tiptap { overflow-wrap: anywhere; }
+.publishing-editor .tiptap p { margin: 0.75rem 0; }
+.publishing-editor .tiptap h2 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0; }
+.publishing-editor .tiptap h3, .publishing-editor .tiptap h4 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0; }
+.publishing-editor .tiptap ul { list-style: disc; padding-left: 1.5rem; }
+.publishing-editor .tiptap ol { list-style: decimal; padding-left: 1.5rem; }
+.publishing-editor .tiptap blockquote { border-left: 4px solid #28146B; padding-left: 1rem; font-style: italic; }
+.publishing-editor .tiptap a { color: #28146B; text-decoration: underline; }
+.publishing-editor .tiptap img { max-width: 100%; height: auto; border-radius: 0.75rem; }

@@ -161,6 +161,7 @@ async function main() {
     });
     pass("Create/edit, ordering, active and featured filtering");
     const chrome =
+      process.env.IGT_TEST_BROWSER ||
       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
     browser = await chromium.launch({
       headless: true,
@@ -382,14 +383,15 @@ async function main() {
           .locator("main > section")
           .evaluateAll((sections) =>
             sections
-              .slice(0, 4)
+              .slice(0, 5)
               .map((s) => s.querySelector("h1,h2")?.textContent),
           ),
         [
           "Professional LED Display Solutions",
-          "Organisations We've Worked With",
-          "One team for the display lifecycle.",
-          "Featured LED screens",
+          "Our Services",
+          "Featured LED Screens",
+          "Electronic Digital Bell Systems",
+          "LED Screen Cameras & Live Video Solutions",
         ],
       );
       assert.ok(
@@ -408,7 +410,7 @@ async function main() {
     }
     assert.deepEqual(pageErrors, [], "No hydration or uncaught browser errors");
     pass(
-      "All ten supplied names, null logos and exact Hero → Organisations → Services → Catalogue order at six widths",
+      "All ten supplied names, null logos and exact Hero → Services → Catalogue → Bell → Cameras order at six widths",
     );
 
     await page.route("**/_next/image?**", (route) => route.abort());

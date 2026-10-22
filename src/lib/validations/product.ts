@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { safeImage } from "@/lib/publishing/rich-content";
 import {
   defaultCurrency,
   indoorOutdoorOptions,
@@ -25,12 +26,27 @@ const optionalUrl = z
   ])
   .default("");
 // LED media can use existing public assets as well as external image URLs.
-const ledImageUrl = optionalUrl.removeDefault().or(
-  z.string().trim().regex(/^\/(?!\/)[^\\\s?#]+$/, "Use a local path or http(s) URL"),
-);
+const ledImageUrl = optionalUrl
+  .removeDefault()
+  .or(
+    z
+      .string()
+      .trim()
+      .regex(/^\/(?!\/)[^\\\s?#]+$/, "Use a local path or http(s) URL"),
+  )
+  .refine((value) => !value || safeImage(value), "Use a safe image URL");
 const stringList = (maxItems: number, maxLength: number) =>
   z.array(z.string().trim().min(1).max(maxLength)).max(maxItems).default([]);
 const sharedFields = {
+  slug: z
+    .string()
+    .trim()
+    .max(180)
+    .regex(
+      /^(?:[a-z0-9]+(?:-[a-z0-9]+)*)?$/,
+      "Use lowercase letters, numbers and hyphens",
+    )
+    .default(""),
   name: z.string().trim().min(2, "Product name is required").max(160),
   category: objectIdSchema,
   shortDescription: z.string().trim().min(10).max(300),
@@ -46,16 +62,19 @@ const sharedFields = {
     .max(60)
     .default([]),
   imageUrls: z
-    .array(
-      z
-        .string()
-        .trim()
-        .url()
-        .refine((value) => /^https?:\/\//.test(value)),
-    )
+    .array(ledImageUrl.refine(Boolean, "Image URL is required"))
     .max(20)
     .default([]),
-  featuredImageUrl: optionalUrl,
+  featuredImageUrl: ledImageUrl.default(""),
+  imageAlt: text(300),
+  imageAlts: z.array(text(300)).max(20).default([]),
+  promotionalPrice: z
+    .preprocess(
+      (v) => (v === "" || v === undefined ? null : v),
+      z.coerce.number().min(0).nullable(),
+    )
+    .default(null),
+  showcase: z.enum(["accessory", "camera"]).default("accessory"),
   videoUrl: optionalUrl,
   price: z.preprocess(
     (value) => (value === "" || value === undefined ? null : value),
@@ -72,7 +91,12 @@ const sharedFields = {
   quantity: z.coerce.number().int().min(0).default(0),
   isPurchasableOnline: z.boolean().default(false),
   minOrderQuantity: z.coerce.number().int().min(1).default(1),
-  maxOrderQuantity: z.preprocess((v) => (v === "" || v === undefined ? null : v), z.coerce.number().int().min(1).nullable()).default(null),
+  maxOrderQuantity: z
+    .preprocess(
+      (v) => (v === "" || v === undefined ? null : v),
+      z.coerce.number().int().min(1).nullable(),
+    )
+    .default(null),
   allowBackorder: z.boolean().default(false),
   trackInventory: z.boolean().default(true),
   lowStockThreshold: z.coerce.number().int().min(0).default(1),
@@ -100,10 +124,39 @@ const sharedFields = {
   seoDescription: text(320),
 };
 function priceRule(
-  value: { priceType: string; price: number | null },
+  value: {
+    priceType: string;
+    price: number | null;
+    promotionalPrice?: number | null;
+  },
   context: z.RefinementCtx,
 ) {
-  if (["fixed", "from", "per_sqm"].includes(value.priceType) && value.price === null)
+  if (
+    value.promotionalPrice != null &&
+    (value.priceType !== "fixed" ||
+      value.price == null ||
+      value.promotionalPrice >= value.price)
+  )
+    context.addIssue({
+      code: "custom",
+      path: ["promotionalPrice"],
+      message: "Promotional price must be below a regular fixed price",
+    });
+  for (const amount of [value.price, value.promotionalPrice])
+    if (
+      amount != null &&
+      (!Number.isSafeInteger(Math.round(amount * 100)) ||
+        Math.abs(amount * 100 - Math.round(amount * 100)) > 0.00001)
+    )
+      context.addIssue({
+        code: "custom",
+        path: ["price"],
+        message: "Use a safe amount with at most two decimal places",
+      });
+  if (
+    ["fixed", "from", "per_sqm"].includes(value.priceType) &&
+    value.price === null
+  )
     context.addIssue({
       code: "custom",
       path: ["price"],
@@ -115,7 +168,12 @@ export const productSchema = z
   .object({
     ...sharedFields,
     featuredImageUrl: ledImageUrl.default(""),
-    imageUrls: z.array(ledImageUrl.refine((value) => Boolean(value), "Image URL is required")).max(20).default([]),
+    imageUrls: z
+      .array(
+        ledImageUrl.refine((value) => Boolean(value), "Image URL is required"),
+      )
+      .max(20)
+      .default([]),
     imageFit: z.enum(["cover", "contain"]).default("cover"),
     indoorOutdoor: z.enum(indoorOutdoorOptions),
     pixelPitch: text(50),
@@ -144,6 +202,7 @@ export const accessorySchema = z
   .object({
     ...sharedFields,
     productType: z.literal("led-accessory"),
+    currency: z.literal("NGN").default("NGN"),
     brand: text(100),
     modelNumber: text(100),
     sku: z
@@ -160,7 +219,47 @@ export const accessorySchema = z
   })
   .strict()
   .superRefine(priceRule);
-export const bellAlarmSchema = z.object({ ...sharedFields, productType: z.enum(["bell-alarm-system","bell-alarm-accessory"]), brand: text(100), modelNumber: text(100), sku: z.string().trim().toUpperCase().max(80).regex(/^[A-Z0-9._-]*$/).default(""), compatibility: stringList(50,200), bellSystemType:text(120), applicationType:text(120), operatingMode:text(80), programmable:z.boolean().default(false), numberOfSchedules:z.coerce.number().int().min(0).default(0), outputZones:z.coerce.number().int().min(0).default(0), audioOutput:text(120), speakerSupport:z.boolean().default(false), sirenSupport:z.boolean().default(false), amplifierRequired:z.boolean().default(false), timerIncluded:z.boolean().default(false), controllerIncluded:z.boolean().default(false), batteryBackupSupported:z.boolean().default(false), remoteControlSupported:z.boolean().default(false), networkSupported:z.boolean().default(false), wifiSupported:z.boolean().default(false), gsmSupported:z.boolean().default(false), powerRequirement:text(120), coverageDescription:text(500), installationRequired:z.boolean().default(false), recommendedFor:stringList(30,120), includedComponents:stringList(50,200), optionalComponents:stringList(50,200) }).strict().superRefine(priceRule);
+export const bellAlarmSchema = z
+  .object({
+    ...sharedFields,
+    currency: z.literal("NGN").default("NGN"),
+    productType: z.enum(["bell-alarm-system", "bell-alarm-accessory"]),
+    brand: text(100),
+    modelNumber: text(100),
+    sku: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .max(80)
+      .regex(/^[A-Z0-9._-]*$/)
+      .default(""),
+    compatibility: stringList(50, 200),
+    bellSystemType: text(120),
+    applicationType: text(120),
+    operatingMode: text(80),
+    programmable: z.boolean().default(false),
+    numberOfSchedules: z.coerce.number().int().min(0).default(0),
+    outputZones: z.coerce.number().int().min(0).default(0),
+    audioOutput: text(120),
+    speakerSupport: z.boolean().default(false),
+    sirenSupport: z.boolean().default(false),
+    amplifierRequired: z.boolean().default(false),
+    timerIncluded: z.boolean().default(false),
+    controllerIncluded: z.boolean().default(false),
+    batteryBackupSupported: z.boolean().default(false),
+    remoteControlSupported: z.boolean().default(false),
+    networkSupported: z.boolean().default(false),
+    wifiSupported: z.boolean().default(false),
+    gsmSupported: z.boolean().default(false),
+    powerRequirement: text(120),
+    coverageDescription: text(500),
+    installationRequired: z.boolean().default(false),
+    recommendedFor: stringList(30, 120),
+    includedComponents: stringList(50, 200),
+    optionalComponents: stringList(50, 200),
+  })
+  .strict()
+  .superRefine(priceRule);
 
 export const productCategorySchema = z
   .object({

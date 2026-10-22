@@ -1,3 +1,5 @@
+import { effectiveProductPrice } from "@/lib/utils/product-price";
+import { PageHero } from "@/components/layout/page-hero";
 import { buildProductMetadata } from "@/lib/seo/metadata";
 import { buildProductJsonLd } from "@/lib/seo/structured-data";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -39,26 +41,23 @@ export default async function AccessoryPublicDetail({ params }: Props) {
         ]}
       />
       <JsonLd data={buildProductJsonLd(item)} />
-      <section className="bg-brand-900 py-12 text-white">
-        <Container>
-          <p className="text-sm font-bold tracking-wider text-brand-300 uppercase">
-            {item.category.name}
-          </p>
-          <h1 className="mt-3 text-4xl font-black sm:text-5xl">{item.name}</h1>
-          <p className="mt-3 text-slate-300">
+      <PageHero
+        title={<>{item.name}</>}
+        description={
+          <>
             {[item.brand, item.modelNumber, item.sku]
               .filter(Boolean)
               .join(" · ")}
-          </p>
-        </Container>
-      </section>
+          </>
+        }
+      />
       <Container className="py-10">
         <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
           <div>
             <ProductImage
               priority
               url={item.featuredImageUrl}
-              name={item.name}
+              name={item.imageAlt || item.name}
               className="aspect-video rounded-2xl"
             />
             {gallery.length > 1 && (
@@ -67,7 +66,10 @@ export default async function AccessoryPublicDetail({ params }: Props) {
                   <ProductImage
                     key={image}
                     url={image}
-                    name={`${item.name} image ${index + 2}`}
+                    name={
+                      item.imageAlts[item.imageUrls.indexOf(image)] ||
+                      `${item.name} image ${index + 2}`
+                    }
                     className="aspect-square rounded-lg"
                   />
                 ))}
@@ -98,7 +100,8 @@ export default async function AccessoryPublicDetail({ params }: Props) {
                       sku: item.sku,
                       imageUrl: item.featuredImageUrl,
                       quantity: item.minOrderQuantity || 1,
-                      displayedUnitPrice: item.price,
+                      displayedUnitPrice:
+                        effectiveProductPrice(item) ?? item.price,
                       currency: item.currency,
                       minOrderQuantity: item.minOrderQuantity,
                       maxOrderQuantity: item.maxOrderQuantity,
@@ -107,7 +110,7 @@ export default async function AccessoryPublicDetail({ params }: Props) {
                 )}
               <Link
                 href={`/request-quote?product=${item.slug}`}
-                className="block rounded-lg bg-primary px-5 py-3 text-center font-bold text-white"
+                className="bg-primary block rounded-lg px-5 py-3 text-center font-bold text-white"
               >
                 Request Quote
               </Link>
@@ -116,7 +119,7 @@ export default async function AccessoryPublicDetail({ params }: Props) {
                   href={whatsapp}
                   target="_blank"
                   rel="noreferrer"
-                  className="block rounded-lg bg-success-500 px-5 py-3 text-center font-bold text-brand-900"
+                  className="bg-success-500 text-brand-900 block rounded-lg px-5 py-3 text-center font-bold"
                 >
                   Enquire on WhatsApp
                 </a>
@@ -153,7 +156,7 @@ export default async function AccessoryPublicDetail({ params }: Props) {
               {item.compatibility.map((value) => (
                 <span
                   key={value}
-                  className="rounded-full bg-brand-50 px-4 py-2 text-sm font-semibold"
+                  className="bg-brand-50 rounded-full px-4 py-2 text-sm font-semibold"
                 >
                   {value}
                 </span>

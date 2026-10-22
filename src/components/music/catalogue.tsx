@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import Link from "next/link";
 import {
   getMusicPage,
@@ -27,12 +28,20 @@ export async function PublicMusicCatalogue({
       <p className="text-brand-700 text-sm font-bold tracking-[0.2em] uppercase">
         Listen, reflect, worship
       </p>
-      <h1 className="mt-2 text-4xl font-black">
-        {browse ? "Browse music and audio" : "Christian & Catholic Music"}
-      </h1>
-      <p className="mt-3 max-w-2xl text-slate-600">
-        Stream published recordings and explore music from official sources.
-      </p>
+      <PageHero
+        title={
+          <>
+            {browse ? "Browse music and audio" : "Christian & Catholic Music"}
+          </>
+        }
+        description={
+          <>
+            {" "}
+            Stream published recordings and explore music from official
+            sources.{" "}
+          </>
+        }
+      />
       <nav
         aria-label="Music browsing"
         className="text-brand-700 mt-6 flex flex-wrap gap-5"

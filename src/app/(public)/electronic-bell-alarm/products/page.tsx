@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { BellAlarmProductImage } from "@/components/bell-alarm/product-image";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
@@ -8,10 +9,16 @@ export default async function Page() {
   const products = await getBellAlarmProducts("bell-alarm-system");
   return (
     <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <h1 className="text-4xl font-black">Electronic bell and alarm systems</h1>
-      <p className="mt-3 text-slate-600">
-        Published systems for schools, churches, offices and institutions.
-      </p>
+      <PageHero
+        title={<>Electronic bell and alarm systems</>}
+        description={
+          <>
+            {" "}
+            Published systems for schools, churches, offices and
+            institutions.{" "}
+          </>
+        }
+      />
       {products.length === 0 ? (
         <p className="mt-10">No bell/alarm products yet.</p>
       ) : (

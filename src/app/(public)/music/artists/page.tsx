@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import Link from "next/link";
 import { getPublishedArtists } from "@/services/music";
 import { staticPageMetadata } from "@/lib/seo/pages";
@@ -16,7 +17,7 @@ export default async function ArtistsPage() {
           { name: "Artists", path: "/music/artists" },
         ]}
       />
-      <h1 className="text-4xl font-black">Music artists</h1>
+      <PageHero title={<>Music artists</>} />
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         {artists.map(
           (artist: { id: string; slug: string; name: string; bio: string }) => (

@@ -11,7 +11,11 @@ export type ProductCategoryDto = {
   sortOrder: number;
   productType: ProductType;
 };
-export type AccessoryProduct = Omit<AccessoryValues, "category"> & {
+export type AccessoryProduct = Omit<
+  AccessoryValues,
+  "category" | "currency"
+> & {
+  currency: string;
   id: string;
   slug: string;
   category: { id: string; name: string; slug: string };

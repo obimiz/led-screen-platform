@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildServiceJsonLd } from "@/lib/seo/structured-data";
 import { publicPages } from "@/lib/seo/pages";
@@ -22,39 +23,28 @@ export default async function Page() {
           "/led-maintenance",
         )}
       />
-      <section className="bg-brand-900 px-4 py-20 text-white sm:px-6">
-        <div className="mx-auto max-w-5xl">
-          <p className="text-sm font-bold tracking-widest text-brand-300 uppercase">
-            LED maintenance & repairs
-          </p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-black sm:text-6xl">
-            Keep your LED display working reliably.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            We diagnose and service LED screens whether we installed them or
-            another company did. Request repairs, preventive maintenance,
-            calibration or emergency support.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/led-maintenance/request"
-              className="rounded-lg bg-primary px-5 py-3 font-bold text-white"
-            >
-              Request Maintenance / Repair
-            </Link>
-            {w && (
-              <a
-                href={w}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-white/30 px-5 py-3 font-bold"
-              >
-                Ask on WhatsApp
-              </a>
-            )}
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="LED maintenance & repairs"
+        title="Keep your LED display working reliably."
+        description="We diagnose and service LED screens whether we installed them or another company did. Request repairs, preventive maintenance, calibration or emergency support."
+      >
+        <Link
+          href="/led-maintenance/request"
+          className="bg-primary rounded-lg px-5 py-3 font-bold text-white"
+        >
+          Request Maintenance / Repair
+        </Link>
+        {w && (
+          <a
+            href={w}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-lg border border-white/30 px-5 py-3 font-bold"
+          >
+            Ask on WhatsApp
+          </a>
+        )}
+      </PageHero>
       <section className="mx-auto grid max-w-5xl gap-5 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
         {[
           [
@@ -82,7 +72,7 @@ export default async function Page() {
       </section>
       <nav
         aria-label="Related services"
-        className="mx-auto flex max-w-5xl flex-wrap gap-5 px-4 pb-10 text-brand-700"
+        className="text-brand-700 mx-auto flex max-w-5xl flex-wrap gap-5 px-4 pb-10"
       >
         <Link className="underline" href="/projects">
           View project examples

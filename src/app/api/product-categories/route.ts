@@ -1,3 +1,4 @@
+import { productTypes } from "@/lib/constants/products";
 import { NextResponse, type NextRequest } from "next/server";
 import {
   apiServerError,
@@ -16,9 +17,9 @@ export async function GET(request: NextRequest) {
   try {
     const admin = await getCurrentAdmin();
     const productType =
-      request.nextUrl.searchParams.get("productType") === "led-accessory"
-        ? "led-accessory"
-        : "led-screen";
+      productTypes.find(
+        (type) => type === request.nextUrl.searchParams.get("productType"),
+      ) || "led-screen";
     return apiSuccess(
       "Categories loaded",
       await getCategoriesByType(productType, Boolean(admin)),

@@ -1,3 +1,4 @@
+import { effectiveProductPrice } from "@/lib/utils/product-price";
 import { getProductDisplayImages } from "@/lib/media/product-primary-image";
 import Link from "next/link";
 import { PriceDisplay } from "@/components/products/price-display";
@@ -68,7 +69,8 @@ export function ProductCard({ product }: { product: LedProduct }) {
                   sku: "",
                   imageUrl,
                   quantity: product.minOrderQuantity || 1,
-                  displayedUnitPrice: product.price,
+                  displayedUnitPrice:
+                    effectiveProductPrice(product) ?? product.price,
                   currency: product.currency,
                   minOrderQuantity: product.minOrderQuantity,
                   maxOrderQuantity: product.maxOrderQuantity,

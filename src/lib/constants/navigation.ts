@@ -17,25 +17,43 @@ export type AdminNavigationItem = NavigationItem & {
   icon: LucideIcon;
 };
 
-export const publicNavigation: NavigationItem[] = [
+export const mainPublicNavigation: NavigationItem[] = [
   { label: "Home", href: "/" },
   { label: "LED Screens", href: "/led-screens" },
   { label: "Accessories", href: "/led-accessories" },
-  { label: "Request Quote", href: "/request-quote" },
+  { label: "Electronic Bell & Alarm", href: "/electronic-bell-alarm" },
+  { label: "Blog", href: "/blog" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];
+
+export const morePublicNavigation: NavigationItem[] = [
   { label: "LED Installation", href: "/led-installation" },
   { label: "LED Maintenance", href: "/led-maintenance" },
-  { label: "Electronic Bell & Alarm", href: "/electronic-bell-alarm" },
   { label: "Music", href: "/music" },
   { label: "Projects", href: "/projects" },
   { label: "Gallery", href: "/gallery" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Solutions", href: "/#solutions" },
+  { label: "Solutions", href: "/services" },
+];
+
+export const publicNavigation: NavigationItem[] = [
+  ...mainPublicNavigation,
+  ...morePublicNavigation,
 ];
 
 export const adminNavigation: AdminNavigationItem[] = [
   { label: "Overview", href: "/admin", icon: LayoutDashboard },
+  {
+    label: "Homepage Images",
+    href: "/admin/settings/homepage",
+    icon: Settings,
+  },
   { label: "Products", href: "/admin/products", icon: Package },
+  {
+    label: "Electronic Bell · Page Content",
+    href: "/admin/electronic-bell",
+    icon: Bell,
+  },
   { label: "LED Accessories", href: "/admin/accessories", icon: Package },
   {
     label: "Product Categories",
@@ -121,10 +139,10 @@ export const adminNavigation: AdminNavigationItem[] = [
   { label: "Music & Audio", href: "/admin/music", icon: Menu },
   { label: "Music · Categories", href: "/admin/music/categories", icon: Menu },
   { label: "Music · Artists", href: "/admin/music/artists", icon: Menu },
-  { label: "Portfolio · Projects", href: "/admin/portfolio", icon: Menu },
+  { label: "Blog & Projects", href: "/admin/blog", icon: Menu },
   {
-    label: "Portfolio · Categories",
-    href: "/admin/portfolio/categories",
+    label: "Blog · Categories",
+    href: "/admin/blog/categories",
     icon: Menu,
   },
   { label: "Gallery", href: "/admin/gallery", icon: Menu },

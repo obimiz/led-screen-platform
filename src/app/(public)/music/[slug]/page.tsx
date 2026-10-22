@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { MusicPlayer } from "@/components/music/audio-player";
 import Link from "next/link";
 import { getMusicArtistBySlug, getMusicCategories } from "@/services/music";
@@ -37,16 +38,24 @@ export default async function Page({
       <p className="text-brand-700 text-sm font-bold uppercase">
         {item.contentType}
       </p>
-      <h1 className="mt-2 text-4xl font-black">{item.title}</h1>
-      <p className="mt-2 text-lg text-slate-600">
-        {artist ? (
-          <Link className="underline" href={`/music/artists/${artist.slug}`}>
-            {item.artistName || artist.name}
-          </Link>
-        ) : (
-          item.artistName
-        )}
-      </p>
+      <PageHero
+        title={<>{item.title}</>}
+        description={
+          <>
+            {" "}
+            {artist ? (
+              <Link
+                className="underline"
+                href={`/music/artists/${artist.slug}`}
+              >
+                {item.artistName || artist.name}
+              </Link>
+            ) : (
+              item.artistName
+            )}{" "}
+          </>
+        }
+      />
       {category && (
         <Link
           className="text-brand-700 mt-3 inline-block underline"

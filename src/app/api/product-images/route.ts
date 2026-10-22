@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { getCurrentAdmin } from "@/lib/auth/current-admin";
@@ -96,6 +97,11 @@ export async function POST(request: Request) {
     const data = Buffer.concat(chunks);
     try {
       validateProductImage(data, mime);
+      // Decode pixels as well as checking signatures, rejecting truncated or oversized images.
+      await sharp(data, { limitInputPixels: 40_000_000, failOn: "warning" })
+        .rotate()
+        .raw()
+        .toBuffer();
     } catch (error) {
       return Response.json(
         { message: (error as Error).message },

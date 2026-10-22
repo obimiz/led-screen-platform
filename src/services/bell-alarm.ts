@@ -1,3 +1,5 @@
+import { revalidatePath } from "next/cache";
+import { validateImageReferences } from "@/lib/media/validate-references";
 import { cache } from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
@@ -29,7 +31,7 @@ export async function getBellAlarmProducts(
       productType: type,
       ...(admin ? {} : { status: "published" }),
     })
-      .sort({ featured: -1, updatedAt: -1 })
+      .sort({ featured: -1, updatedAt: -1, _id: 1 })
       .limit(200)
   ).map(dto);
 }
@@ -57,6 +59,7 @@ export async function getBellAlarmProductById(id: string, admin = false) {
 export async function createBellAlarmProduct(raw: unknown, adminId: string) {
   const input = bellAlarmSchema.parse(raw);
   await connectToDatabase();
+  await validateImageReferences([input.featuredImageUrl, ...input.imageUrls]);
   let category = input.category;
   if (
     !(await ProductCategory.exists({
@@ -72,15 +75,19 @@ export async function createBellAlarmProduct(raw: unknown, adminId: string) {
         })
       )?.id || "";
   if (!category) throw new Error("INVALID_CATEGORY");
-  return dto(
+  const created = dto(
     await Product.create({
       ...input,
       category,
-      slug: await slug(input.name),
+      slug: input.slug || (await slug(input.name)),
+      sku: input.sku || undefined,
       createdBy: adminId,
       updatedBy: adminId,
     }),
   );
+  revalidatePath("/");
+  revalidatePath("/electronic-bell-alarm", "layout");
+  return created;
 }
 export async function updateBellAlarmProduct(
   id: string,
@@ -89,10 +96,30 @@ export async function updateBellAlarmProduct(
 ) {
   const input = bellAlarmSchema.parse(raw);
   await connectToDatabase();
+  if (!Types.ObjectId.isValid(id)) return null;
+  if (
+    !(await ProductCategory.exists({
+      _id: input.category,
+      productType: input.productType,
+    }))
+  )
+    throw Error("INVALID_CATEGORY");
+  await validateImageReferences([input.featuredImageUrl, ...input.imageUrls]);
+  const { sku, slug: requestedSlug, ...values } = input;
   const d = await Product.findOneAndUpdate(
     { _id: id, productType: input.productType },
-    { $set: { ...input, updatedBy: adminId } },
+    {
+      $set: {
+        ...values,
+        ...(requestedSlug ? { slug: requestedSlug } : {}),
+        ...(sku ? { sku } : {}),
+        updatedBy: adminId,
+      },
+      ...(!sku ? { $unset: { sku: 1 } } : {}),
+    },
     { new: true, runValidators: true },
   );
+  revalidatePath("/");
+  revalidatePath("/electronic-bell-alarm", "layout");
   return d ? dto(d) : null;
 }

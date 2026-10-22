@@ -2,7 +2,10 @@
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import type { RefObject } from "react";
-import { publicNavigation } from "@/lib/constants/navigation";
+import {
+  mainPublicNavigation,
+  morePublicNavigation,
+} from "@/lib/constants/navigation";
 import { CartIndicator } from "@/components/cart/cart-controls";
 
 export function MobileNavigation({
@@ -17,7 +20,7 @@ export function MobileNavigation({
   toggleRef: RefObject<HTMLButtonElement | null>;
 }) {
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <button
         ref={toggleRef}
         type="button"
@@ -39,7 +42,7 @@ export function MobileNavigation({
           className="bg-brand-900 absolute inset-x-0 top-full max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain border-t border-white/10 px-4 py-4 shadow-xl"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
-            {publicNavigation.map((item) => (
+            {mainPublicNavigation.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
@@ -49,6 +52,23 @@ export function MobileNavigation({
                 {item.label}
               </Link>
             ))}
+            <details className="rounded-lg">
+              <summary className="cursor-pointer px-3 py-3 text-sm font-medium text-slate-200">
+                More
+              </summary>
+              <div className="grid gap-1 border-l border-white/15 pl-3">
+                {morePublicNavigation.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    className="hover:text-brand-300 rounded-lg px-3 py-3 text-sm font-medium text-slate-200 hover:bg-white/5"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </details>
             <Link
               href="/request-quote"
               onClick={onClose}

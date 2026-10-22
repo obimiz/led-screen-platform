@@ -2,6 +2,7 @@ import "server-only";
 import type { MetadataRoute } from "next";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Product } from "@/models/product";
+import { publicPortfolioFilter } from "@/services/portfolio";
 import { PortfolioProject } from "@/models/portfolio-project";
 import { MusicContent } from "@/models/music-content";
 import { MusicArtist } from "@/models/music-artist";
@@ -10,7 +11,12 @@ import { GalleryItem } from "@/models/gallery-item";
 import { buildCanonicalUrl } from "@/lib/seo/urls";
 import { productPath } from "@/lib/seo/metadata";
 
-type SitemapRecord = { slug: string; updatedAt?: Date; productType?: string };
+type SitemapRecord = {
+  slug: string;
+  updatedAt?: Date;
+  productType?: string;
+  contentType?: string;
+};
 function entries(
   rows: SitemapRecord[],
   path: (row: SitemapRecord) => string,
@@ -47,13 +53,14 @@ export async function getDynamicSitemapEntries(): Promise<MetadataRoute.Sitemap>
             productPath({ slug: row.slug, productType: row.productType! }),
           ),
         ),
-      PortfolioProject.find({ status: "published" })
-        .select("slug updatedAt -_id")
+      PortfolioProject.find(publicPortfolioFilter())
+        .select("slug contentType updatedAt -_id")
         .lean()
         .then((rows) =>
           entries(
             rows as unknown as SitemapRecord[],
-            (row) => `/projects/${encodeURIComponent(row.slug)}`,
+            (row) =>
+              `/${row.contentType === "article" ? "blog" : "projects"}/${encodeURIComponent(row.slug)}`,
           ),
         ),
       MusicContent.find({ status: "published" })

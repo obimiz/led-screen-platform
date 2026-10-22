@@ -29,3 +29,20 @@ export function formatProductPrice(product: {
       ? `${amount} / m²`
       : amount;
 }
+
+/** Keep existing catalogue/cart/order prices consistent without changing monetary storage. */
+export function effectiveProductPrice(product: {
+  priceType: string;
+  price?: number | null;
+  promotionalPrice?: number | null;
+}) {
+  const { price, promotionalPrice: sale } = product;
+  return product.priceType === "fixed" &&
+    price != null &&
+    sale != null &&
+    Number.isFinite(sale) &&
+    sale >= 0 &&
+    sale < price
+    ? sale
+    : price;
+}

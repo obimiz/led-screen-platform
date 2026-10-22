@@ -1,3 +1,5 @@
+import { getHomepageImages } from "@/services/homepage-images";
+import { defaultHomepageImages } from "@/lib/validations/homepage-images";
 import Image from "next/image";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
@@ -9,18 +11,26 @@ import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ProductCard } from "@/components/products/product-card";
-import { MusicCard } from "@/components/music/music-card";
+import { ContentCard } from "@/components/publishing/card";
+import { getFeaturedContent, getHomepageArticles } from "@/services/portfolio";
+import { AccessoryCard } from "@/components/products/accessory-card";
+import {
+  Bell,
+  Video,
+  Monitor,
+  Wrench,
+  CalendarDays,
+  Settings,
+} from "lucide-react";
+import { ProductImage } from "@/components/products/product-media";
 import { getPublicBusinessSettings } from "@/services/business-settings";
 import {
   getFeaturedLedProducts,
   getFeaturedAccessories,
 } from "@/services/products";
-import { getFeaturedMusic } from "@/services/music";
+
 import { getBellAlarmProducts } from "@/services/bell-alarm";
-import {
-  getFeaturedGalleryItems,
-  getFeaturedTestimonials,
-} from "@/services/gallery";
+import { getFeaturedGalleryItems } from "@/services/gallery";
 import { createWhatsAppUrl } from "@/lib/utils/contact";
 import { HeroMedia } from "@/components/home/hero-media";
 import { OrganisationMarquee } from "@/components/organisations/organisation-marquee";
@@ -32,53 +42,81 @@ export const dynamic = "force-dynamic";
 
 const services = [
   [
-    "LED Screen Sales",
-    "Browse displays and request a project quotation.",
+    "LED Display Sales",
+    "Choose a display around your space and audience.",
     "/led-screens",
+    Monitor,
   ],
   [
-    "LED Rental",
-    "Temporary screens for events and celebrations.",
-    "/rent-led-screen",
-  ],
-  [
-    "LED Installation",
-    "Permanent indoor and outdoor displays planned for your space.",
+    "LED Screen Installation",
+    "Plan permanent indoor and outdoor installations.",
     "/led-installation",
+    Settings,
   ],
   [
-    "Maintenance & Repairs",
-    "Troubleshooting, preventive servicing and repairs.",
+    "LED Screen Rental",
+    "Temporary displays for events and celebrations.",
+    "/rent-led-screen",
+    CalendarDays,
+  ],
+  [
+    "LED Screen Maintenance",
+    "Preventive servicing, troubleshooting and repairs.",
     "/led-maintenance",
-  ],
-  [
-    "Accessories & Spares",
-    "Controllers, processors, power systems and cables.",
-    "/led-accessories",
+    Wrench,
   ],
 ] as const;
-
 export default async function Home() {
+  const business = await getPublicBusinessSettings();
   const results = await Promise.allSettled([
-    getPublicBusinessSettings(),
     getFeaturedLedProducts(6),
-    getFeaturedAccessories(4),
-    getFeaturedMusic(3),
-    getBellAlarmProducts("bell-alarm-system"),
-    getFeaturedGalleryItems(6),
-    getFeaturedTestimonials(3),
+    getFeaturedAccessories(6),
+    getBellAlarmProducts(),
+    getFeaturedAccessories(3, true),
+    getFeaturedContent(4, "project"),
+    getHomepageArticles(),
     getOrganisations(true),
+    getFeaturedGalleryItems(6),
+    getHomepageImages(),
   ]);
-  const value = <T,>(result: PromiseSettledResult<T>, fallback: T): T =>
-    result.status === "fulfilled" ? result.value : fallback;
-  const business = value(results[0], await getPublicBusinessSettings());
-  const products = value(results[1], []);
-  const accessories = value(results[2], []);
-  const music = value(results[3], []);
-  const bells = value(results[4], []);
-  const gallery = value(results[5], []);
-  const testimonials = value(results[6], []);
-  const organisations = value(results[7], []);
+  const value = <T,>(r: PromiseSettledResult<T>, fallback: T): T =>
+    r.status === "fulfilled" ? r.value : fallback;
+  const products = value(results[0], []),
+    accessories = value(results[1], []),
+    bells = value(results[2], []),
+    cameras = value(results[3], []),
+    projects = value(results[4], []),
+    articles = value(results[5], []),
+    organisations = value(results[6], []),
+    gallery = value(results[7], []);
+  const homepageImages = value(results[8], defaultHomepageImages);
+  const bell = bells.find(
+    (p) => p.featured && (p.featuredImageUrl || p.imageUrls?.length),
+  );
+  const bellImageUrl =
+    homepageImages.bellImageUrl ||
+    bell?.featuredImageUrl ||
+    bell?.imageUrls?.[0] ||
+    "";
+  const bellImageAlt = homepageImages.bellImageUrl
+    ? homepageImages.bellImageAlt || "Electronic bell system"
+    : bell?.imageAlt || bell?.name || "Electronic bell system";
+  const showBellProduct = bell && !homepageImages.bellImageUrl;
+  const leadCamera = homepageImages.cameraImageUrl
+    ? undefined
+    : cameras.find((p) => p.featuredImageUrl || p.imageUrls.length);
+  const cameraImageUrl =
+    homepageImages.cameraImageUrl ||
+    leadCamera?.featuredImageUrl ||
+    leadCamera?.imageUrls?.[0] ||
+    "";
+  const cameraImageAlt = homepageImages.cameraImageUrl
+    ? homepageImages.cameraImageAlt ||
+      "Camera for LED screen live video production"
+    : leadCamera?.imageAlt ||
+      leadCamera?.name ||
+      "Camera for LED screen live video production";
+  const cameraCards = cameras.filter((p) => p.id !== leadCamera?.id);
   const hasVideo = await access(
     path.join(process.cwd(), "public/videos/image-grant-hero.mp4"),
   ).then(
@@ -86,7 +124,7 @@ export default async function Home() {
     () => false,
   );
   const whatsapp = createWhatsAppUrl(
-    business.whatsappNumber,
+    "2348039308982",
     "Hello, I would like to know more about your LED screen solutions.",
   );
   return (
@@ -124,88 +162,257 @@ export default async function Home() {
           </div>
         </Container>
       </section>
-      <OrganisationMarquee items={organisations} />
-      <section id="services" className="bg-slate-50 py-20">
+
+      <section id="services" className="bg-slate-50 py-12">
         <Container>
-          <p className="text-brand-700 text-sm font-bold tracking-widest uppercase">
-            Our services
-          </p>
-          <h2 className="mt-3 text-3xl font-black sm:text-4xl">
-            One team for the display lifecycle.
-          </h2>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {services.map(([title, description, href]) => (
-              <article key={title} className="rounded-2xl border bg-white p-6">
-                <h3 className="text-lg font-bold">{title}</h3>
-                <p className="mt-2 leading-7 text-slate-600">{description}</p>
-                <Link
-                  href={href}
-                  className="text-brand-700 mt-5 inline-block font-bold"
-                >
-                  Learn more →
-                </Link>
-              </article>
-            ))}
-          </div>
+          <article className="rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
+            <h2 className="text-3xl font-black">Our Services</h2>
+            <p className="mt-4 max-w-3xl leading-7 text-slate-600">
+              Sales, installation, rental and maintenance of LED display systems
+              for churches, businesses, institutions, events, restaurants and
+              bars.
+            </p>
+            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {services.map(([title, description, href, Icon]) => (
+                <div key={title}>
+                  <Icon className="text-brand-700 mb-3" aria-hidden="true" />
+                  <h3 className="font-bold">
+                    <Link href={href}>{title}</Link>
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {description}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <Link
+              href="/request-quote"
+              className="mt-7 inline-block rounded-lg bg-[#DD2421] px-5 py-3 font-bold text-white"
+            >
+              Request a Quote
+            </Link>
+          </article>
         </Container>
       </section>
-      <section className="py-20">
+      <section className="py-12">
         <Container>
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-brand-700 text-sm font-bold tracking-widest uppercase">
-                Featured catalogue
-              </p>
-              <h2 className="mt-2 text-3xl font-black">Featured LED screens</h2>
-            </div>
-            <Link href="/led-screens" className="text-brand-700 font-bold">
-              View All Products
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2 className="text-3xl font-black">Featured LED Screens</h2>
+            <Link className="text-brand-700 font-bold" href="/led-screens">
+              View All Products →
             </Link>
           </div>
           {products.length ? (
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((p) => (
+                <ProductCard key={p.id} product={p} />
               ))}
             </div>
           ) : (
-            <p className="mt-8 rounded-xl border border-dashed p-8">
+            <p className="mt-6">
               Tell us what you need and we will recommend a suitable display.{" "}
-              <Link className="text-brand-700 font-bold" href="/request-quote">
+              <Link href="/request-quote" className="text-brand-700 font-bold">
                 Request a quote
               </Link>
             </p>
           )}
         </Container>
       </section>
-      <section id="solutions" className="bg-brand-50 py-16">
-        <Container>
-          <h2 className="text-3xl font-black">LED solutions for your space</h2>
-          <p className="mt-3 max-w-2xl text-slate-600">
-            Explore a display solution around your audience, environment and
-            intended use.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              "Churches & auditoriums",
-              "Businesses & institutions",
-              "Events & celebrations",
-              "Indoor & outdoor spaces",
-            ].map((title) => (
-              <Link
-                key={title}
-                href="/request-quote"
-                className="rounded-xl border bg-white p-5 font-bold"
-              >
-                {title}
-                <span className="text-brand-700 mt-3 block text-sm font-normal">
-                  Discuss your requirements →
-                </span>
-              </Link>
-            ))}
+      <section
+        id="electronic-digital-bell"
+        aria-labelledby="bell-showcase-heading"
+        className="bg-brand-50 py-12"
+      >
+        <Container className="grid items-center gap-8 md:grid-cols-2">
+          {bellImageUrl ? (
+            <ProductImage
+              url={bellImageUrl}
+              name={bellImageAlt}
+              neutralFallback
+              fit="contain"
+              className="aspect-[4/3] rounded-xl"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-[#28146B]"
+            >
+              <Bell className="size-24 text-white/90" strokeWidth={1} />
+            </div>
+          )}
+          <div>
+            <h2 id="bell-showcase-heading" className="text-3xl font-black">
+              Electronic Digital Bell Systems
+            </h2>
+            {showBellProduct && (
+              <h3 className="mt-4 text-xl font-bold">{bell.name}</h3>
+            )}
+            <p className="mt-3 leading-7 text-slate-600">
+              {showBellProduct
+                ? bell.shortDescription
+                : "Discuss an electronic bell and alarm solution for your school, church, office or institution. Our team can help with equipment selection, installation, configuration and support."}
+            </p>
+            <Link
+              href="/electronic-bell-alarm"
+              className="mt-6 inline-block rounded-lg bg-[#DD2421] px-5 py-3 font-bold text-white"
+            >
+              Explore Bell & Alarm →
+            </Link>
           </div>
         </Container>
       </section>
+      <section
+        id="led-screen-cameras"
+        aria-labelledby="camera-showcase-heading"
+        className="py-12"
+      >
+        <Container>
+          <div
+            className="grid items-center gap-8 md:grid-cols-2"
+            data-camera-feature
+          >
+            {cameraImageUrl ? (
+              <ProductImage
+                url={cameraImageUrl}
+                name={cameraImageAlt}
+                neutralFallback
+                fit="contain"
+                className="aspect-[4/3] rounded-xl"
+              />
+            ) : (
+              <div
+                aria-hidden="true"
+                className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-[#28146B]"
+              >
+                <Video className="size-24 text-white/90" strokeWidth={1} />
+              </div>
+            )}
+            <div>
+              <h2 id="camera-showcase-heading" className="text-3xl font-black">
+                LED Screen Cameras & Live Video Solutions
+              </h2>
+              <p className="mt-3 leading-7 text-slate-600">
+                Cameras for live video production using compatible video
+                processors, switchers or signal conversion equipment. Ask us to
+                confirm compatibility for your setup.
+              </p>
+              {leadCamera ? (
+                <>
+                  <h3 className="mt-4 text-xl font-bold">{leadCamera.name}</h3>
+                  <p className="mt-3 leading-7 text-slate-600">
+                    {leadCamera.shortDescription}
+                  </p>
+                  <Link
+                    href={`/led-accessories/${leadCamera.slug}`}
+                    className="text-brand-700 mt-4 inline-block font-bold"
+                  >
+                    View Camera Details →
+                  </Link>
+                </>
+              ) : (
+                <p className="mt-5 leading-7 text-slate-600">
+                  Tell us about your venue, filming needs and existing LED
+                  display equipment so we can discuss a suitable live video
+                  setup.
+                </p>
+              )}
+              <Link
+                href="/contact"
+                className="mt-6 inline-block rounded-lg bg-[#DD2421] px-5 py-3 font-bold text-white"
+              >
+                Enquire About Live Video Solutions →
+              </Link>
+            </div>
+          </div>
+          {cameraCards.length > 0 && (
+            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {cameraCards.map((item) => (
+                <AccessoryCard
+                  key={item.id}
+                  item={item}
+                  whatsappNumber="2348039308982"
+                />
+              ))}
+            </div>
+          )}
+        </Container>
+      </section>
+      {accessories.length > 0 && (
+        <section className="bg-slate-50 py-12">
+          <Container>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h2 className="text-3xl font-black">LED Screen Accessories</h2>
+              <Link className="text-brand-700 font-bold" href="/accessories">
+                View All Accessories →
+              </Link>
+            </div>
+            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {accessories.map((item) => (
+                <AccessoryCard
+                  key={item.id}
+                  item={item}
+                  whatsappNumber="2348039308982"
+                />
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+      {projects.length > 0 && (
+        <section className="py-12">
+          <Container>
+            <h2 className="text-3xl font-black">Featured Projects</h2>
+            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {projects.map((item) => (
+                <ContentCard key={item.id} item={item} />
+              ))}
+            </div>
+            <Link
+              className="text-brand-700 mt-6 inline-block font-bold"
+              href="/projects"
+            >
+              View All Projects →
+            </Link>
+          </Container>
+        </section>
+      )}
+      <section
+        id="blog"
+        aria-labelledby="homepage-blog-title"
+        className="bg-slate-50 py-12"
+      >
+        <Container>
+          <p className="text-brand-700 mb-3 text-sm font-bold tracking-widest uppercase">
+            From Our Blog
+          </p>
+          <h2 id="homepage-blog-title" className="text-3xl font-black">
+            Latest News & Insights
+          </h2>
+          <p className="mt-3 max-w-3xl leading-7 text-slate-600">
+            Explore news, project stories and practical insights from Image
+            Grant Technology.
+          </p>
+          {articles.length > 0 ? (
+            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {articles.map((item) => (
+                <ContentCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <p className="mt-5 text-slate-600">
+              Our latest articles will appear here when published. Visit the
+              blog for updates.
+            </p>
+          )}
+          <Link
+            className="mt-6 inline-block rounded-lg bg-[#DD2421] px-5 py-3 font-bold text-white"
+            href="/blog"
+          >
+            View All Articles →
+          </Link>
+        </Container>
+      </section>
+      <OrganisationMarquee items={organisations} />
       {gallery.length > 0 && (
         <section className="bg-slate-50 py-20">
           <Container>
@@ -253,120 +460,6 @@ export default async function Home() {
           </Container>
         </section>
       )}
-      <section className="py-16">
-        <Container>
-          <h2 className="text-3xl font-black">
-            Why choose Image Grant Technology?
-          </h2>
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {[
-              [
-                "From selection to support",
-                "Sales, installation, rental and maintenance services in one place.",
-              ],
-              [
-                "Built around your requirements",
-                "Request a quotation for your space, intended use and budget.",
-              ],
-              [
-                "Options for permanent and temporary use",
-                "Explore LED screen purchases and rentals for your next project or event.",
-              ],
-            ].map(([title, text]) => (
-              <article key={title}>
-                <h3 className="text-lg font-bold">{title}</h3>
-                <p className="mt-3 leading-7 text-slate-600">{text}</p>
-              </article>
-            ))}
-          </div>
-        </Container>
-      </section>
-      {testimonials.length > 0 && (
-        <section className="py-20">
-          <Container>
-            <h2 className="text-3xl font-black">What our customers say</h2>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {testimonials.map((item: any) => (
-                <article key={item.id} className="rounded-2xl border p-6">
-                  <p className="leading-7 text-slate-700">“{item.quote}”</p>
-                  <p className="mt-5 font-bold">{item.customerDisplayName}</p>
-                  {item.organizationName && (
-                    <p className="text-sm text-slate-500">
-                      {item.organizationName}
-                    </p>
-                  )}
-                </article>
-              ))}
-            </div>
-            <Link
-              href="/testimonials"
-              className="text-brand-700 mt-6 inline-block font-bold"
-            >
-              Read more testimonials →
-            </Link>
-          </Container>
-        </section>
-      )}
-      {accessories.length > 0 && (
-        <section className="py-20">
-          <Container>
-            <h2 className="text-3xl font-black">Accessories and spare parts</h2>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {accessories.map((item: any) => (
-                <article key={item.id} className="rounded-xl border p-5">
-                  <h3 className="font-bold">{item.name}</h3>
-                  <p className="mt-2 text-sm text-slate-600">
-                    {item.shortDescription}
-                  </p>
-                  <Link
-                    className="text-brand-700 mt-4 inline-block text-sm font-bold"
-                    href={`/led-accessories/${item.slug}`}
-                  >
-                    View accessory
-                  </Link>
-                </article>
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
-      {bells.length > 0 && (
-        <section className="bg-brand-50 py-16">
-          <Container>
-            <h2 className="text-3xl font-black">
-              Electronic bell and alarm systems
-            </h2>
-            <p className="mt-3 max-w-2xl text-slate-600">
-              Programmable bell and alert solutions for churches, schools,
-              offices and institutions.
-            </p>
-            <Link
-              href="/electronic-bell-alarm"
-              className="text-brand-700 mt-5 inline-block font-bold"
-            >
-              Explore Bell & Alarm →
-            </Link>
-          </Container>
-        </section>
-      )}
-      {music.length > 0 && (
-        <section className="py-20">
-          <Container>
-            <h2 className="text-3xl font-black">Christian & Catholic Music</h2>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {music.map((item: any) => (
-                <MusicCard key={item.id} item={item} />
-              ))}
-            </div>
-            <Link
-              href="/music"
-              className="text-brand-700 mt-6 inline-block font-bold"
-            >
-              Explore Music →
-            </Link>
-          </Container>
-        </section>
-      )}
       <section className="bg-brand-50 py-16">
         <Container>
           <h2 className="text-brand-900 text-3xl font-black">
@@ -399,7 +492,6 @@ export default async function Home() {
     </main>
   );
 }
-
 export async function generateMetadata({
   searchParams,
 }: {

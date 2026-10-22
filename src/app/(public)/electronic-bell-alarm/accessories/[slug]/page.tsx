@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { PriceDisplay } from "@/components/products/price-display";
 import { ProductImage } from "@/components/products/product-media";
 import { buildProductJsonLd } from "@/lib/seo/structured-data";
@@ -30,10 +31,10 @@ export default async function Page({
         ]}
       />
       <JsonLd data={buildProductJsonLd(p)} />
-      <p className="text-sm font-bold text-brand-700 uppercase">
+      <p className="text-brand-700 text-sm font-bold uppercase">
         Bell/alarm accessory
       </p>
-      <h1 className="mt-2 text-4xl font-black">{p.name}</h1>
+      <PageHero title={<>{p.name}</>} />
       {p.featuredImageUrl && (
         <ProductImage
           url={p.featuredImageUrl}

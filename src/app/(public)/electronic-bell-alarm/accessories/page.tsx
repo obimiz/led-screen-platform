@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
@@ -7,7 +8,7 @@ export default async function Page() {
   const products = await getBellAlarmProducts("bell-alarm-accessory");
   return (
     <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <h1 className="text-4xl font-black">Bell and alarm accessories</h1>
+      <PageHero title={<>Bell and alarm accessories</>} />
       {products.length === 0 ? (
         <p className="mt-10">No electronic bell/alarm accessories yet.</p>
       ) : (

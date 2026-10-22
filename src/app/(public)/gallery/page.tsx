@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import Link from "next/link";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
@@ -18,11 +19,16 @@ export default async function Page({
     `/gallery?${new URLSearchParams({ category: query.category || "", page: String(p) })}`;
   return (
     <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-      <h1 className="text-4xl font-black">Gallery</h1>
-      <p className="mt-3 text-slate-600">
-        Explore our products, equipment, installations and events. Each caption
-        describes the image shown.
-      </p>
+      <PageHero
+        title={<>Gallery</>}
+        description={
+          <>
+            {" "}
+            Explore our products, equipment, installations and events. Each
+            caption describes the image shown.{" "}
+          </>
+        }
+      />
       <form className="mt-6 flex flex-wrap gap-3">
         <label>
           Gallery category

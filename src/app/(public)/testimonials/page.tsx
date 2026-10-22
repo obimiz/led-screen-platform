@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
 /* eslint-disable @typescript-eslint/no-explicit-any */ import { getPublishedTestimonials } from "@/services/gallery";
@@ -6,7 +7,7 @@ export default async function Page() {
   const rows = await getPublishedTestimonials();
   return (
     <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
-      <h1 className="text-4xl font-black">What our customers say</h1>
+      <PageHero title={<>What our customers say</>} />
       {rows.length === 0 ? (
         <p className="mt-8">No testimonials have been published yet.</p>
       ) : (

@@ -1,3 +1,4 @@
+import { isSameOriginUpload } from "@/lib/media/upload-origin";
 import { NextResponse, type NextRequest } from "next/server";
 import {
   apiBadRequest,
@@ -60,6 +61,8 @@ export async function PUT(request: NextRequest, { params }: Context) {
       { success: false, message: "Authentication required." },
       { status: 401 },
     );
+  if (!isSameOriginUpload(request))
+    return apiBadRequest("Invalid request origin.");
   try {
     const body: unknown = await request.json();
     if (
@@ -108,6 +111,8 @@ export async function PUT(request: NextRequest, { params }: Context) {
       ? apiSuccess("LED product updated", product)
       : apiNotFound("LED product not found.");
   } catch (error) {
+    if (error instanceof Error && error.message === "INVALID_IMAGE_REFERENCE")
+      return apiBadRequest("Select an existing image or upload it again.");
     if (error instanceof Error && error.message === "INVALID_CATEGORY")
       return apiBadRequest("Select a valid product category.");
     if (error instanceof Error && error.message.includes("E11000"))

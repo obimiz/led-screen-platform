@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { PriceDisplay } from "@/components/products/price-display";
 import { BellAlarmProductImage } from "@/components/bell-alarm/product-image";
 import { buildProductJsonLd } from "@/lib/seo/structured-data";
@@ -36,11 +37,11 @@ export default async function Page({
       <p className="text-brand-700 text-sm font-bold uppercase">
         Electronic bell/alarm system
       </p>
-      <h1 className="mt-2 text-4xl font-black">{p.name}</h1>
+      <PageHero title={<>{p.name}</>} />
       <div className="mt-6 overflow-hidden rounded-xl">
         <BellAlarmProductImage
           url={p.featuredImageUrl}
-          name={p.name}
+          name={p.imageAlt || p.name}
           priority
         />
       </div>
@@ -67,6 +68,35 @@ export default async function Page({
           </p>
         </section>
       </div>
+      <p className="mt-4 text-sm text-slate-600">
+        Availability: {p.stockStatus}
+      </p>
+      {p.specifications?.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-2xl font-bold">Technical specifications</h2>
+          <dl className="mt-4 divide-y rounded-xl border">
+            {p.specifications.map(
+              (s: { label: string; value: string }, i: number) => (
+                <div key={i} className="grid grid-cols-2 gap-4 p-4">
+                  <dt className="font-semibold">{s.label}</dt>
+                  <dd>{s.value}</dd>
+                </div>
+              ),
+            )}
+          </dl>
+        </section>
+      )}
+      {p.imageUrls?.length > 0 && (
+        <section className="mt-8 grid gap-4 sm:grid-cols-3">
+          {p.imageUrls.map((url: string, i: number) => (
+            <BellAlarmProductImage
+              key={`${url}-${i}`}
+              url={url}
+              name={p.imageAlts?.[i] || p.name}
+            />
+          ))}
+        </section>
+      )}
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           className="bg-primary rounded-lg px-5 py-3 font-bold text-white"

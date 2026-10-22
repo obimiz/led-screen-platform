@@ -40,7 +40,14 @@ export function CategoryManager({
   });
   function edit(category: ProductCategoryDto) {
     setEditing(category);
-    reset(category);
+    reset(
+      Object.fromEntries(
+        Object.keys(productCategorySchema.shape).map((key) => [
+          key,
+          category[key as keyof ProductCategoryDto],
+        ]),
+      ) as ProductCategoryInput,
+    );
   }
   async function submit(values: ProductCategoryValues) {
     const response = await fetch(
@@ -77,7 +84,7 @@ export function CategoryManager({
         <h2 className="text-lg font-bold">
           {editing ? "Edit category" : "New category"}
         </h2>
-        {message && <p className="text-sm text-success-700">{message}</p>}
+        {message && <p className="text-success-700 text-sm">{message}</p>}
         {errors.root && (
           <p className="text-sm text-red-700">{errors.root.message}</p>
         )}
@@ -121,7 +128,7 @@ export function CategoryManager({
         <div className="flex gap-2">
           <button
             disabled={isSubmitting}
-            className="rounded-lg bg-primary px-4 py-2.5 font-bold"
+            className="bg-primary rounded-lg px-4 py-2.5 font-bold"
           >
             {isSubmitting ? "Saving…" : "Save category"}
           </button>
@@ -161,7 +168,7 @@ export function CategoryManager({
                   <button
                     type="button"
                     onClick={() => edit(category)}
-                    className="font-semibold text-brand-700"
+                    className="text-brand-700 font-semibold"
                   >
                     Edit
                   </button>

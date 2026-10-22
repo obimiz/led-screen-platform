@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { getPublicBusinessSettings } from "@/services/business-settings";
@@ -21,8 +22,7 @@ export default async function Page({
           { name: a.name, path: `/music/artists/${a.slug}` },
         ]}
       />
-      <h1 className="text-4xl font-black">{a.name}</h1>
-      <p className="mt-4 max-w-2xl text-slate-600">{a.bio}</p>
+      <PageHero title={<>{a.name}</>} description={<> {a.bio} </>} />
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((x: any) => (
           <MusicCard key={x.id} item={x} />

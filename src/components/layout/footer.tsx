@@ -77,6 +77,7 @@ export function Footer({ settings }: { settings: PublicBusinessSettings }) {
                 ["Services", "/services"],
                 ["LED Rental", "/rent-led-screen"],
                 ["Projects", "/projects"],
+                ["Blog", "/blog"],
                 ["Testimonials", "/testimonials"],
                 ["Contact", "/contact"],
               ].map(([name, href]) => (

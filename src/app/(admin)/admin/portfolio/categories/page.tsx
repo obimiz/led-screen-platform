@@ -1,1 +1,4 @@
-import {requirePortfolioAdmin} from "@/lib/portfolio/access"; import {getPortfolioCategories} from "@/services/portfolio"; export const dynamic="force-dynamic"; export default async function Page(){await requirePortfolioAdmin();const rows=await getPortfolioCategories();return <main className="p-6"><h1 className="text-3xl font-black">Portfolio categories</h1>{rows.length?<ul className="mt-6 space-y-2">{rows.map((x:any)=><li key={x.id} className="rounded-lg border p-4">{x.name}</li>)}</ul>:<p className="mt-6">No portfolio categories yet.</p>}</main>}
+import { redirect } from "next/navigation";
+export default function Page() {
+  redirect("/admin/blog/categories");
+}

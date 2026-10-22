@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/layout/page-hero";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { getPublicBusinessSettings } from "@/services/business-settings";
@@ -27,13 +28,20 @@ export default async function GalleryDetail({
         ]}
       />
       <Container>
-        <Link href="/gallery" className="text-sm font-bold text-brand-700">
+        <Link href="/gallery" className="text-brand-700 text-sm font-bold">
           ← Back to gallery
         </Link>
-        <h1 className="mt-6 text-4xl font-black">{item.title}</h1>
-        <p className="mt-3 text-slate-600">
-          {[item.category, item.city, item.state].filter(Boolean).join(" · ")}
-        </p>
+        <PageHero
+          title={<>{item.title}</>}
+          description={
+            <>
+              {" "}
+              {[item.category, item.city, item.state]
+                .filter(Boolean)
+                .join(" · ")}{" "}
+            </>
+          }
+        />
         <div className="mt-8 overflow-hidden rounded-2xl bg-slate-100">
           {video ? (
             <iframe
@@ -50,7 +58,9 @@ export default async function GalleryDetail({
               alt={item.altText || item.title}
               className="max-h-[70vh] w-full object-contain"
             />
-          ) : <p className="p-8 text-slate-500">This media is unavailable.</p>}
+          ) : (
+            <p className="p-8 text-slate-500">This media is unavailable.</p>
+          )}
         </div>
         {item.description && (
           <p className="mt-8 max-w-3xl leading-8 whitespace-pre-line text-slate-700">
@@ -63,7 +73,7 @@ export default async function GalleryDetail({
         <div className="mt-10">
           <Link
             href="/request-quote"
-            className="rounded-lg bg-primary px-5 py-3 font-bold text-white"
+            className="bg-primary rounded-lg px-5 py-3 font-bold text-white"
           >
             Request a Quote
           </Link>

@@ -1,1 +1,19 @@
-import {Schema,model,models} from "mongoose"; const schema=new Schema({name:{type:String,required:true,trim:true},slug:{type:String,unique:true,required:true,index:true},description:{type:String,default:""},imageUrl:{type:String,default:""},isActive:{type:Boolean,default:true},sortOrder:{type:Number,default:0}},{timestamps:true}); export const PortfolioCategory=models.PortfolioCategory||model("PortfolioCategory",schema);
+import { Schema, model, models } from "mongoose";
+const schema = new Schema(
+  {
+    scope: {
+      type: String,
+      enum: ["all", "project", "article"],
+      default: "all",
+    },
+    name: { type: String, required: true, trim: true },
+    slug: { type: String, unique: true, required: true, index: true },
+    description: { type: String, default: "" },
+    imageUrl: { type: String, default: "" },
+    isActive: { type: Boolean, default: true },
+    sortOrder: { type: Number, default: 0 },
+  },
+  { timestamps: true },
+);
+export const PortfolioCategory =
+  models.PortfolioCategory || model("PortfolioCategory", schema);

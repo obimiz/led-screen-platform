@@ -1,1 +1,4 @@
-import {requirePortfolioAdmin} from "@/lib/portfolio/access"; import {PortfolioProjectForm} from "@/components/portfolio/project-form"; export default async function Page(){await requirePortfolioAdmin();return <main className="p-6"><h1 className="mb-6 text-3xl font-black">New portfolio project</h1><PortfolioProjectForm/></main>}
+import { redirect } from "next/navigation";
+export default function Page() {
+  redirect("/admin/blog/new?type=project");
+}
