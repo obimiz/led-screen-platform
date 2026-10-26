@@ -52,7 +52,7 @@ export default async function AccessoriesPage({
           </Link>
           <Link
             href="/admin/accessories/new"
-            className="rounded-lg bg-primary px-4 py-2.5 font-bold"
+            className="bg-primary rounded-lg px-4 py-2.5 font-bold"
           >
             New accessory
           </Link>
@@ -146,7 +146,7 @@ export default async function AccessoriesPage({
                     <div>
                       <p className="font-bold">{item.name}</p>
                       {item.featured && (
-                        <span className="text-xs text-brand-700">Featured</span>
+                        <span className="text-brand-700 text-xs">Featured</span>
                       )}
                     </div>
                   </div>
@@ -167,7 +167,7 @@ export default async function AccessoriesPage({
                   <div className="flex gap-3">
                     <Link
                       href={`/admin/accessories/${item.id}`}
-                      className="font-semibold text-brand-700"
+                      className="text-brand-700 font-semibold"
                     >
                       View
                     </Link>
@@ -195,7 +195,7 @@ export default async function AccessoriesPage({
             </p>
             <Link
               href="/admin/accessories/new"
-              className="mt-3 inline-block font-semibold text-brand-700"
+              className="text-brand-700 mt-3 inline-block font-semibold"
             >
               Add the first accessory
             </Link>

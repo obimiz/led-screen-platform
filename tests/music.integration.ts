@@ -170,7 +170,8 @@ async function main() {
       "unauthorised metadata mutations, upload and private library access are rejected",
     );
     const chrome =
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+      process.env.IGT_TEST_BROWSER ||
+      "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge";
     browser = await chromium.launch({
       headless: true,
       args: ["--autoplay-policy=no-user-gesture-required"],
@@ -337,6 +338,7 @@ async function main() {
       0,
     );
     assert.equal((await fetch(base + `/api/music/${id}`)).status, 404);
+    assert.equal((await fetch(base + audio.url + "?download=1")).status, 404);
     // Next.js loading boundaries may stream a 200 before notFound() resolves.
     // Assert the private metadata is absent, alongside the strict API 404 above.
     const draftPage = await (await fetch(base + `/music/${item.slug}`)).text();
@@ -398,6 +400,7 @@ async function main() {
       .getByLabel("Licence or permission information (optional)")
       .fill("Self-generated test tone; test only.");
     await page.getByLabel("Featured music", { exact: true }).check();
+    await page.getByLabel(/^Allow public downloads/).check();
     await page
       .getByRole("button", { name: "Publish music", exact: true })
       .click();
@@ -414,6 +417,31 @@ async function main() {
       "permissionToDistribute",
     ])
       assert.ok(!(key in publicItem), key);
+    assert.equal(publicItem.downloadUrl, audio.url + "?download=1");
+    const attachment = await fetch(base + publicItem.downloadUrl);
+    assert.equal(attachment.status, 200);
+    assert.match(
+      attachment.headers.get("content-disposition") || "",
+      /^attachment; filename=/,
+    );
+    assert.deepEqual(Buffer.from(await attachment.arrayBuffer()), wave);
+    await db
+      .collection("musiccontents")
+      .updateOne(
+        { _id: new Types.ObjectId(id) },
+        { $set: { permissionToDistribute: false } },
+      );
+    assert.equal((await fetch(base + publicItem.downloadUrl)).status, 404);
+    assert.equal((await fetch(base + audio.url)).status, 200);
+    await db
+      .collection("musiccontents")
+      .updateOne(
+        { _id: new Types.ObjectId(id) },
+        { $set: { permissionToDistribute: true } },
+      );
+    pass(
+      "Published audio downloads return exact stored bytes as an attachment; drafts and revoked download permission are protected",
+    );
     let range = await fetch(base + audio.url, {
       headers: { Range: "bytes=44-83" },
     });
@@ -468,11 +496,17 @@ async function main() {
       await players.last().evaluate((a) => (a as HTMLAudioElement).paused),
       false,
     );
-    assert.ok(
-      (await players.last().getAttribute("controlslist"))?.includes(
-        "nodownload",
-      ),
-    );
+    assert.equal(await players.last().getAttribute("controlslist"), null);
+    const downloadEvent = publicPage.waitForEvent("download");
+    await publicPage
+      .getByRole("link", {
+        name: "Download Synthetic music fixture",
+        exact: true,
+      })
+      .first()
+      .click();
+    const downloaded = await downloadEvent;
+    assert.deepEqual(readFileSync((await downloaded.path())!), wave);
     for (const width of [390, 1440]) {
       await publicPage.setViewportSize({ width, height: 900 });
       await publicPage.goto(base + "/music");
@@ -521,10 +555,12 @@ async function main() {
       .click();
     await publicPage.getByText(/No music matches your search/).waitFor();
     assert.ok(
-      (await (await fetch(base)).text()).includes("Synthetic music fixture"),
+      (await (await fetch(base + "/music")).text()).includes(
+        "Synthetic music fixture",
+      ),
     );
     pass(
-      "public desktop/mobile playback, one active track, streaming-only controls, search, category filtering and featured homepage",
+      "public desktop/mobile playback, one active track, public download controls, search, category filtering and featured music page",
     );
     await page.goto(base + `/admin/music/${id}/edit`);
     await page
@@ -578,7 +614,9 @@ async function main() {
     await api(`/api/music/${id}`, "PUT", { sortOrder: 1 });
     assert.equal((await api(`/api/music/${id}`)).categoryId, other.id);
     assert.ok(
-      (await (await fetch(base)).text()).includes("Updated synthetic music"),
+      (await (await fetch(base + "/music")).text()).includes(
+        "Updated synthetic music",
+      ),
     );
     pass(
       "editing/replacing audio preserves cover, rights, historical assets and deactivated category associations",
@@ -591,13 +629,19 @@ async function main() {
       0,
     );
     assert.equal((await fetch(base + replacement.url)).status, 404);
+    assert.equal(
+      (await fetch(base + replacement.url + "?download=1")).status,
+      404,
+    );
     const unpublishedPage = await (
       await fetch(base + `/music/${item.slug}`)
     ).text();
     assert.ok(!unpublishedPage.includes("Updated synthetic music"));
     assert.ok(!unpublishedPage.includes(replacement.url));
     assert.ok(
-      !(await (await fetch(base)).text()).includes("Updated synthetic music"),
+      !(await (await fetch(base + "/music")).text()).includes(
+        "Updated synthetic music",
+      ),
     );
     page.once("dialog", (d) => d.dismiss());
     await page.getByRole("button", { name: "Archive", exact: true }).click();

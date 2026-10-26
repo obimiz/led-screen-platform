@@ -74,7 +74,7 @@ const sharedFields = {
       z.coerce.number().min(0).nullable(),
     )
     .default(null),
-  showcase: z.enum(["accessory", "camera"]).default("accessory"),
+  showcase: z.enum(["accessory", "camera", "video"]).default("accessory"),
   videoUrl: optionalUrl,
   price: z.preprocess(
     (value) => (value === "" || value === undefined ? null : value),
@@ -265,7 +265,7 @@ export const productCategorySchema = z
   .object({
     name: z.string().trim().min(2).max(120),
     description: text(1000),
-    imageUrl: optionalUrl,
+    imageUrl: ledImageUrl.default(""),
     active: z.boolean().default(true),
     sortOrder: z.coerce.number().int().min(0).max(10000).default(0),
     productType: z.enum(productTypes).default("led-screen"),

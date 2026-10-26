@@ -34,8 +34,18 @@ export function ContentMediaManager({
       .catch((e) => setMessage(e.message));
   }, []);
   function add(url: string, cover = false) {
-    if (cover || (autoFeature && !value.coverImageUrl)) onChange({ ...value, coverImageUrl: url });
-    else if (!value.imageUrls.includes(url) && value.imageUrls.length < maxImages)
+    if (cover || (autoFeature && !value.coverImageUrl))
+      onChange({
+        ...value,
+        coverImageUrl: url,
+        ...(autoFeature
+          ? { coverAlt: value.imageAlts[value.imageUrls.indexOf(url)] || "" }
+          : {}),
+      });
+    else if (
+      !value.imageUrls.includes(url) &&
+      value.imageUrls.length < maxImages
+    )
       onChange({
         ...value,
         imageUrls: [...value.imageUrls, url],
@@ -75,11 +85,19 @@ export function ContentMediaManager({
       setMessage((e as Error).message);
     } finally {
       if (uploaded.length) {
-        if (cover) onChange({ ...value, coverImageUrl: uploaded[0] });
+        if (cover)
+          onChange({
+            ...value,
+            coverImageUrl: uploaded[0],
+            ...(autoFeature ? { coverAlt: "" } : {}),
+          });
         else
           onChange({
             ...value,
-            coverImageUrl: autoFeature && !value.coverImageUrl ? uploaded[0] : value.coverImageUrl,
+            coverImageUrl:
+              autoFeature && !value.coverImageUrl
+                ? uploaded[0]
+                : value.coverImageUrl,
             imageUrls: [...value.imageUrls, ...uploaded],
             imageAlts: [...value.imageAlts, ...uploaded.map(() => "")],
           });
@@ -136,7 +154,19 @@ export function ContentMediaManager({
                 maxLength={300}
                 value={value.coverAlt}
                 onChange={(e) =>
-                  onChange({ ...value, coverAlt: e.target.value })
+                  onChange({
+                    ...value,
+                    coverAlt: e.target.value,
+                    ...(autoFeature
+                      ? {
+                          imageAlts: value.imageUrls.map((url, i) =>
+                            url === value.coverImageUrl
+                              ? e.target.value
+                              : value.imageAlts[i] || "",
+                          ),
+                        }
+                      : {}),
+                  })
                 }
               />
             </label>
@@ -214,11 +244,36 @@ export function ContentMediaManager({
                   onChange={(e) => {
                     const alts = [...value.imageAlts];
                     alts[i] = e.target.value;
-                    onChange({ ...value, imageAlts: alts });
+                    onChange({
+                      ...value,
+                      imageAlts: alts,
+                      ...(autoFeature && value.coverImageUrl === url
+                        ? { coverAlt: e.target.value }
+                        : {}),
+                    });
                   }}
                 />
               </label>
               <div className="flex flex-wrap gap-2">
+                {autoFeature && (
+                  <button
+                    type="button"
+                    className="rounded border p-2"
+                    aria-pressed={value.coverImageUrl === url}
+                    aria-label={`Set photograph ${i + 1} as featured`}
+                    onClick={() =>
+                      onChange({
+                        ...value,
+                        coverImageUrl: url,
+                        coverAlt: value.imageAlts[i] || "",
+                      })
+                    }
+                  >
+                    {value.coverImageUrl === url
+                      ? "Featured image"
+                      : "Set as featured"}
+                  </button>
+                )}
                 <button
                   type="button"
                   className="rounded border p-2"
@@ -240,13 +295,21 @@ export function ContentMediaManager({
                 <button
                   type="button"
                   className="rounded border p-2"
-                  onClick={() =>
+                  onClick={() => {
+                    const urls = value.imageUrls.filter((_, n) => n !== i);
+                    const alts = value.imageAlts.filter((_, n) => n !== i);
                     onChange({
                       ...value,
-                      imageUrls: value.imageUrls.filter((_, n) => n !== i),
-                      imageAlts: value.imageAlts.filter((_, n) => n !== i),
-                    })
-                  }
+                      imageUrls: urls,
+                      imageAlts: alts,
+                      ...(autoFeature && value.coverImageUrl === url
+                        ? {
+                            coverImageUrl: urls[0] || "",
+                            coverAlt: alts[0] || "",
+                          }
+                        : {}),
+                    });
+                  }}
                 >
                   Remove photograph {i + 1}
                 </button>

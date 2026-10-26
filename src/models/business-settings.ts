@@ -5,6 +5,64 @@ import {
   type InferSchemaType,
   type Model,
 } from "mongoose";
+import {
+  defaultHomepageServicesSettings,
+  defaultHomepageHeroSettings,
+} from "@/lib/constants/homepage";
+import { defaultHomepageAccessorySettings } from "@/lib/constants/homepage-accessories";
+
+function homepageCopyFields(defaults: {
+  heading: string;
+  description: string;
+}) {
+  return {
+    heading: {
+      type: String,
+      trim: true,
+      maxlength: 160,
+      default: defaults.heading,
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 2000,
+      default: defaults.description,
+    },
+  };
+}
+
+const heroCopyFields = {
+  ...homepageCopyFields(defaultHomepageHeroSettings),
+  headingTwo: { type: String, trim: true, maxlength: 160, default: "" },
+};
+const accessoryCopyFields = homepageCopyFields(
+  defaultHomepageAccessorySettings,
+);
+
+const servicesCopyFields = {
+  ...homepageCopyFields(defaultHomepageServicesSettings),
+  buttonLabel: {
+    type: String,
+    trim: true,
+    maxlength: 80,
+    default: defaultHomepageServicesSettings.buttonLabel,
+  },
+  buttonHref: {
+    type: String,
+    trim: true,
+    maxlength: 300,
+    default: defaultHomepageServicesSettings.buttonHref,
+  },
+  items: {
+    type: [
+      new Schema(
+        { title: String, description: String, href: String },
+        { _id: false },
+      ),
+    ],
+    default: defaultHomepageServicesSettings.items,
+  },
+};
 
 const businessSettingsSchema = new Schema(
   {
@@ -16,12 +74,9 @@ const businessSettingsSchema = new Schema(
       immutable: true,
       select: false,
     },
-    homepageImages: {
-      bellImageUrl: { type: String, default: "" },
-      bellImageAlt: { type: String, default: "", maxlength: 300 },
-      cameraImageUrl: { type: String, default: "" },
-      cameraImageAlt: { type: String, default: "", maxlength: 300 },
-    },
+    homepageServices: servicesCopyFields,
+    homepageHero: heroCopyFields,
+    homepageAccessories: accessoryCopyFields,
     bellPageDraft: { type: Schema.Types.Mixed, default: null },
     bellPagePublished: { type: Schema.Types.Mixed, default: null },
     businessName: { type: String, required: true, trim: true, maxlength: 120 },
@@ -68,6 +123,28 @@ const businessSettingsSchema = new Schema(
 export type BusinessSettingsDocument = InferSchemaType<
   typeof businessSettingsSchema
 >;
+const cachedSettingsModel = models.BusinessSettings as
+  Model<BusinessSettingsDocument> | undefined;
+// next dev retains compiled models across edits. Register new homepage paths on
+// that same model so strict update casting cannot silently discard saved copy.
+if (cachedSettingsModel) {
+  if (!cachedSettingsModel.schema.path("homepageServices.heading"))
+    cachedSettingsModel.schema.add({ homepageServices: servicesCopyFields });
+  for (const field of ["headingTwo"] as const) {
+    if (!cachedSettingsModel.schema.path(`homepageHero.${field}`))
+      cachedSettingsModel.schema.add({
+        [`homepageHero.${field}`]: heroCopyFields[field],
+      });
+  }
+  if (!cachedSettingsModel.schema.path("homepageHero.heading"))
+    cachedSettingsModel.schema.add({
+      homepageHero: heroCopyFields,
+    });
+  if (!cachedSettingsModel.schema.path("homepageAccessories.heading"))
+    cachedSettingsModel.schema.add({
+      homepageAccessories: accessoryCopyFields,
+    });
+}
 export const BusinessSettingsModel =
-  (models.BusinessSettings as Model<BusinessSettingsDocument> | undefined) ??
+  cachedSettingsModel ??
   model<BusinessSettingsDocument>("BusinessSettings", businessSettingsSchema);

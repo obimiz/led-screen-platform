@@ -152,29 +152,132 @@ test("existing online order and cart pricing use only a valid configured discoun
   );
 });
 
-test("homepage photographs preserve empty defaults and reject unsafe image values", async () => {
-  const { homepageImagesSchema } =
-    await import("../src/lib/validations/homepage-images");
-  assert.deepEqual(homepageImagesSchema.parse({}), {
-    bellImageUrl: "",
-    bellImageAlt: "",
-    cameraImageUrl: "",
-    cameraImageAlt: "",
+test("homepage content comes directly from the featured product", async () => {
+  const { homepageProductContent } =
+    await import("../src/lib/utils/homepage-product");
+  assert.deepEqual(
+    homepageProductContent("bell", {
+      name: "Featured bell",
+      shortDescription: "Product summary",
+      featuredImageUrl: "/bell.png",
+      imageAlt: "Bell photograph",
+      imageUrls: ["/other.png"],
+    }),
+    {
+      heading: "Featured bell",
+      description: "Product summary",
+      imageUrl: "/bell.png",
+      imageAlt: "Bell photograph",
+    },
+  );
+});
+
+test("homepage uses product gallery photos and matching alt text when no featured photo exists", async () => {
+  const { homepageProductContent } =
+    await import("../src/lib/utils/homepage-product");
+  const result = homepageProductContent("camera", {
+    name: "Camera",
+    shortDescription: "Camera summary",
+    imageUrls: ["", "/camera.png"],
+    imageAlts: ["", "Side view"],
+  });
+  assert.equal(result.imageUrl, "/camera.png");
+  assert.equal(result.imageAlt, "Side view");
+  assert.equal(result.heading, "Camera");
+});
+
+test("homepage handles missing featured products and missing photographs safely", async () => {
+  const { homepageProductContent } =
+    await import("../src/lib/utils/homepage-product");
+  const { homepageSectionDefaults, homepageSectionFallbacks } =
+    await import("../src/lib/constants/homepage");
+  const empty = homepageProductContent("camera");
+  assert.equal(empty.heading, homepageSectionDefaults.cameraHeading);
+  assert.equal(empty.description, homepageSectionFallbacks.camera);
+  assert.equal(empty.imageUrl, "");
+  const product = homepageProductContent("bell", {
+    name: "Bell without a photo",
+    shortDescription: "Saved product summary",
+  });
+  assert.equal(product.heading, "Bell without a photo");
+  assert.equal(product.description, "Saved product summary");
+  assert.equal(product.imageUrl, "");
+});
+
+test("accessory homepage copy retains the existing text as defaults", async () => {
+  const { homepageAccessorySettingsSchema } =
+    await import("../src/lib/validations/homepage-accessories");
+  assert.deepEqual(homepageAccessorySettingsSchema.parse({}), {
+    heading: "LED Screen Accessories",
+    description:
+      "Explore accessories and spare parts for your LED display system.",
   });
   assert.equal(
-    homepageImagesSchema.safeParse({
-      bellImageUrl: "/api/product-images/507f1f77bcf86cd799439011",
-      cameraImageUrl: "/Images/camera.png",
-    }).success,
-    true,
+    homepageAccessorySettingsSchema.parse({
+      heading: "  LED Parts  ",
+      description: "  Available parts  ",
+    }).heading,
+    "LED Parts",
   );
-  for (const cameraImageUrl of [
-    "javascript:alert(1)",
-    "//example.test/image",
-    "/../secret",
+});
+
+test("accessory homepage settings reject blank, oversized and unrelated fields", async () => {
+  const { homepageAccessorySettingsSchema } =
+    await import("../src/lib/validations/homepage-accessories");
+  for (const input of [
+    { heading: " " },
+    { description: "" },
+    { heading: "x".repeat(161) },
+    { description: "x".repeat(2001) },
+    { bellHeading: "No override" },
   ])
     assert.equal(
-      homepageImagesSchema.safeParse({ cameraImageUrl }).success,
+      homepageAccessorySettingsSchema.safeParse(input).success,
       false,
     );
+});
+
+test("homepage hero uses the previous write-up as defaults and validates edits", async () => {
+  const { homepageHeroSettingsSchema } =
+    await import("../src/lib/validations/homepage-accessories");
+  assert.deepEqual(homepageHeroSettingsSchema.parse({}), {
+    headingTwo: "",
+    heading: "Professional LED Display Solutions",
+    description:
+      "Sales, installation, rental and maintenance of LED display systems for churches, businesses, institutions and events.",
+  });
+  for (const input of [
+    { heading: " " },
+    { description: "" },
+    { heading: "x".repeat(161) },
+    { description: "x".repeat(2001) },
+    { bellHeading: "Unrelated" },
+  ])
+    assert.equal(homepageHeroSettingsSchema.safeParse(input).success, false);
+  assert.equal(
+    homepageHeroSettingsSchema.parse({ heading: "  LED solutions  " }).heading,
+    "LED solutions",
+  );
+});
+
+test("hero headings are independent and reject legacy message fields", async () => {
+  const { homepageHeroSettingsSchema } =
+    await import("../src/lib/validations/homepage-accessories");
+  const parsed = homepageHeroSettingsSchema.parse({
+    heading: " Original heading ",
+    headingTwo: " Second heading ",
+  });
+  assert.equal(parsed.heading, "Original heading");
+  assert.equal(parsed.headingTwo, "Second heading");
+  assert.equal(
+    homepageHeroSettingsSchema.parse({ heading: "Original" }).headingTwo,
+    "",
+  );
+  for (const input of [
+    { headingTwo: "x".repeat(161) },
+    { headingTwo: null },
+    { messageOne: "Retired" },
+    { messageTwo: "Retired" },
+  ])
+    assert.equal(homepageHeroSettingsSchema.safeParse(input).success, false);
 });

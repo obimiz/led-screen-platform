@@ -20,7 +20,7 @@ export default async function Page({
         id={product.id}
         category={String(product.category)}
         initial={initial}
-        categories={await getCategoriesByType(product.productType, true)}
+        categories={await getCategoriesByType(product.productType)}
       />
     </section>
   );

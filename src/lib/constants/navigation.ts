@@ -44,7 +44,7 @@ export const publicNavigation: NavigationItem[] = [
 export const adminNavigation: AdminNavigationItem[] = [
   { label: "Overview", href: "/admin", icon: LayoutDashboard },
   {
-    label: "Homepage Images",
+    label: "Homepage Content",
     href: "/admin/settings/homepage",
     icon: Settings,
   },
@@ -53,6 +53,11 @@ export const adminNavigation: AdminNavigationItem[] = [
     label: "Electronic Bell · Page Content",
     href: "/admin/electronic-bell",
     icon: Bell,
+  },
+  {
+    label: "Bell & Alarm Categories",
+    href: "/admin/bell-alarm/categories",
+    icon: Menu,
   },
   { label: "LED Accessories", href: "/admin/accessories", icon: Package },
   {

@@ -19,6 +19,7 @@ const categories = [
   "Replacement Parts",
   "Tools & Installation Accessories",
   "Other LED Accessories",
+  "LED Screen Cameras",
 ];
 
 async function seed() {

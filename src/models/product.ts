@@ -90,7 +90,7 @@ const productSchema = new Schema(
     promotionalPrice: { type: Number, min: 0, default: null },
     showcase: {
       type: String,
-      enum: ["accessory", "camera"],
+      enum: ["accessory", "camera", "video"],
       default: "accessory",
     },
     price: { type: Number, min: 0, default: null },
@@ -175,6 +175,10 @@ productSchema.index({
   pixelPitch: "text",
 });
 export type ProductDocument = InferSchemaType<typeof productSchema>;
+const cachedProduct = models.Product as Model<ProductDocument> | undefined;
+const cachedShowcase = cachedProduct?.schema.path("showcase") as
+  (Schema.Types.String & { enumValues: string[] }) | undefined;
+if (cachedShowcase && !cachedShowcase.enumValues.includes("video"))
+  cachedShowcase.enum("video");
 export const Product =
-  (models.Product as Model<ProductDocument> | undefined) ??
-  model<ProductDocument>("Product", productSchema);
+  cachedProduct ?? model<ProductDocument>("Product", productSchema);

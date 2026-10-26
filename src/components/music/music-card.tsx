@@ -10,6 +10,7 @@ export type MusicCardItem = {
   contentType?: string;
   sourcePlatform?: string;
   audioUrl?: string;
+  downloadUrl?: string;
   categoryId?: string | { name?: string; slug?: string };
   shortDescription?: string;
   description?: string;
@@ -52,7 +53,11 @@ export function MusicCard({ item }: { item: MusicCardItem }) {
         </p>
       )}
       {item.sourcePlatform === "owned" && item.audioUrl ? (
-        <MusicPlayer src={item.audioUrl} title={item.title} />
+        <MusicPlayer
+          src={item.audioUrl}
+          title={item.title}
+          downloadUrl={item.downloadUrl}
+        />
       ) : (
         <Link
           className="text-brand-700 mt-4 inline-block font-semibold underline"

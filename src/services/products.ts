@@ -1,3 +1,4 @@
+import { videoAccessoryCategorySlugs } from "@/lib/utils/accessory-group";
 import { validateImageReferences } from "@/lib/media/validate-references";
 import "server-only";
 
@@ -126,7 +127,7 @@ function productDto(
     name: product.name,
     shortDescription: product.shortDescription,
     description: product.description,
-    indoorOutdoor: product.indoorOutdoor ?? "indoor",
+    indoorOutdoor: product.indoorOutdoor ?? "not-specified",
     pixelPitch: product.pixelPitch,
     displayTechnology: product.displayTechnology,
     brightness: product.brightness,
@@ -524,6 +525,33 @@ export const getAccessoryBySlug = cache(async (slug: string) => {
   if (!product) return null;
   return (await attachAccessoryCategories([product]))[0] ?? null;
 });
+
+export async function getHomepageAccessories(limit = 4, video = false) {
+  await connectToDatabase();
+  const videoCategories = await ProductCategory.find({
+    productType: "led-accessory",
+    slug: { $in: videoAccessoryCategorySlugs },
+  }).select("_id");
+  const categoryIds = videoCategories.map((category) => category._id);
+  const products = await Product.find({
+    productType: "led-accessory",
+    status: "published",
+    ...(video
+      ? {
+          $or: [
+            { showcase: "video" },
+            { category: { $in: categoryIds }, showcase: { $ne: "camera" } },
+          ],
+        }
+      : {
+          showcase: { $nin: ["camera", "video"] },
+          category: { $nin: categoryIds },
+        }),
+  })
+    .sort({ featured: -1, updatedAt: -1, _id: 1 })
+    .limit(limit);
+  return attachAccessoryCategories(products);
+}
 
 export async function getFeaturedAccessories(limit = 6, cameras = false) {
   await connectToDatabase();

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHero } from "@/components/layout/page-hero";
 import { RichContent } from "@/components/publishing/rich-content";
+import { AccessoryGallery } from "@/components/products/accessory-gallery";
 import { ProductImage } from "@/components/products/product-media";
 import { PriceDisplay } from "@/components/products/price-display";
 import type { BellPageContent } from "@/lib/validations/bell-page";
@@ -11,6 +12,8 @@ type BellProduct = {
   shortDescription: string;
   featuredImageUrl: string;
   imageAlt?: string;
+  imageUrls?: string[];
+  imageAlts?: string[];
   price: number | null;
   priceType: string;
   currency: string;
@@ -45,36 +48,47 @@ export function BellPageView({
           />
         )}
         <p>{c.showcaseText}</p>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => (
-            <article key={p.id} className="overflow-hidden rounded-xl border">
-              <ProductImage
-                url={p.featuredImageUrl}
-                name={p.imageAlt || p.name}
-                fit="contain"
+        <div
+          data-bell-products
+          className={`mx-auto grid w-full max-w-[824px] auto-rows-fr grid-cols-1 justify-items-center gap-6 ${products.length > 1 ? "md:grid-cols-2" : ""}`}
+        >
+          {products.map((p, index) => (
+            <article
+              key={p.id}
+              className={`flex h-full w-full max-w-[400px] min-w-0 flex-col overflow-hidden rounded-xl border bg-white ${products.length > 1 && products.length % 2 === 1 && index === products.length - 1 ? "md:col-span-2" : ""}`}
+            >
+              <AccessoryGallery
+                compact
+                name={p.name}
+                featuredImageUrl={p.featuredImageUrl}
+                imageAlt={p.imageAlt || p.name}
+                imageUrls={p.imageUrls || []}
+                imageAlts={p.imageAlts || []}
               />
-              <div className="space-y-3 p-5">
-                <h3 className="text-xl font-bold">{p.name}</h3>
-                <p>{p.shortDescription}</p>
-                <PriceDisplay product={p} />
-                <Link
-                  className="text-brand-700 block font-bold"
-                  href={`/electronic-bell-alarm/products/${p.slug}`}
-                >
-                  View details →
-                </Link>
+              <div className="flex flex-1 flex-col p-5">
+                <h3 className="text-xl font-bold break-words">{p.name}</h3>
+                <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
+                  {p.shortDescription}
+                </p>
+                <p className="mt-3 font-bold">
+                  <PriceDisplay product={p} />
+                </p>
+                <div className="mt-auto flex flex-wrap gap-3 pt-5">
+                  <Link
+                    className="text-brand-700 rounded-lg border px-4 py-2.5 text-sm font-bold"
+                    href={`/electronic-bell-alarm/products/${p.slug}`}
+                  >
+                    View Details
+                  </Link>
+                  <Link
+                    className="rounded-lg bg-[#DD2421] px-4 py-2.5 text-sm font-bold text-white"
+                    href={`/electronic-bell-alarm/request?product=${p.slug}`}
+                  >
+                    Request Quote
+                  </Link>
+                </div>
               </div>
             </article>
-          ))}
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2">
-          {c.imageUrls.map((url, i) => (
-            <ProductImage
-              key={`${url}-${i}`}
-              url={url}
-              name={c.imageAlts[i] || c.sectionHeading}
-              fit="contain"
-            />
           ))}
         </div>
         <nav className="text-brand-700 flex flex-wrap gap-5 font-bold">

@@ -324,7 +324,7 @@ async function main() {
       await page.goto(base);
       const featured = page.locator("section").filter({
         has: page.getByRole("heading", {
-          name: "Featured LED screens",
+          name: "Featured LED Screens",
           exact: true,
         }),
       });

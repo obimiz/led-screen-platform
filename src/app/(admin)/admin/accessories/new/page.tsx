@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccessoryForm } from "@/components/forms/accessory-form";
 import { getCurrentAdmin } from "@/lib/auth/current-admin";
@@ -10,13 +11,20 @@ export default async function NewAccessoryPage() {
     <section className="mx-auto max-w-6xl">
       <h1 className="text-3xl font-black">Create LED accessory</h1>
       <p className="mt-2 mb-7 text-slate-600">
-        Add replacement parts or related LED equipment.
+        Add replacement parts, related LED equipment or cameras. For a camera,
+        choose the LED Screen Cameras category.
       </p>
       {categories.some((item) => item.active) ? (
         <AccessoryForm categories={categories} />
       ) : (
         <p className="rounded-xl bg-amber-50 p-5 text-amber-900">
-          Create an active accessory category first.
+          Create an active accessory category first.{" "}
+          <Link
+            href="/admin/accessory-categories"
+            className="font-bold underline"
+          >
+            Create Category
+          </Link>
         </p>
       )}
     </section>

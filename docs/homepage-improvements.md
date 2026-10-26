@@ -90,3 +90,32 @@ Results:
 No claim is made that every pre-existing module passed an end-to-end test. The new integration test uses a production Next server, ephemeral MongoDB and browser fixtures to cover protected APIs, CRUD, active/featured filtering, sorting, all six requested viewport widths, missing assets, reduced motion, pause behaviour, product prices/details/quote selection, admin form operations, empty state, seed idempotency and database outage handling. Screenshots are written to `/private/tmp/homepage-{width}.png`.
 
 Successful playback and visual loop quality of the final real video cannot be verified until that asset is supplied. Production data, live payments and external notification delivery were not exercised. Broader regression failures must be reported rather than treated as passed.
+
+
+# Homepage content and presentation
+
+`/admin/settings/homepage` now includes an Our Services form for the section heading, introduction, four service titles/descriptions/links, and call-to-action label/link. Saving persists `homepageServices` on the primary MongoDB BusinessSettings document through the authenticated, same-origin `/api/settings/homepage` POST handler. Existing Hero and accessories settings are saved independently. Existing service copy remains the default; no migration is required.
+
+The Hero has no label above its headings. Heading 1 uses a responsive 30–48px scale; Heading 2 uses a lighter 24–36px green treatment. Descriptions use 16–18px text with readable line spacing. Leading dash prefixes are removed at render time; saved text, internal hyphens, original imagery, video behavior and buttons are preserved.
+
+The homepage has separate LED Screen Accessories and Video Accessories sections. Products can be assigned “Video accessory” through the existing accessory form's Homepage classification. Legacy Video Processors, Video Accessories, Video Switchers, Capture Cards and Live Video Accessories categories also appear in the video section automatically. Camera/live video products retain their existing camera showcase. Draft and archived products are excluded. Both groups share the existing `/accessories` page (also available at `/led-accessories`), with headings grouping the current filtered, paginated results. There is no new accessory page.
+
+The desktop More dropdown uses native details/summary so it can open without waiting for JavaScript. It supports keyboard operation and closes on Escape, outside clicks, leaving navigation focus, resizing and link navigation. Mobile retains its expandable More section.
+
+Verification:
+
+- `npm run typecheck`
+- `npm run build`
+- `node --import tsx --test tests/homepage-improvements.test.ts tests/homepage-settings-model.test.ts tests/homepage.test.ts tests/catalogue-redesign.test.ts`
+- `node --import tsx tests/homepage-improvements.integration.ts` uses ephemeral MongoDB fixtures and Chrome. Covers authenticated form persistence/reload, public rendering, unchanged saved Hero wording, classification, both shared accessory URLs, six viewport widths, More navigation, keyboard handling, no-JavaScript desktop toggle and browser errors. Screenshots are written to `/private/tmp/igt-homepage-improved-*.png`.
+
+
+## Video cards and sign-in follow-up
+
+Video Accessories now uses dedicated image-and-description cards with full short descriptions, prices and individual product detail links. Product galleries remain available. The section always displays three cards: published accessories fill the available slots, and remaining slots show clearly labelled informational cards with image placeholders and catalogue links. Populate cards through Accessories using the Video accessory classification or an existing video category; the homepage settings page links to that workflow.
+
+After a successful sign-in, the login form requests a fresh dashboard document so the browser cannot reuse a cached signed-out layout. Account credentials, session security and rate limits are unchanged. Verification includes an incorrect-password attempt followed by a successful login and dashboard reload, using an isolated account.
+
+## Keyboard admin sign-in
+
+The admin form now has a native POST destination in addition to its interactive submission handler. Pressing Enter while the page is still loading submits the credentials without placing them in the URL. The login route accepts form-encoded requests, retains the same validation, rate limit, password check and session cookie behavior, and redirects to the dashboard on success. Failed native submissions return to the login form with a visible error. The route rejects cross-origin submissions. Browser verification covers Enter after hydration, Enter without JavaScript, invalid credentials, a successful session and cross-origin rejection.

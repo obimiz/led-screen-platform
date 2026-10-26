@@ -39,6 +39,7 @@ export function CategoryManager({
     },
   });
   function edit(category: ProductCategoryDto) {
+    setMessage("");
     setEditing(category);
     reset(
       Object.fromEntries(
@@ -50,43 +51,70 @@ export function CategoryManager({
     );
   }
   async function submit(values: ProductCategoryValues) {
-    const response = await fetch(
-      editing
-        ? `/api/product-categories/${editing.id}`
-        : "/api/product-categories",
-      {
-        method: editing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      },
-    );
-    const body = (await response.json()) as { message: string };
-    if (!response.ok) return setError("root", { message: body.message });
-    setMessage(body.message);
-    setEditing(null);
-    reset({
-      name: "",
-      description: "",
-      imageUrl: "",
-      active: true,
-      sortOrder: 0,
-      productType,
-    });
-    router.refresh();
+    setMessage("");
+    try {
+      const response = await fetch(
+        editing
+          ? `/api/product-categories/${editing.id}`
+          : "/api/product-categories",
+        {
+          method: editing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        },
+      );
+      const body = (await response.json()) as { message?: string };
+      if (!response.ok)
+        throw new Error(body.message || "Could not save the category.");
+      setMessage(body.message || "Category saved.");
+      setEditing(null);
+      reset({
+        name: "",
+        description: "",
+        imageUrl: "",
+        active: true,
+        sortOrder: 0,
+        productType,
+      });
+      router.refresh();
+    } catch (error) {
+      setError("root", {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Could not save the category.",
+      });
+    }
   }
   return (
     <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
       <form
+        action="/api/product-categories"
+        method="post"
         onSubmit={handleSubmit(submit)}
+        noValidate
         className="h-fit space-y-4 rounded-2xl border border-slate-200 bg-white p-5"
       >
-        <input type="hidden" {...register("productType")} />
+        <input
+          type="hidden"
+          defaultValue={productType}
+          {...register("productType")}
+        />
+        {editing && (
+          <input type="hidden" name="categoryId" value={editing.id} readOnly />
+        )}
         <h2 className="text-lg font-bold">
           {editing ? "Edit category" : "New category"}
         </h2>
-        {message && <p className="text-success-700 text-sm">{message}</p>}
+        {message && (
+          <p role="status" className="text-success-700 text-sm">
+            {message}
+          </p>
+        )}
         {errors.root && (
-          <p className="text-sm text-red-700">{errors.root.message}</p>
+          <p role="alert" className="text-sm text-red-700">
+            {errors.root.message}
+          </p>
         )}
         <label className="block text-sm font-semibold">
           Name
@@ -106,24 +134,42 @@ export function CategoryManager({
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           />
         </label>
+        {errors.description && (
+          <p role="alert" className="text-sm text-red-600">
+            {errors.description.message}
+          </p>
+        )}
         <label className="block text-sm font-semibold">
-          Image URL
+          Image URL (optional)
           <input
             {...register("imageUrl")}
-            type="url"
+            type="text"
+            placeholder="https://example.com/image.jpg or /images/accessory.jpg"
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           />
         </label>
+        {errors.imageUrl && (
+          <p role="alert" className="text-sm text-red-600">
+            {errors.imageUrl.message}
+          </p>
+        )}
         <label className="block text-sm font-semibold">
           Sort order
           <input
             {...register("sortOrder")}
             type="number"
+            defaultValue={0}
             className="mt-2 w-full rounded-lg border border-slate-300 p-2.5"
           />
         </label>
+        {errors.sortOrder && (
+          <p role="alert" className="text-sm text-red-600">
+            {errors.sortOrder.message}
+          </p>
+        )}
         <label className="flex gap-2 text-sm font-semibold">
-          <input type="checkbox" {...register("active")} /> Active
+          <input type="checkbox" defaultChecked {...register("active")} />{" "}
+          Active
         </label>
         <div className="flex gap-2">
           <button

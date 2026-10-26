@@ -9,13 +9,13 @@ export default async function Page() {
       <h1 className="text-3xl font-black">New electronic bell product</h1>
       <a
         className="text-brand-700 block underline"
-        href="/admin/product-categories?productType=bell-alarm-system"
+        href="/admin/bell-alarm/categories"
       >
         Manage bell product categories
       </a>
       <BellAlarmProductForm
         category=""
-        categories={await getCategoriesByType("bell-alarm-system", true)}
+        categories={await getCategoriesByType("bell-alarm-system")}
       />
     </section>
   );

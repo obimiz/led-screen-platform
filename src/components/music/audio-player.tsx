@@ -1,6 +1,14 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-export function MusicPlayer({ src, title }: { src: string; title: string }) {
+export function MusicPlayer({
+  src,
+  title,
+  downloadUrl = "",
+}: {
+  src: string;
+  title: string;
+  downloadUrl?: string;
+}) {
   const ref = useRef<HTMLAudioElement>(null);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState(false);
@@ -23,7 +31,7 @@ export function MusicPlayer({ src, title }: { src: string; title: string }) {
         ref={ref}
         src={src}
         controls
-        controlsList="nodownload"
+        controlsList={downloadUrl ? undefined : "nodownload"}
         preload="metadata"
         aria-label={`Listen to ${title}`}
         className="w-full min-w-0"
@@ -38,6 +46,16 @@ export function MusicPlayer({ src, title }: { src: string; title: string }) {
         }}
         onError={() => setError(true)}
       />
+      {downloadUrl && (
+        <a
+          href={downloadUrl}
+          download
+          className="inline-flex rounded-lg bg-[#DD2421] px-4 py-2.5 text-sm font-bold text-white"
+          aria-label={`Download ${title}`}
+        >
+          Download audio
+        </a>
+      )}
       {duration > 0 && (
         <p className="text-xs text-slate-500">
           Duration: {Math.floor(duration / 60)}:

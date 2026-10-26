@@ -12,7 +12,7 @@ import { bellAlarmSchema } from "@/lib/validations/product";
 const dto = (d: any) => {
   const v = d.toObject();
   const { _id, __v, ...r } = v;
-  return { ...r, id: String(_id) };
+  return { ...r, category: String(r.category), id: String(_id) };
 };
 async function slug(name: string) {
   const b = createSlug(name) || "bell-alarm";
@@ -60,21 +60,15 @@ export async function createBellAlarmProduct(raw: unknown, adminId: string) {
   const input = bellAlarmSchema.parse(raw);
   await connectToDatabase();
   await validateImageReferences([input.featuredImageUrl, ...input.imageUrls]);
-  let category = input.category;
+  const category = input.category;
   if (
     !(await ProductCategory.exists({
       _id: category,
       productType: input.productType,
+      active: true,
     }))
   )
-    category =
-      (
-        await ProductCategory.findOne({
-          productType: input.productType,
-          active: true,
-        })
-      )?.id || "";
-  if (!category) throw new Error("INVALID_CATEGORY");
+    throw new Error("INVALID_CATEGORY");
   const created = dto(
     await Product.create({
       ...input,
@@ -101,6 +95,7 @@ export async function updateBellAlarmProduct(
     !(await ProductCategory.exists({
       _id: input.category,
       productType: input.productType,
+      active: true,
     }))
   )
     throw Error("INVALID_CATEGORY");

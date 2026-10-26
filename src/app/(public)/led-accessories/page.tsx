@@ -1,3 +1,4 @@
+import { isVideoAccessory } from "@/lib/utils/accessory-group";
 import { PageHero } from "@/components/layout/page-hero";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
@@ -58,7 +59,7 @@ export default async function AccessoriesCatalogue({
   return (
     <main>
       <PageHero
-        title={<>LED accessories & spare parts</>}
+        title={<>LED screen & video accessories</>}
         description={
           <>
             Controllers, modules, power supplies, cables, and replacement
@@ -115,13 +116,47 @@ export default async function AccessoriesCatalogue({
             {total} accessories found
           </p>
           {products.length ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((item) => (
-                <AccessoryCard
-                  key={item.id}
-                  item={item}
-                  whatsappNumber={settings.whatsappNumber}
-                />
+            <div className="space-y-12">
+              {[
+                {
+                  id: "led-screen-accessories",
+                  title: "LED Screen Accessories",
+                  items: products.filter((item) => !isVideoAccessory(item)),
+                },
+                {
+                  id: "video-accessories",
+                  title: "Video Accessories",
+                  items: products.filter(isVideoAccessory),
+                },
+              ].map((group) => (
+                <section
+                  key={group.id}
+                  id={group.id}
+                  aria-labelledby={`${group.id}-title`}
+                >
+                  <h2
+                    id={`${group.id}-title`}
+                    className="mb-6 text-2xl font-bold"
+                  >
+                    {group.title}
+                  </h2>
+                  {group.items.length ? (
+                    <div className="grid auto-rows-fr items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {group.items.map((item) => (
+                        <AccessoryCard
+                          key={item.id}
+                          item={item}
+                          whatsappNumber={settings.whatsappNumber}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-600">
+                      No {group.title.toLowerCase()} match the current filters
+                      on this page.
+                    </p>
+                  )}
+                </section>
               ))}
             </div>
           ) : databaseUnavailable ? (

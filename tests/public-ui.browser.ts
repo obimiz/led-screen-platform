@@ -101,9 +101,13 @@ async function main() {
       "sticky public header, one correct WhatsApp button, white red-button text/icons and preserved pages",
     );
     await page.goto(base + "/services");
-    const more = () => page.getByRole("button", { name: "More", exact: false });
+    await page.waitForTimeout(750);
+    const more = () =>
+      page.locator('nav[aria-label="Main navigation"] details summary');
+    const moreDetails = () =>
+      page.locator('nav[aria-label="Main navigation"] details');
     await more().click();
-    assert.equal(await more().getAttribute("aria-expanded"), "true");
+    assert.equal(await moreDetails().getAttribute("open"), "");
     await page.keyboard.press("Tab");
     assert.equal(
       await page
@@ -113,27 +117,27 @@ async function main() {
       true,
     );
     await page.keyboard.press("Escape");
-    assert.equal(await more().getAttribute("aria-expanded"), "false");
+    assert.equal(await moreDetails().getAttribute("open"), null);
     assert.equal(
       await more().evaluate((e) => e === document.activeElement),
       true,
     );
     await more().click();
     await page.mouse.click(4, 4);
-    assert.equal(await more().getAttribute("aria-expanded"), "false");
+    assert.equal(await moreDetails().getAttribute("open"), null);
     await more().click();
     await page
       .locator("#public-more-navigation")
       .getByRole("link", { name: "Gallery", exact: true })
       .click();
-    assert.equal(await page.locator("#public-more-navigation").count(), 0);
     await page.waitForURL("**/gallery");
+    assert.equal(await moreDetails().getAttribute("open"), null);
     await more().click();
     await page.evaluate(() => {
       history.pushState(null, "", "?navigation-test=1");
       window.dispatchEvent(new PopStateEvent("popstate"));
     });
-    assert.equal(await page.locator("#public-more-navigation").count(), 0);
+    assert.equal(await moreDetails().getAttribute("open"), null);
     pass(
       "desktop selection, outside click, Escape, keyboard focus and query navigation close dropdown",
     );
@@ -169,6 +173,7 @@ async function main() {
         await page.mouse.click(4, 4);
         assert.equal(await nav.count(), 0);
         await toggle.click();
+        await nav.locator("summary").click();
         await nav.getByRole("link", { name: "Gallery", exact: true }).click();
         assert.equal(await nav.count(), 0);
         await page.waitForURL("**/gallery");

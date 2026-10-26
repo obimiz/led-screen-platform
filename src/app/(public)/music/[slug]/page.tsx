@@ -65,7 +65,11 @@ export default async function Page({
         </Link>
       )}
       {item.sourcePlatform === "owned" && item.audioUrl && (
-        <MusicPlayer src={item.audioUrl} title={item.title} />
+        <MusicPlayer
+          src={item.audioUrl}
+          title={item.title}
+          downloadUrl={item.downloadUrl}
+        />
       )}
       {item.sourcePlatform !== "owned" && embed && (
         <div className="mt-8 aspect-video overflow-hidden rounded-xl bg-black">

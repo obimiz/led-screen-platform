@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AccessoryCard } from "@/components/products/accessory-card";
 import { PriceDisplay } from "@/components/products/price-display";
-import { ProductImage } from "@/components/products/product-media";
+import { AccessoryGallery } from "@/components/products/accessory-gallery";
 import { Container } from "@/components/ui/container";
 
 import { createWhatsAppUrl } from "@/lib/utils/contact";
@@ -31,7 +31,6 @@ export default async function AccessoryPublicDetail({ params }: Props) {
     `Hello, I am interested in the ${item.name} listed on your website. Please provide more information.`,
   );
   const video = getVideoEmbedUrl(item.videoUrl);
-  const gallery = [item.featuredImageUrl, ...item.imageUrls].filter(Boolean);
   return (
     <main>
       <Breadcrumbs
@@ -53,29 +52,14 @@ export default async function AccessoryPublicDetail({ params }: Props) {
       />
       <Container className="py-10">
         <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
-          <div>
-            <ProductImage
-              priority
-              url={item.featuredImageUrl}
-              name={item.imageAlt || item.name}
-              className="aspect-video rounded-2xl"
-            />
-            {gallery.length > 1 && (
-              <div className="mt-3 grid grid-cols-4 gap-3">
-                {gallery.slice(1).map((image, index) => (
-                  <ProductImage
-                    key={image}
-                    url={image}
-                    name={
-                      item.imageAlts[item.imageUrls.indexOf(image)] ||
-                      `${item.name} image ${index + 2}`
-                    }
-                    className="aspect-square rounded-lg"
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          <AccessoryGallery
+            key={item.id}
+            name={item.name}
+            featuredImageUrl={item.featuredImageUrl}
+            imageAlt={item.imageAlt}
+            imageUrls={item.imageUrls}
+            imageAlts={item.imageAlts}
+          />
           <aside className="rounded-2xl border p-6">
             <p className="text-2xl font-black">
               <PriceDisplay product={item} />

@@ -1,5 +1,12 @@
-import { getHomepageImages } from "@/services/homepage-images";
-import { defaultHomepageImages } from "@/lib/validations/homepage-images";
+import { VideoAccessories } from "@/components/home/video-accessories";
+import { homepageProductContent } from "@/lib/utils/homepage-product";
+import {
+  defaultHomepageServicesSettings,
+  formatHeroCopy,
+  defaultHomepageHeroSettings,
+} from "@/lib/constants/homepage";
+import { getHomepageTextSettings } from "@/services/homepage-accessories";
+import { defaultHomepageAccessorySettings } from "@/lib/constants/homepage-accessories";
 import Image from "next/image";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
@@ -11,9 +18,13 @@ import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ProductCard } from "@/components/products/product-card";
+import { AccessoryTypeCards } from "@/components/products/accessory-type-cards";
 import { ContentCard } from "@/components/publishing/card";
 import { getFeaturedContent, getHomepageArticles } from "@/services/portfolio";
-import { AccessoryCard } from "@/components/products/accessory-card";
+import {
+  AccessoryCard,
+  AccessoryShowcaseCard,
+} from "@/components/products/accessory-card";
 import {
   Bell,
   Video,
@@ -27,6 +38,7 @@ import { getPublicBusinessSettings } from "@/services/business-settings";
 import {
   getFeaturedLedProducts,
   getFeaturedAccessories,
+  getHomepageAccessories,
 } from "@/services/products";
 
 import { getBellAlarmProducts } from "@/services/bell-alarm";
@@ -40,44 +52,20 @@ import path from "node:path";
 
 export const dynamic = "force-dynamic";
 
-const services = [
-  [
-    "LED Display Sales",
-    "Choose a display around your space and audience.",
-    "/led-screens",
-    Monitor,
-  ],
-  [
-    "LED Screen Installation",
-    "Plan permanent indoor and outdoor installations.",
-    "/led-installation",
-    Settings,
-  ],
-  [
-    "LED Screen Rental",
-    "Temporary displays for events and celebrations.",
-    "/rent-led-screen",
-    CalendarDays,
-  ],
-  [
-    "LED Screen Maintenance",
-    "Preventive servicing, troubleshooting and repairs.",
-    "/led-maintenance",
-    Wrench,
-  ],
-] as const;
+const serviceIcons = [Monitor, Settings, CalendarDays, Wrench];
 export default async function Home() {
   const business = await getPublicBusinessSettings();
   const results = await Promise.allSettled([
     getFeaturedLedProducts(6),
-    getFeaturedAccessories(6),
+    getHomepageAccessories(3),
     getBellAlarmProducts(),
     getFeaturedAccessories(3, true),
     getFeaturedContent(4, "project"),
     getHomepageArticles(),
     getOrganisations(true),
     getFeaturedGalleryItems(6),
-    getHomepageImages(),
+    getHomepageTextSettings(),
+    getHomepageAccessories(3, true),
   ]);
   const value = <T,>(r: PromiseSettledResult<T>, fallback: T): T =>
     r.status === "fulfilled" ? r.value : fallback;
@@ -89,33 +77,20 @@ export default async function Home() {
     articles = value(results[5], []),
     organisations = value(results[6], []),
     gallery = value(results[7], []);
-  const homepageImages = value(results[8], defaultHomepageImages);
-  const bell = bells.find(
-    (p) => p.featured && (p.featuredImageUrl || p.imageUrls?.length),
-  );
-  const bellImageUrl =
-    homepageImages.bellImageUrl ||
-    bell?.featuredImageUrl ||
-    bell?.imageUrls?.[0] ||
-    "";
-  const bellImageAlt = homepageImages.bellImageUrl
-    ? homepageImages.bellImageAlt || "Electronic bell system"
-    : bell?.imageAlt || bell?.name || "Electronic bell system";
-  const showBellProduct = bell && !homepageImages.bellImageUrl;
-  const leadCamera = homepageImages.cameraImageUrl
-    ? undefined
-    : cameras.find((p) => p.featuredImageUrl || p.imageUrls.length);
-  const cameraImageUrl =
-    homepageImages.cameraImageUrl ||
-    leadCamera?.featuredImageUrl ||
-    leadCamera?.imageUrls?.[0] ||
-    "";
-  const cameraImageAlt = homepageImages.cameraImageUrl
-    ? homepageImages.cameraImageAlt ||
-      "Camera for LED screen live video production"
-    : leadCamera?.imageAlt ||
-      leadCamera?.name ||
-      "Camera for LED screen live video production";
+  const bell = bells.find((p) => p.featured);
+  const {
+    accessories: accessorySettings,
+    hero: heroSettings,
+    services: servicesSettings,
+  } = value(results[8], {
+    accessories: defaultHomepageAccessorySettings,
+    hero: defaultHomepageHeroSettings,
+    services: defaultHomepageServicesSettings,
+  });
+  const videoAccessories = value(results[9], []);
+  const leadCamera = cameras[0];
+  const bellContent = homepageProductContent("bell", bell);
+  const cameraContent = homepageProductContent("camera", leadCamera);
   const cameraCards = cameras.filter((p) => p.id !== leadCamera?.id);
   const hasVideo = await access(
     path.join(process.cwd(), "public/videos/image-grant-hero.mp4"),
@@ -131,20 +106,29 @@ export default async function Home() {
     <main>
       <JsonLd data={buildOrganizationJsonLd(business)} />
       <JsonLd data={buildWebsiteJsonLd(business)} />
-      <section className="bg-brand-950 relative isolate flex min-h-[560px] items-center overflow-hidden py-20 text-white md:min-h-[75svh] md:py-28">
+      <section
+        id="home-hero"
+        className="bg-brand-950 relative isolate flex min-h-[560px] items-center overflow-hidden py-20 text-white md:min-h-[75svh] md:py-28"
+      >
         <HeroMedia
           videoUrl={hasVideo ? "/videos/image-grant-hero.mp4" : undefined}
         />
         <Container className="relative z-10 w-full">
-          <p className="text-sm font-bold tracking-[0.18em] text-white/80 uppercase">
-            {business.businessName}
-          </p>
-          <h1 className="mt-5 max-w-3xl text-4xl leading-tight font-black tracking-tight sm:text-5xl lg:text-6xl">
-            Professional LED Display Solutions
+          <h1 className="max-w-3xl text-3xl leading-[1.2] font-bold tracking-tight text-balance break-words sm:text-4xl lg:text-5xl">
+            <span className="block" data-hero-heading="1">
+              {formatHeroCopy(heroSettings.heading)}
+            </span>
+            {heroSettings.headingTwo && (
+              <span
+                className="text-success-300 mt-4 block text-2xl leading-snug font-medium tracking-normal sm:text-3xl lg:text-4xl"
+                data-hero-heading="2"
+              >
+                {formatHeroCopy(heroSettings.headingTwo)}
+              </span>
+            )}
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-white/90">
-            Sales, installation, rental and maintenance of LED display systems
-            for churches, businesses, institutions and events.
+          <p className="mt-6 max-w-2xl text-base leading-7 break-words whitespace-pre-line text-white/90 sm:text-lg sm:leading-8">
+            {formatHeroCopy(heroSettings.description)}
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
@@ -166,30 +150,36 @@ export default async function Home() {
       <section id="services" className="bg-slate-50 py-12">
         <Container>
           <article className="rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
-            <h2 className="text-3xl font-black">Our Services</h2>
+            <h2 className="text-3xl font-black">{servicesSettings.heading}</h2>
             <p className="mt-4 max-w-3xl leading-7 text-slate-600">
-              Sales, installation, rental and maintenance of LED display systems
-              for churches, businesses, institutions, events, restaurants and
-              bars.
+              {servicesSettings.description}
             </p>
             <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {services.map(([title, description, href, Icon]) => (
-                <div key={title}>
-                  <Icon className="text-brand-700 mb-3" aria-hidden="true" />
-                  <h3 className="font-bold">
-                    <Link href={href}>{title}</Link>
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {description}
-                  </p>
-                </div>
-              ))}
+              {servicesSettings.items.map(
+                ({ title, description, href }, index) => {
+                  const Icon = serviceIcons[index];
+                  return (
+                    <div key={title}>
+                      <Icon
+                        className="text-brand-700 mb-3"
+                        aria-hidden="true"
+                      />
+                      <h3 className="font-bold">
+                        <Link href={href}>{title}</Link>
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">
+                        {description}
+                      </p>
+                    </div>
+                  );
+                },
+              )}
             </div>
             <Link
-              href="/request-quote"
+              href={servicesSettings.buttonHref}
               className="mt-7 inline-block rounded-lg bg-[#DD2421] px-5 py-3 font-bold text-white"
             >
-              Request a Quote
+              {servicesSettings.buttonLabel}
             </Link>
           </article>
         </Container>
@@ -224,10 +214,10 @@ export default async function Home() {
         className="bg-brand-50 py-12"
       >
         <Container className="grid items-center gap-8 md:grid-cols-2">
-          {bellImageUrl ? (
+          {bellContent.imageUrl ? (
             <ProductImage
-              url={bellImageUrl}
-              name={bellImageAlt}
+              url={bellContent.imageUrl}
+              name={bellContent.imageAlt}
               neutralFallback
               fit="contain"
               className="aspect-[4/3] rounded-xl"
@@ -242,15 +232,10 @@ export default async function Home() {
           )}
           <div>
             <h2 id="bell-showcase-heading" className="text-3xl font-black">
-              Electronic Digital Bell Systems
+              {bellContent.heading}
             </h2>
-            {showBellProduct && (
-              <h3 className="mt-4 text-xl font-bold">{bell.name}</h3>
-            )}
             <p className="mt-3 leading-7 text-slate-600">
-              {showBellProduct
-                ? bell.shortDescription
-                : "Discuss an electronic bell and alarm solution for your school, church, office or institution. Our team can help with equipment selection, installation, configuration and support."}
+              {bellContent.description}
             </p>
             <Link
               href="/electronic-bell-alarm"
@@ -271,10 +256,10 @@ export default async function Home() {
             className="grid items-center gap-8 md:grid-cols-2"
             data-camera-feature
           >
-            {cameraImageUrl ? (
+            {cameraContent.imageUrl ? (
               <ProductImage
-                url={cameraImageUrl}
-                name={cameraImageAlt}
+                url={cameraContent.imageUrl}
+                name={cameraContent.imageAlt}
                 neutralFallback
                 fit="contain"
                 className="aspect-[4/3] rounded-xl"
@@ -289,32 +274,18 @@ export default async function Home() {
             )}
             <div>
               <h2 id="camera-showcase-heading" className="text-3xl font-black">
-                LED Screen Cameras & Live Video Solutions
+                {cameraContent.heading}
               </h2>
               <p className="mt-3 leading-7 text-slate-600">
-                Cameras for live video production using compatible video
-                processors, switchers or signal conversion equipment. Ask us to
-                confirm compatibility for your setup.
+                {cameraContent.description}
               </p>
-              {leadCamera ? (
-                <>
-                  <h3 className="mt-4 text-xl font-bold">{leadCamera.name}</h3>
-                  <p className="mt-3 leading-7 text-slate-600">
-                    {leadCamera.shortDescription}
-                  </p>
-                  <Link
-                    href={`/led-accessories/${leadCamera.slug}`}
-                    className="text-brand-700 mt-4 inline-block font-bold"
-                  >
-                    View Camera Details →
-                  </Link>
-                </>
-              ) : (
-                <p className="mt-5 leading-7 text-slate-600">
-                  Tell us about your venue, filming needs and existing LED
-                  display equipment so we can discuss a suitable live video
-                  setup.
-                </p>
+              {leadCamera && (
+                <Link
+                  href={`/led-accessories/${leadCamera.slug}`}
+                  className="text-brand-700 mt-4 inline-block font-bold"
+                >
+                  View Camera Details →
+                </Link>
               )}
               <Link
                 href="/contact"
@@ -337,27 +308,61 @@ export default async function Home() {
           )}
         </Container>
       </section>
-      {accessories.length > 0 && (
-        <section className="bg-slate-50 py-12">
-          <Container>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <h2 className="text-3xl font-black">LED Screen Accessories</h2>
-              <Link className="text-brand-700 font-bold" href="/accessories">
-                View All Accessories →
-              </Link>
-            </div>
-            <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <section
+        id="accessories"
+        aria-labelledby="accessories-showcase-heading"
+        className="bg-slate-50 py-12"
+      >
+        <Container>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2
+              id="accessories-showcase-heading"
+              className="max-w-full min-w-0 text-3xl font-black break-words"
+            >
+              {accessorySettings.heading}
+            </h2>
+            <Link className="text-brand-700 font-bold" href="/accessories">
+              View All Accessories →
+            </Link>
+          </div>
+          <p className="mt-3 max-w-3xl leading-7 break-words text-slate-600">
+            {accessorySettings.description}
+          </p>
+          {accessories.length > 0 ? (
+            <div className="mt-7 grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {accessories.map((item) => (
-                <AccessoryCard
-                  key={item.id}
-                  item={item}
-                  whatsappNumber="2348039308982"
-                />
+                <AccessoryShowcaseCard key={item.id} item={item} />
               ))}
             </div>
-          </Container>
-        </section>
-      )}
+          ) : (
+            <AccessoryTypeCards />
+          )}
+        </Container>
+      </section>
+      <section
+        id="video-accessories"
+        aria-labelledby="video-accessories-heading"
+        className="py-12"
+      >
+        <Container>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2 id="video-accessories-heading" className="text-3xl font-black">
+              Video Accessories
+            </h2>
+            <Link
+              href="/accessories#video-accessories"
+              className="text-brand-700 font-bold"
+            >
+              View Video Accessories →
+            </Link>
+          </div>
+          <p className="mt-3 max-w-3xl leading-7 text-slate-600">
+            Video processors, switchers and accessories for live video
+            production and display connectivity.
+          </p>
+          <VideoAccessories items={videoAccessories} />
+        </Container>
+      </section>
       {projects.length > 0 && (
         <section className="py-12">
           <Container>
@@ -388,7 +393,7 @@ export default async function Home() {
           <h2 id="homepage-blog-title" className="text-3xl font-black">
             Latest News & Insights
           </h2>
-          <p className="mt-3 max-w-3xl leading-7 text-slate-600">
+          <p className="mt-3 max-w-3xl leading-7 break-words text-slate-600">
             Explore news, project stories and practical insights from Image
             Grant Technology.
           </p>

@@ -1,3 +1,5 @@
+import { AccessoryGallery } from "@/components/products/accessory-gallery";
+import { getProductDisplayImages } from "@/lib/media/product-primary-image";
 import { PageHero } from "@/components/layout/page-hero";
 import { PriceDisplay } from "@/components/products/price-display";
 import { BellAlarmProductImage } from "@/components/bell-alarm/product-image";
@@ -39,11 +41,21 @@ export default async function Page({
       </p>
       <PageHero title={<>{p.name}</>} />
       <div className="mt-6 overflow-hidden rounded-xl">
-        <BellAlarmProductImage
-          url={p.featuredImageUrl}
-          name={p.imageAlt || p.name}
-          priority
-        />
+        {getProductDisplayImages(p).length > 1 ? (
+          <AccessoryGallery
+            name={p.name}
+            featuredImageUrl={p.featuredImageUrl || ""}
+            imageAlt={p.imageAlt || p.name}
+            imageUrls={p.imageUrls || []}
+            imageAlts={p.imageAlts || []}
+          />
+        ) : (
+          <BellAlarmProductImage
+            url={p.featuredImageUrl}
+            name={p.imageAlt || p.name}
+            priority
+          />
+        )}
       </div>
       <p className="mt-5 text-xl font-bold">
         <PriceDisplay product={p} />
@@ -84,17 +96,6 @@ export default async function Page({
               ),
             )}
           </dl>
-        </section>
-      )}
-      {p.imageUrls?.length > 0 && (
-        <section className="mt-8 grid gap-4 sm:grid-cols-3">
-          {p.imageUrls.map((url: string, i: number) => (
-            <BellAlarmProductImage
-              key={`${url}-${i}`}
-              url={url}
-              name={p.imageAlts?.[i] || p.name}
-            />
-          ))}
         </section>
       )}
       <div className="mt-8 flex flex-wrap gap-3">

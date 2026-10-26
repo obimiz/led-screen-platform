@@ -17,6 +17,7 @@ import { getVideoEmbedUrl } from "@/lib/utils/video";
 import { getPublicBusinessSettings } from "@/services/business-settings";
 import { getLedProductBySlug } from "@/services/products";
 import { AddToCartButton } from "@/components/cart/cart-controls";
+import { getLedHeadlineSpecs } from "@/lib/utils/led-headline-specs";
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ slug: string }> };
 export default async function LedProductPage({ params }: Props) {
@@ -31,13 +32,17 @@ export default async function LedProductPage({ params }: Props) {
   const gallery = getProductDisplayImages(product);
   const imageUrl = gallery[0] || "";
   const keySpecs = [
-    ["Pixel pitch", product.pixelPitch],
-    ["Environment", product.indoorOutdoor],
+    ...getLedHeadlineSpecs(product),
     ["Brightness", product.brightness],
     ["Refresh rate", product.refreshRate],
     ["Resolution", product.resolution],
     ["Maintenance", product.maintenanceType],
-  ].filter(([, value]) => Boolean(value) && value !== "not-specified");
+  ].filter(
+    ([, value]) =>
+      typeof value === "string" &&
+      value.trim() !== "" &&
+      value.trim() !== "not-specified",
+  );
   return (
     <main>
       <Breadcrumbs
@@ -133,24 +138,33 @@ export default async function LedProductPage({ params }: Props) {
             </div>
           </aside>
         </div>
-        <section className="mt-12 grid gap-10 lg:grid-cols-2">
+        <section
+          className={`mt-12 grid gap-10 ${keySpecs.length > 0 ? "lg:grid-cols-2" : ""}`}
+        >
           <div>
             <h2 className="text-2xl font-black">Product overview</h2>
             <p className="mt-4 leading-8 whitespace-pre-line text-slate-600">
               {product.description}
             </p>
           </div>
-          <div>
-            <h2 className="text-2xl font-black">Key specifications</h2>
-            <dl className="mt-4 divide-y rounded-xl border px-5">
-              {keySpecs.map(([label, value]) => (
-                <div key={label} className="flex justify-between gap-5 py-3">
-                  <dt className="text-slate-500">{label}</dt>
-                  <dd className="font-semibold">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+          {keySpecs.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-black">Key specifications</h2>
+              <dl className="mt-4 divide-y rounded-xl border px-5">
+                {keySpecs.map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 py-3 sm:flex sm:justify-between sm:gap-5"
+                  >
+                    <dt className="text-slate-500">{label}:</dt>
+                    <dd className="min-w-0 font-semibold break-words sm:text-right">
+                      {value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
         </section>
         {product.features.length > 0 && (
           <section className="mt-12">

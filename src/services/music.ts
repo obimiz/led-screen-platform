@@ -18,6 +18,15 @@ import { normalizeMusicSourceUrl } from "@/lib/music/embeds";
 const plain = (d: any, publicOnly = false) => {
   const { _id, __v, ...r } = JSON.parse(JSON.stringify(d.toObject()));
   void __v;
+  const downloadUrl =
+    r.status === "published" &&
+    r.sourcePlatform === "owned" &&
+    r.audioAssetId &&
+    r.permissionToDistribute &&
+    r.rightsConfirmed &&
+    ["client-owned", "licensed"].includes(r.contentRights)
+      ? `/api/music/audio/${r.audioAssetId}?download=1`
+      : "";
   if (publicOnly)
     for (const key of [
       "createdBy",
@@ -28,7 +37,11 @@ const plain = (d: any, publicOnly = false) => {
       "permissionToDistribute",
     ])
       delete r[key];
-  return { ...r, id: String(_id) };
+  return {
+    ...r,
+    id: String(_id),
+    ...(publicOnly && "sourcePlatform" in r ? { downloadUrl } : {}),
+  };
 };
 async function unique(base: string, model: any) {
   let s = createSlug(base) || "music";

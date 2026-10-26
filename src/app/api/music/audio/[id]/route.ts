@@ -25,6 +25,22 @@ async function serve(
       rightsConfirmed: true,
       contentRights: { $in: ["client-owned", "licensed"] },
     });
+    const download = new URL(request.url).searchParams.get("download") === "1";
+    if (
+      download &&
+      !(await MusicContent.exists({
+        audioAssetId: oid,
+        status: "published",
+        sourcePlatform: "owned",
+        rightsConfirmed: true,
+        contentRights: { $in: ["client-owned", "licensed"] },
+        permissionToDistribute: true,
+      }))
+    )
+      return new Response(null, {
+        status: 404,
+        headers: { "Cache-Control": "private, no-store" },
+      });
     if (!publicTrack && !(await getCurrentAdmin()))
       return new Response(null, {
         status: 404,
@@ -38,6 +54,13 @@ async function serve(
       "Content-Disposition": "inline",
       ETag: `"${id}"`,
     });
+    if (download) {
+      const filename =
+        String(file.filename || "audio")
+          .replace(/[^a-zA-Z0-9_. -]/g, "_")
+          .slice(0, 160) || "audio";
+      headers.set("Content-Disposition", `attachment; filename="${filename}"`);
+    }
     let range;
     try {
       const ifRange = request.headers.get("if-range");

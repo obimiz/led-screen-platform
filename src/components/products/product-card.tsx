@@ -5,8 +5,10 @@ import { PriceDisplay } from "@/components/products/price-display";
 import { ProductImage } from "@/components/products/product-media";
 import type { LedProduct } from "@/types/product";
 import { AddToCartButton } from "@/components/cart/cart-controls";
+import { getLedHeadlineSpecs } from "@/lib/utils/led-headline-specs";
 export function ProductCard({ product }: { product: LedProduct }) {
   const imageUrl = getProductDisplayImages(product)[0] || "";
+  const headlineSpecs = getLedHeadlineSpecs(product);
   return (
     <article className="group hover:border-brand-300 flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:shadow-md">
       <ProductImage
@@ -31,15 +33,19 @@ export function ProductCard({ product }: { product: LedProduct }) {
         <p className="mt-3 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-slate-600">
           {product.shortDescription}
         </p>
-        <div className="mt-3 flex flex-wrap gap-3 text-sm text-slate-500">
-          {product.indoorOutdoor !== "not-specified" && (
-            <span className="capitalize">{product.indoorOutdoor}</span>
-          )}
-          {product.pixelPitch && <span>• {product.pixelPitch}</span>}
-          {product.usageApplications.length > 0 && (
-            <span>{product.usageApplications.slice(0, 2).join(" · ")}</span>
-          )}
-        </div>
+        {(headlineSpecs.length > 0 || product.usageApplications.length > 0) && (
+          <div className="mt-3 space-y-1 text-sm leading-5 text-slate-500">
+            {headlineSpecs.map(([label, value]) => (
+              <p key={label} className="break-words">
+                <span className="font-medium text-slate-600">{label}:</span>{" "}
+                {value}
+              </p>
+            ))}
+            {product.usageApplications.length > 0 && (
+              <p>{product.usageApplications.slice(0, 2).join(" · ")}</p>
+            )}
+          </div>
+        )}
         <p className="mt-auto pt-4 font-bold text-slate-950">
           <PriceDisplay product={product} />
         </p>

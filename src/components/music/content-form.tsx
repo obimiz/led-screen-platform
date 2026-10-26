@@ -198,8 +198,8 @@ export function MusicContentForm({
     >
       <p className="text-slate-600">
         Upload recordings you own or are licensed to stream. Draft audio is
-        private to administrators. This module provides streaming; public
-        download links are disabled.
+        private to administrators. Enable public downloads below when you have
+        permission to distribute the recording.
       </p>
       <fieldset disabled={busy} className="space-y-5 disabled:opacity-60">
         <Field label="Song title">
@@ -455,8 +455,7 @@ export function MusicContentForm({
                 change("permissionToDistribute", e.target.checked)
               }
             />
-            Permission also allows distribution (record only; does not enable
-            public downloads).
+            Allow public downloads (permission to distribute this recording).
           </label>
         </fieldset>
         <label className="flex gap-3">

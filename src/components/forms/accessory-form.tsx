@@ -241,7 +241,15 @@ export function AccessoryForm({
           </label>
           <select
             id="category"
-            {...register("category")}
+            {...register("category", {
+              onChange: (event) => {
+                const category = categories.find(
+                  (item) => item.id === event.target.value,
+                );
+                if (category?.slug === "led-screen-cameras")
+                  setValue("showcase", "camera", { shouldDirty: true });
+              },
+            })}
             className="mt-2 w-full rounded-lg border p-2.5"
           >
             <option value="">Select category</option>
@@ -451,6 +459,7 @@ export function AccessoryForm({
             className="mt-2 w-full rounded-lg border p-3"
           >
             <option value="accessory">LED accessory</option>
+            <option value="video">Video accessory</option>
             <option value="camera">Camera / live video</option>
           </select>
         </label>

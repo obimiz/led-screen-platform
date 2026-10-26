@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { bellAlarmSchema } from "@/lib/validations/product";
 import { ContentMediaManager } from "@/components/publishing/media-manager";
 import type { ProductCategoryDto } from "@/types/product";
@@ -39,11 +40,20 @@ export function BellAlarmProductForm({
   function set(key: keyof Values, value: unknown) {
     setV((old) => ({ ...old, [key]: value }));
   }
+  const activeCategories = categories.filter(
+    (item) => item.active && item.productType === v.productType,
+  );
   return (
     <form
       className="max-w-5xl space-y-6"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!activeCategories.some((item) => item.id === v.category)) {
+          setMessage(
+            "Choose an active Bell & Alarm category. Create a category first if the list is empty.",
+          );
+          return;
+        }
         const parsed = bellAlarmSchema.safeParse(v);
         if (!parsed.success) {
           setMessage(
@@ -101,21 +111,38 @@ export function BellAlarmProductForm({
             />
           </label>
         ))}
-        <label>
-          Category
+        <div>
+          <label htmlFor="bell-category">Category</label>
           <select
+            id="bell-category"
+            required
+            disabled={activeCategories.length === 0}
             className="mt-2 w-full rounded border p-3"
             value={v.category || ""}
             onChange={(e) => set("category", e.target.value)}
           >
             <option value="">Choose category</option>
-            {categories.map((c) => (
+            {activeCategories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-        </label>
+          {activeCategories.length === 0 && (
+            <span className="mt-2 block text-sm text-slate-600">
+              No active categories are available for this product type. Create
+              or activate a category before saving.
+            </span>
+          )}
+          <Link
+            className="text-brand-700 mt-2 block text-sm font-semibold underline"
+            href={`/admin/product-categories?productType=${v.productType}`}
+          >
+            {activeCategories.length === 0
+              ? "Create Category"
+              : "Manage categories"}
+          </Link>
+        </div>
         {(["priceType", "stockStatus", "status"] as const).map((key) => (
           <label key={key}>
             {key}
@@ -246,7 +273,7 @@ export function BellAlarmProductForm({
       />
       <p role="alert">{message}</p>
       <button
-        disabled={busy || uploading}
+        disabled={busy || uploading || activeCategories.length === 0}
         className="rounded bg-[#DD2421] px-5 py-3 font-bold text-white disabled:opacity-50"
       >
         Save product

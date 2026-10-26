@@ -13,22 +13,38 @@ import { MobileNavigation } from "./mobile-navigation";
 import { CartIndicator } from "@/components/cart/cart-controls";
 
 function PublicNavigation() {
-  const [open, setOpen] = useState<"desktop" | "mobile" | null>(null);
+  const [open, setOpen] = useState<"mobile" | null>(null);
   const root = useRef<HTMLDivElement>(null),
-    desktopToggle = useRef<HTMLButtonElement>(null),
+    desktopToggle = useRef<HTMLElement>(null),
+    desktopDetails = useRef<HTMLDetailsElement>(null),
     mobileToggle = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    const outside = (event: Event) => {
-      if (event.target instanceof Node && !root.current?.contains(event.target))
-        setOpen(null);
+    const closeDesktop = () => {
+      if (desktopDetails.current) desktopDetails.current.open = false;
     };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && open) {
+    const outside = (event: Event) => {
+      if (
+        event.target instanceof Node &&
+        !root.current?.contains(event.target)
+      ) {
         setOpen(null);
-        (open === "desktop" ? desktopToggle : mobileToggle).current?.focus();
+        closeDesktop();
       }
     };
-    const close = () => setOpen(null);
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && desktopDetails.current?.open) {
+        closeDesktop();
+        desktopToggle.current?.focus();
+      }
+      if (event.key === "Escape" && open) {
+        setOpen(null);
+        mobileToggle.current?.focus();
+      }
+    };
+    const close = () => {
+      setOpen(null);
+      closeDesktop();
+    };
     document.addEventListener("pointerdown", outside);
     document.addEventListener("click", outside);
     document.addEventListener("keydown", escape);
@@ -46,15 +62,19 @@ function PublicNavigation() {
     <div
       ref={root}
       onClick={(event) => {
-        if (event.target instanceof Element && event.target.closest("a"))
+        if (event.target instanceof Element && event.target.closest("a")) {
           setOpen(null);
+          if (desktopDetails.current) desktopDetails.current.open = false;
+        }
       }}
       onBlur={(event) => {
         if (
           event.relatedTarget instanceof Node &&
           !event.currentTarget.contains(event.relatedTarget)
-        )
+        ) {
           setOpen(null);
+          if (desktopDetails.current) desktopDetails.current.open = false;
+        }
       }}
     >
       <nav
@@ -70,34 +90,29 @@ function PublicNavigation() {
             {item.label}
           </Link>
         ))}
-        <div className="relative">
-          <button
+        <details ref={desktopDetails} className="relative">
+          <summary
             ref={desktopToggle}
-            type="button"
-            aria-expanded={open === "desktop"}
             aria-controls="public-more-navigation"
-            onClick={() => setOpen((v) => (v === "desktop" ? null : "desktop"))}
-            className="hover:text-brand-300 cursor-pointer text-sm font-medium text-slate-300 transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            className="hover:text-brand-300 cursor-pointer list-none text-sm font-medium text-slate-300 transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white [&::-webkit-details-marker]:hidden"
           >
             More <span aria-hidden="true">⌄</span>
-          </button>
-          {open === "desktop" && (
-            <div
-              id="public-more-navigation"
-              className="absolute top-8 right-0 z-50 grid max-h-[calc(100dvh-6rem)] min-w-52 gap-1 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 p-2 shadow-2xl"
-            >
-              {morePublicNavigation.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="hover:text-brand-300 rounded-lg px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+          </summary>
+          <div
+            id="public-more-navigation"
+            className="absolute top-8 right-0 z-50 grid max-h-[calc(100dvh-6rem)] min-w-52 gap-1 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 p-2 shadow-2xl"
+          >
+            {morePublicNavigation.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="hover:text-brand-300 rounded-lg px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </details>
         <CartIndicator />
         <Link
           href="/request-quote"

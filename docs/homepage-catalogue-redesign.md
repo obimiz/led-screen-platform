@@ -202,3 +202,29 @@ Both homepage sections now use an image-and-text layout: side by side from table
 New files: `src/lib/validations/homepage-images.ts`, `src/services/homepage-images.ts`, `src/app/api/settings/homepage-images/route.ts`, `src/components/home/homepage-images-form.tsx`, `src/app/(admin)/admin/settings/homepage/page.tsx`. Existing navigation, ProductImagePicker, BusinessSettings and homepage files were extended. No photographs or inventory were invented or added to production; the owner can select their real images in Homepage Images.
 
 Photo/navigation follow-up validation: production build, TypeScript and 12 focused unit tests passed. All 19 isolated browser/integration checks passed, including distinct computer uploads for the two homepage photos, saved references and alt text surviving reload, actual image decoding/loading, side-by-side desktop geometry and stacked mobile geometry, removal without asset deletion, existing-library reselection, and manual photo visibility after products are unpublished. Electronic Bell & Alarm is verified in the primary navbar and Music in More on desktop/mobile. No production images or records were changed during testing.
+
+## Follow-up: four accessory cards on the homepage
+
+The LED Screen Accessories section now remains visible and displays up to four published, featured LED accessories from the existing Product records. Its compact cards contain the stored product photograph, name, short description, configured price/quotation text and a red Read More link to `/accessories`. Product names still link to their individual details. The grid displays one card per row on phones, two on tablets and four on larger screens, with aligned actions. Cameras, drafts and archived records are excluded by the existing query.
+
+Owners choose the products through `/admin/accessories` using the existing Published and Featured controls. If fewer than four eligible records exist, the page displays only actual eligible records; when none exist, the section and catalogue link remain visible without fabricated cards. Existing full catalogue cards and their actions are unchanged.
+
+Accessory-card follow-up validation: production build, TypeScript and all 20 isolated browser/integration checks passed. The new check seeds five eligible test-only accessories and verifies that exactly four appear, each has a stored image and description, every Read More action points to `/accessories`, navigation reaches the catalogue, and draft/archived accessories and cameras are excluded. Responsive overflow checks continue to pass. ESLint remains at 0 errors and 36 pre-existing warnings; existing Mongoose update-option deprecation messages are unrelated to these display changes.
+
+### Accessory card visibility follow-up
+
+The homepage now fills up to four accessory cards from published non-camera accessories, prioritising featured records and then the most recently updated products, with ID as a stable tie-breaker. Draft and archived records remain excluded. Each card retains its photograph, description, pricing and Read More link to `/accessories`. The connected catalogue was inspected read-only and contained no accessory records; the owner must add and publish real accessories with photographs in the existing admin before product cards can appear. No business records were created or changed.
+
+Verification for this follow-up: TypeScript and production build passed; 12 focused unit tests and 20 isolated integration checks passed, including four cards with featured-first ordering and published non-featured fallback. ESLint completed with zero errors and the 36 previously recorded warnings. No physical-device testing or deployment was performed.
+
+### Visible accessory cards with an empty catalogue
+
+The empty accessory section now renders four clearly labelled informational accessory-type cards with branded icons, descriptions and Read More links. Published catalogue records automatically replace them with real product cards. No invented products, photographs, prices or inventory records were added. See `docs/bell-alarm-category-fix.md` for the related category-management fix and final validation: production build and TypeScript passed, 12 focused unit tests and 21 isolated integration checks passed, and ESLint reported zero errors with 36 existing warnings.
+
+### Cameras managed as an accessory category
+
+Cameras remain under LED Accessories in the existing dashboard. The separate camera sidebar entry and camera-specific form/list presentation have been removed. A real active LED Screen Cameras category (`led-screen-cameras`) was added to the existing ProductCategory collection using an insert-only, repeatable script (`scripts/ensure-camera-category.ts`). Existing records and images were left unchanged. The regular accessory seed also includes this category for future environments.
+
+Choose LED Accessories → New accessory → Category: LED Screen Cameras. Selecting this category automatically sets the existing homepage classification to Camera / live video. Upload photographs, enter the product details, publish and mark Featured to show the camera in the homepage live-video section. The owner can edit, activate and order the category through Accessory Categories.
+
+Validation: TypeScript and targeted ESLint passed; six catalogue unit tests passed. No commit, push or deployment was performed.

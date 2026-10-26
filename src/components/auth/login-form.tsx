@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -11,8 +10,7 @@ import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 
 type ResponseBody = { success: boolean; message: string };
 
-export function LoginForm() {
-  const router = useRouter();
+export function LoginForm({ initialError }: { initialError?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const {
     register,
@@ -29,25 +27,32 @@ export function LoginForm() {
         body: JSON.stringify(values),
       });
       const body = (await response.json()) as ResponseBody;
-      if (!response.ok) {
+      if (!response.ok || !body.success) {
         setError("root", { message: body.message });
         return;
       }
-      router.replace("/admin");
-      router.refresh();
+      // The login API changes an HttpOnly cookie outside a Server Action.
+      // Request a fresh document so a cached signed-out layout cannot be reused.
+      window.location.replace("/admin");
     } catch {
       setError("root", { message: "Unable to sign in. Please try again." });
     }
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
-      {errors.root && (
+    <form
+      action="/api/auth/login"
+      method="post"
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      className="space-y-5"
+    >
+      {(errors.root || initialError) && (
         <p
           role="alert"
           className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
         >
-          {errors.root.message}
+          {errors.root?.message || initialError}
         </p>
       )}
       <div>
@@ -61,7 +66,7 @@ export function LoginForm() {
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "email-error" : undefined}
           {...register("email")}
-          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+          className="focus:border-brand-600 focus:ring-brand-100 mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-2"
         />
         {errors.email && (
           <p
@@ -83,7 +88,7 @@ export function LoginForm() {
           </label>
           <Link
             href="/admin/forgot-password"
-            className="text-sm font-semibold text-brand-700 hover:text-brand-600"
+            className="text-brand-700 hover:text-brand-600 text-sm font-semibold"
           >
             Forgot password?
           </Link>
@@ -96,7 +101,7 @@ export function LoginForm() {
             aria-invalid={Boolean(errors.password)}
             aria-describedby={errors.password ? "password-error" : undefined}
             {...register("password")}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-11 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+            className="focus:border-brand-600 focus:ring-brand-100 w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-11 outline-none focus:ring-2"
           />
           <button
             type="button"
@@ -120,7 +125,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-white hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+        className="bg-primary hover:bg-primary-hover focus-visible:outline-brand-600 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting && (
           <LoaderCircle size={18} className="animate-spin" aria-hidden="true" />
