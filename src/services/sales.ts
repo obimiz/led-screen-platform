@@ -373,6 +373,11 @@ async function quotationValues(
     ...calculated,
     items,
     quoteRequestId: input.quoteRequestId || null,
+    rentalRequestId: input.rentalRequestId || null,
+    installationRequestId: input.installationRequestId || null,
+    maintenanceRequestId: input.maintenanceRequestId || null,
+    maintenanceJobId: input.maintenanceJobId || null,
+    bellAlarmRequestId: input.bellAlarmRequestId || null,
     validUntil,
   };
 }

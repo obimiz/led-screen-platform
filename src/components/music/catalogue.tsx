@@ -17,7 +17,7 @@ export async function PublicMusicCatalogue({
   const [{ rows, total, page, pages }, categories, featured] =
     await Promise.all([
       getMusicPage(query, true),
-      getMusicCategories(true),
+      getMusicCategories(),
       browse ? Promise.resolve([]) : getFeaturedMusic(6),
     ]);
   const base = browse ? "/music/browse" : "/music";

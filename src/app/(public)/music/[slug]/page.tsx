@@ -21,7 +21,7 @@ export default async function Page({
   const artist = item.artistSlug
     ? await getMusicArtistBySlug(item.artistSlug)
     : null;
-  const category = (await getMusicCategories(true)).find(
+  const category = (await getMusicCategories()).find(
     (c: { slug: string }) => c.slug === item.categoryId?.slug,
   );
   const embed =

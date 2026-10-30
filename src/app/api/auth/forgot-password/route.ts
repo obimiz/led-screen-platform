@@ -9,6 +9,7 @@ import {
 import { checkRateLimit, getRequestIdentifier } from "@/lib/auth/rate-limit";
 import { createPasswordResetToken } from "@/lib/auth/reset-token";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { sendEmail } from "@/lib/notifications/email";
 import { forgotPasswordSchema } from "@/lib/validations/auth";
 import { siteConfig } from "@/lib/config/site";
 import { Admin } from "@/models/admin";
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
       email: parsed.data.email,
       isActive: true,
     })
-      .select("_id")
+      .select("_id email")
       .lean();
     let resetUrl: string | undefined;
 
@@ -46,7 +47,18 @@ export async function POST(request: NextRequest) {
         tokenHash: reset.tokenHash,
         expiresAt: new Date(Date.now() + 30 * 60_000),
       });
-      resetUrl = `${siteConfig.url}/admin/reset-password/${reset.token}`;
+      const baseUrl = siteConfig.url.replace(/\/+$/, "");
+      resetUrl = `${baseUrl}/admin/reset-password/${reset.token}`;
+      try {
+        await sendEmail({
+          to: admin.email,
+          subject: `${siteConfig.name} — Admin Password Reset`,
+          text: `A password reset was requested for your ${siteConfig.name} administrator account.\n\nUse the link below within 30 minutes to set a new password:\n${resetUrl}\n\nIf you did not request this change, you can safely ignore this email.`,
+          html: `<p>A password reset was requested for your <strong>${siteConfig.name}</strong> administrator account.</p><p><a href="${resetUrl}">Reset your password</a> (valid for 30 minutes).</p><p>If you did not request this change, you can safely ignore this email.</p>`,
+        });
+      } catch {
+        // Preserve generic response and avoid leaking reset URLs or account existence in logs.
+      }
       if (process.env.NODE_ENV === "development")
         console.info(`[development only] Password reset URL: ${resetUrl}`);
     }

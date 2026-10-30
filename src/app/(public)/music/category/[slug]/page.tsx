@@ -12,7 +12,7 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const slug = (await params).slug;
-  const cats = await getMusicCategories(true);
+  const cats = await getMusicCategories();
   const c = cats.find((x: any) => x.slug === slug);
   if (!c) return notFound();
   const items = await getMusicForCategory(c.id);
@@ -43,7 +43,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const slug = (await params).slug;
-  const c = (await getMusicCategories(true)).find(
+  const c = (await getMusicCategories()).find(
     (item: { slug: string }) => item.slug === slug,
   );
   if (!c) notFound();

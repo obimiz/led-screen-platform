@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import sharp from "sharp";
 import {
   MAX_IMAGE_BYTES,
+  decodeProductImagePixels,
   validateProductImage,
 } from "../src/lib/media/product-images";
 test("upload validation accepts PNG/JPEG/WebP signatures and rejects mismatched or active content", () => {
@@ -71,4 +73,41 @@ test("product display uses additional images when no featured image is selected 
     ["/second.png", "/first.png"],
   );
   assert.deepEqual(getProductDisplayImages({}), []);
+});
+
+test("Sharp pixel validation accepts valid images and rejects corrupt or truncated pixel streams with low memory", async () => {
+  const validPng = await sharp({
+    create: {
+      width: 64,
+      height: 48,
+      channels: 4,
+      background: { r: 20, g: 60, b: 120, alpha: 1 },
+    },
+  })
+    .png()
+    .toBuffer();
+  await decodeProductImagePixels(validPng, "image/png");
+
+  const corruptHeaderOnly = Buffer.from([
+    137,
+    80,
+    78,
+    71,
+    13,
+    10,
+    26,
+    10,
+    ...Array(24).fill(0),
+  ]);
+  await assert.rejects(() =>
+    decodeProductImagePixels(corruptHeaderOnly, "image/png"),
+  );
+
+  const truncatedMidStream = validPng.subarray(
+    0,
+    Math.floor(validPng.length / 2),
+  );
+  await assert.rejects(() =>
+    decodeProductImagePixels(truncatedMidStream, "image/png"),
+  );
 });

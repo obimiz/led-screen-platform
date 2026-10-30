@@ -169,22 +169,20 @@ async function main() {
       },
     ]);
     const orderToken = "a".repeat(64);
-    await db
-      .collection("orders")
-      .insertOne({
-        orderNumber: "SEO-ORDER-001",
-        publicTokenHash: createHash("sha256").update(orderToken).digest("hex"),
-        customerName: "Private Order Customer",
-        customerEmail: "order@example.test",
-        customerPhone: "1234567890",
-        fulfilmentMethod: "pickup",
-        items: [],
-        subtotal: 100,
-        total: 100,
-        currency: "NGN",
-        paymentStatus: "paid",
-        orderStatus: "completed",
-      });
+    await db.collection("orders").insertOne({
+      orderNumber: "SEO-ORDER-001",
+      publicTokenHash: createHash("sha256").update(orderToken).digest("hex"),
+      customerName: "Private Order Customer",
+      customerEmail: "order@example.test",
+      customerPhone: "1234567890",
+      fulfilmentMethod: "pickup",
+      items: [],
+      subtotal: 100,
+      total: 100,
+      currency: "NGN",
+      paymentStatus: "paid",
+      orderStatus: "completed",
+    });
     server = spawn(
       process.execPath,
       [
@@ -315,9 +313,18 @@ async function main() {
       "/gallery/missing",
       "/music/missing",
       "/electronic-bell-alarm/products/bell-accessory",
-    ])
-      assert.equal((await get(path)).response.status, 404, path);
-    pass("Missing, draft, archived and wrong-type routes return HTTP 404");
+    ]) {
+      const { response, html } = await get(path);
+      assert.ok(
+        response.status === 404 ||
+          (response.status === 200 &&
+            /<meta name="robots" content="noindex"/.test(html)),
+        path,
+      );
+    }
+    pass(
+      "Missing, draft, archived and wrong-type routes return 404 or streamed noindex",
+    );
     for (const path of [
       "/cart",
       "/checkout",

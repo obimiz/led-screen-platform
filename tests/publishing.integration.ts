@@ -809,15 +809,14 @@ async function main() {
           0,
         );
       } else {
-        await publicPage.getByRole("button", { name: /More/ }).click();
+        await publicPage
+          .locator('summary[aria-controls="public-more-navigation"]')
+          .click();
         await publicPage
           .locator("#public-more-navigation")
           .getByRole("link", { name: "LED Installation", exact: true })
           .click();
-        assert.equal(
-          await publicPage.locator("#public-more-navigation").count(),
-          0,
-        );
+        assert.equal(await publicPage.locator("details[open]").count(), 0);
       }
     }
     pass(

@@ -11,6 +11,7 @@ import mongoose, { Types } from "mongoose";
 import { hash } from "bcryptjs";
 import { SignJWT } from "jose";
 import { chromium, type Browser } from "@playwright/test";
+import { officialContact } from "../src/lib/constants/contact";
 import type { Enquiry, Quotation, SalesList } from "../src/types/sales";
 
 async function main() {
@@ -563,11 +564,12 @@ async function main() {
       await page.locator('[role="status"]').innerText(),
       /QR-\d{4}-\d{5}/,
     );
-    assert.match(
-      (await page
-        .getByRole("link", { name: "Contact us on WhatsApp" })
-        .getAttribute("href")) || "",
-      /^https:\/\/wa.me\/2348012345678/,
+    const whatsappHref = await page
+      .getByRole("link", { name: "Contact us on WhatsApp" })
+      .getAttribute("href");
+    assert.equal(
+      new URL(whatsappHref || "").pathname,
+      `/${officialContact.number.replace(/\D/g, "")}`,
     );
     await page.screenshot({
       path: "test-results/quote-confirmation.png",

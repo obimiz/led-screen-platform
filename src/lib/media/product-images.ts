@@ -1,4 +1,11 @@
+import sharp from "sharp";
+
+// Keep native libvips memory bounded for 512 MB container environments (e.g. Render Free).
+sharp.cache(false);
+sharp.concurrency(1);
+
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+export const MAX_IMAGE_PIXELS = 40_000_000;
 export function validateProductImage(bytes: Uint8Array, mime: string) {
   if (!bytes.length || bytes.length > MAX_IMAGE_BYTES)
     throw new Error("Images must be between 1 byte and 4 MB.");
@@ -22,4 +29,18 @@ export function validateProductImage(bytes: Uint8Array, mime: string) {
     (mime === "image/webp" && webp)
   ))
     throw new Error("Upload a valid PNG, JPEG or WebP image.");
+}
+
+export async function decodeProductImagePixels(
+  bytes: Uint8Array,
+  mime: string,
+) {
+  validateProductImage(bytes, mime);
+  // Stream-decode all pixel scanlines through libvips stats without allocating
+  // an uncompressed multi-megabyte raw pixel Buffer in V8 heap.
+  await sharp(bytes, {
+    limitInputPixels: MAX_IMAGE_PIXELS,
+    failOn: "warning",
+    sequentialRead: true,
+  }).stats();
 }
