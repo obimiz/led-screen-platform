@@ -1,1 +1,78 @@
-import {Schema,model,models} from "mongoose"; import {maintenanceJobStatuses,warrantyStatuses} from "@/lib/maintenance/constants"; const t={type:String,default:"",trim:true}; const schema=new Schema({jobNumber:{type:String,unique:true,required:true},maintenanceRequestId:{type:Schema.Types.ObjectId,ref:"MaintenanceRequest",required:true,unique:true},installationProjectId:{type:Schema.Types.ObjectId,ref:"InstallationProject",default:null},quotationId:{type:Schema.Types.ObjectId,ref:"Quotation",default:null},customerSnapshot:Schema.Types.Mixed,equipmentSnapshot:Schema.Types.Mixed,locationSnapshot:Schema.Types.Mixed,inspectionScheduledAt:Date,serviceScheduledAt:Date,actualStartAt:Date,actualCompletedAt:Date,assignedTechnicians:[{type:Schema.Types.ObjectId,ref:"Admin"}],leadTechnician:{type:Schema.Types.ObjectId,ref:"Admin",default:null},reportedIssue:t,diagnosis:t,rootCause:t,diagnosticNotes:t,severity:t,recommendedRepair:t,repairActions:[Schema.Types.Mixed],partsUsed:[Schema.Types.Mixed],labourItems:[Schema.Types.Mixed],testsPerformed:[Schema.Types.Mixed],testingNotes:t,finalOperationalStatus:t,warrantyStatus:{type:String,enum:warrantyStatuses,default:"unknown"},quotationTotal:{type:Number,min:0,default:0},amountPaid:{type:Number,min:0,default:0},balanceDue:{type:Number,min:0,default:0},currency:t,status:{type:String,enum:maintenanceJobStatuses,default:"scheduled"},completionSummary:t,recommendations:t,nextServiceDate:t,beforeImageUrls:[String],afterImageUrls:[String],internalNotes:t,createdBy:{type:Schema.Types.ObjectId,ref:"Admin",required:true},updatedBy:{type:Schema.Types.ObjectId,ref:"Admin",required:true}},{timestamps:true,optimisticConcurrency:true}); schema.index({status:1,serviceScheduledAt:1}); export const MaintenanceJob=models.MaintenanceJob||model("MaintenanceJob",schema);
+import { Schema, model, models } from "mongoose";
+import {
+  maintenanceJobStatuses,
+  warrantyStatuses,
+} from "@/lib/maintenance/constants";
+const t = { type: String, default: "", trim: true };
+const schema = new Schema(
+  {
+    jobNumber: { type: String, unique: true, required: true },
+    maintenanceRequestId: {
+      type: Schema.Types.ObjectId,
+      ref: "MaintenanceRequest",
+      required: true,
+      unique: true,
+    },
+    installationProjectId: {
+      type: Schema.Types.ObjectId,
+      ref: "InstallationProject",
+      default: null,
+    },
+    quotationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Quotation",
+      default: null,
+    },
+    customerSnapshot: Schema.Types.Mixed,
+    equipmentSnapshot: Schema.Types.Mixed,
+    locationSnapshot: Schema.Types.Mixed,
+    inspectionScheduledAt: Date,
+    serviceScheduledAt: Date,
+    actualStartAt: Date,
+    actualCompletedAt: Date,
+    assignedTechnicians: [{ type: Schema.Types.ObjectId, ref: "Admin" }],
+    leadTechnician: {
+      type: Schema.Types.ObjectId,
+      ref: "Admin",
+      default: null,
+    },
+    reportedIssue: t,
+    diagnosis: t,
+    rootCause: t,
+    diagnosticNotes: t,
+    severity: t,
+    recommendedRepair: t,
+    repairActions: [Schema.Types.Mixed],
+    partsUsed: [Schema.Types.Mixed],
+    labourItems: [Schema.Types.Mixed],
+    testsPerformed: [Schema.Types.Mixed],
+    testingNotes: t,
+    finalOperationalStatus: t,
+    warrantyStatus: {
+      type: String,
+      enum: warrantyStatuses,
+      default: "unknown",
+    },
+    quotationTotal: { type: Number, min: 0, default: 0 },
+    amountPaid: { type: Number, min: 0, default: 0 },
+    balanceDue: { type: Number, min: 0, default: 0 },
+    currency: t,
+    status: {
+      type: String,
+      enum: maintenanceJobStatuses,
+      default: "scheduled",
+    },
+    completionSummary: t,
+    recommendations: t,
+    nextServiceDate: t,
+    beforeImageUrls: [String],
+    afterImageUrls: [String],
+    internalNotes: t,
+    createdBy: { type: Schema.Types.ObjectId, ref: "Admin", required: true },
+    updatedBy: { type: Schema.Types.ObjectId, ref: "Admin", required: true },
+  },
+  { timestamps: true, optimisticConcurrency: true },
+);
+schema.index({ status: 1, serviceScheduledAt: 1 });
+export const MaintenanceJob =
+  models.MaintenanceJob || model("MaintenanceJob", schema);

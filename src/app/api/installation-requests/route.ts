@@ -1,3 +1,30 @@
-import type { NextRequest } from "next/server"; import { apiRateLimitError, apiSuccess } from "@/lib/api/responses"; import { checkRateLimit,getRequestIdentifier } from "@/lib/auth/rate-limit"; import { salesApi,salesApiError,salesBody } from "@/lib/sales/api"; import { createInstallationRequest,getInstallationRequests } from "@/services/installations";
-export async function POST(r:NextRequest){const l=checkRateLimit(`installation:${getRequestIdentifier(r)}`,5,900000);if(!l.allowed)return apiRateLimitError(l.retryAfter);try{return apiSuccess("Installation request received",await createInstallationRequest(await salesBody(r)),201)}catch(e){return salesApiError(e)}}
-export async function GET(){return salesApi(async()=>apiSuccess("Installation requests loaded",await getInstallationRequests()))}
+import type { NextRequest } from "next/server";
+import { apiRateLimitError, apiSuccess } from "@/lib/api/responses";
+import { checkRateLimit, getRequestIdentifier } from "@/lib/auth/rate-limit";
+import { salesApi, salesApiError, salesBody } from "@/lib/sales/api";
+import {
+  createInstallationRequest,
+  getInstallationRequests,
+} from "@/services/installations";
+export async function POST(r: NextRequest) {
+  const l = checkRateLimit(
+    `installation:${getRequestIdentifier(r)}`,
+    5,
+    900000,
+  );
+  if (!l.allowed) return apiRateLimitError(l.retryAfter);
+  try {
+    return apiSuccess(
+      "Installation request received",
+      await createInstallationRequest(await salesBody(r)),
+      201,
+    );
+  } catch (e) {
+    return salesApiError(e);
+  }
+}
+export async function GET() {
+  return salesApi(async () =>
+    apiSuccess("Installation requests loaded", await getInstallationRequests()),
+  );
+}

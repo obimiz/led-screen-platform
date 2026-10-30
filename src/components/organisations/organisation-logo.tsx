@@ -13,7 +13,8 @@ export function OrganisationLogo({
     (image: HTMLImageElement | null) => {
       if (image?.complete && url) {
         if (image.naturalWidth === 0) setFailed(url);
-        else setWideUrl(image.naturalWidth / image.naturalHeight >= 2 ? url : "");
+        else
+          setWideUrl(image.naturalWidth / image.naturalHeight >= 2 ? url : "");
       }
     },
     [url],

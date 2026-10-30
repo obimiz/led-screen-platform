@@ -1,10 +1,84 @@
-import {z} from "zod";
-export const enquiryTypes=["general","product","sales","quote","rental","installation","maintenance","accessories","bell-alarm","order","payment","partnership","other"] as const;
-export const contactStatuses=["new","contacted","in-progress","awaiting-customer","resolved","closed"] as const;
-export const contactPriorities=["normal","high","urgent"] as const;
-export const contactMethods=["whatsapp","phone","email","any"] as const;
-export const contactSources=["homepage","contact-page","product-detail","quote-page","rental-page","installation-page","maintenance-page","bell-alarm-page","order-page","payment-page","portfolio-page","gallery-page"] as const;
-const text=(n:number)=>z.string().trim().max(n).default("");
-export const contactEnquirySchema=z.object({name:z.string().trim().min(2).max(160),email:z.union([z.literal(""),z.string().trim().email()]).default(""),phone:text(40),whatsappNumber:text(40),enquiryType:z.enum(enquiryTypes).default("general"),preferredContactMethod:z.enum(contactMethods).default("any"),subject:z.string().trim().min(2).max(180),message:z.string().trim().min(10).max(3000),source:z.enum(contactSources).default("contact-page"),sourcePage:text(200),productId:text(80),quotationId:text(80),rentalRequestId:text(80),installationRequestId:text(80),maintenanceRequestId:text(80),bellAlarmRequestId:text(80),orderId:text(80),paymentId:text(80),portfolioProjectId:text(80),honeypot:text(100),idempotencyKey:text(100)}).superRefine((v,c)=>{if(!v.email&&!v.phone&&!v.whatsappNumber)c.addIssue({code:"custom",path:["email"],message:"Provide an email, phone, or WhatsApp number."});});
-export const contactUpdateSchema=z.object({status:z.enum(contactStatuses).optional(),priority:z.enum(contactPriorities).optional(),assignedTo:text(80),adminNotes:text(2000)});
-export const communicationSchema=z.object({method:z.enum(["whatsapp","phone","email","in-person","other"]),direction:z.enum(["incoming","outgoing"]),note:z.string().trim().min(2).max(1000)});
+import { z } from "zod";
+export const enquiryTypes = [
+  "general",
+  "product",
+  "sales",
+  "quote",
+  "rental",
+  "installation",
+  "maintenance",
+  "accessories",
+  "bell-alarm",
+  "order",
+  "payment",
+  "partnership",
+  "other",
+] as const;
+export const contactStatuses = [
+  "new",
+  "contacted",
+  "in-progress",
+  "awaiting-customer",
+  "resolved",
+  "closed",
+] as const;
+export const contactPriorities = ["normal", "high", "urgent"] as const;
+export const contactMethods = ["whatsapp", "phone", "email", "any"] as const;
+export const contactSources = [
+  "homepage",
+  "contact-page",
+  "product-detail",
+  "quote-page",
+  "rental-page",
+  "installation-page",
+  "maintenance-page",
+  "bell-alarm-page",
+  "order-page",
+  "payment-page",
+  "portfolio-page",
+  "gallery-page",
+] as const;
+const text = (n: number) => z.string().trim().max(n).default("");
+export const contactEnquirySchema = z
+  .object({
+    name: z.string().trim().min(2).max(160),
+    email: z.union([z.literal(""), z.string().trim().email()]).default(""),
+    phone: text(40),
+    whatsappNumber: text(40),
+    enquiryType: z.enum(enquiryTypes).default("general"),
+    preferredContactMethod: z.enum(contactMethods).default("any"),
+    subject: z.string().trim().min(2).max(180),
+    message: z.string().trim().min(10).max(3000),
+    source: z.enum(contactSources).default("contact-page"),
+    sourcePage: text(200),
+    productId: text(80),
+    quotationId: text(80),
+    rentalRequestId: text(80),
+    installationRequestId: text(80),
+    maintenanceRequestId: text(80),
+    bellAlarmRequestId: text(80),
+    orderId: text(80),
+    paymentId: text(80),
+    portfolioProjectId: text(80),
+    honeypot: text(100),
+    idempotencyKey: text(100),
+  })
+  .superRefine((v, c) => {
+    if (!v.email && !v.phone && !v.whatsappNumber)
+      c.addIssue({
+        code: "custom",
+        path: ["email"],
+        message: "Provide an email, phone, or WhatsApp number.",
+      });
+  });
+export const contactUpdateSchema = z.object({
+  status: z.enum(contactStatuses).optional(),
+  priority: z.enum(contactPriorities).optional(),
+  assignedTo: text(80),
+  adminNotes: text(2000),
+});
+export const communicationSchema = z.object({
+  method: z.enum(["whatsapp", "phone", "email", "in-person", "other"]),
+  direction: z.enum(["incoming", "outgoing"]),
+  note: z.string().trim().min(2).max(1000),
+});

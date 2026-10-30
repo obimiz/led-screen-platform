@@ -11,7 +11,7 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
       </p>
       <button
         onClick={reset}
-        className="rounded-lg bg-primary hover:bg-primary-hover px-4 py-2 text-white"
+        className="bg-primary hover:bg-primary-hover rounded-lg px-4 py-2 text-white"
       >
         Try again
       </button>

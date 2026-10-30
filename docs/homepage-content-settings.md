@@ -29,7 +29,6 @@ TypeScript and 14 focused unit tests passed. ESLint completed with zero errors a
 
 Tests use disposable MongoDB records and browser viewports. Physical devices were not tested. No production records were changed. No commit, push or deployment was performed.
 
-
 ## Editable accessories section introduction
 
 The homepage LED Screen Accessories heading and description were previously hardcoded. They are now editable at Dashboard → Homepage Content → LED Screen Accessories section (`/admin/settings/homepage`) through Accessories section heading and Accessories section description. The existing text is retained as the default for older records or unavailable settings.

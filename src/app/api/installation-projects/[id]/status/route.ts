@@ -1,2 +1,49 @@
-import { apiSuccess } from "@/lib/api/responses"; import { salesApi,salesBody } from "@/lib/sales/api"; import { updateInstallationProject } from "@/services/installations"; import { installationProjectStatusSchema } from "@/lib/validations/installations";
-export async function PATCH(r:Request,c:{params:Promise<{id:string}>}){return salesApi(async a=>{const b=installationProjectStatusSchema.parse(await salesBody(r));return apiSuccess("Status updated",await updateInstallationProject((await c.params).id,{...b,scheduledStartDate:"",scheduledCompletionDate:"",actualStartDate:"",actualCompletionDate:"",tasks:[],equipment:[],materials:[],projectManager:"",assignedStaff:[],displayPowerTested:false,controllerConfigured:false,contentTested:false,brightnessChecked:false,connectivityChecked:false,finalInspectionCompleted:false,customerTrainingCompleted:false,commissioningNotes:"",handoverDate:"",handedOverTo:"",customerRepresentative:"",handoverNotes:"",warrantyStartDate:"",warrantyEndDate:"",warrantyNotes:"",internalNotes:"",customerNotes:"",amountPaid:0},a.id))})}
+import { apiSuccess } from "@/lib/api/responses";
+import { salesApi, salesBody } from "@/lib/sales/api";
+import { updateInstallationProject } from "@/services/installations";
+import { installationProjectStatusSchema } from "@/lib/validations/installations";
+export async function PATCH(
+  r: Request,
+  c: { params: Promise<{ id: string }> },
+) {
+  return salesApi(async (a) => {
+    const b = installationProjectStatusSchema.parse(await salesBody(r));
+    return apiSuccess(
+      "Status updated",
+      await updateInstallationProject(
+        (await c.params).id,
+        {
+          ...b,
+          scheduledStartDate: "",
+          scheduledCompletionDate: "",
+          actualStartDate: "",
+          actualCompletionDate: "",
+          tasks: [],
+          equipment: [],
+          materials: [],
+          projectManager: "",
+          assignedStaff: [],
+          displayPowerTested: false,
+          controllerConfigured: false,
+          contentTested: false,
+          brightnessChecked: false,
+          connectivityChecked: false,
+          finalInspectionCompleted: false,
+          customerTrainingCompleted: false,
+          commissioningNotes: "",
+          handoverDate: "",
+          handedOverTo: "",
+          customerRepresentative: "",
+          handoverNotes: "",
+          warrantyStartDate: "",
+          warrantyEndDate: "",
+          warrantyNotes: "",
+          internalNotes: "",
+          customerNotes: "",
+          amountPaid: 0,
+        },
+        a.id,
+      ),
+    );
+  });
+}

@@ -1,1 +1,74 @@
-"use client"; import {useState} from "react"; import {useRouter} from "next/navigation"; import {salesFetch} from "@/components/sales/client-api"; import {buttonClass,inputClass,Field} from "@/components/sales/ui"; export function TestimonialForm(){const [name,setName]=useState("");const [quote,setQuote]=useState("");const [consent,setConsent]=useState(false);const [error,setError]=useState("");const r=useRouter();return <form className="max-w-2xl space-y-5" onSubmit={async e=>{e.preventDefault();try{await salesFetch('/api/testimonials','POST',{customerName:'',customerDisplayName:name,organizationName:'',roleTitle:'',quote,rating:undefined,customerImageUrl:'',organizationLogoUrl:'',serviceType:'general',portfolioProjectId:'',location:'',testimonialDate:'',source:'direct',consentConfirmed:consent,featured:false,status:'draft',sortOrder:0});r.push('/admin/testimonials')}catch(x){setError(x instanceof Error?x.message:'Unable to save testimonial')}}}><Field label="Public display name"><input className={inputClass} value={name} onChange={e=>setName(e.target.value)} required/></Field><Field label="Quote"><textarea className={inputClass} rows={5} value={quote} onChange={e=>setQuote(e.target.value)} required/></Field><label className="flex gap-2"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/> Customer consent confirmed</label>{error&&<p className="text-red-700">{error}</p>}<button className={buttonClass}>Save draft</button></form>}
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { salesFetch } from "@/components/sales/client-api";
+import { buttonClass, inputClass, Field } from "@/components/sales/ui";
+export function TestimonialForm() {
+  const [name, setName] = useState("");
+  const [quote, setQuote] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [error, setError] = useState("");
+  const r = useRouter();
+  return (
+    <form
+      className="max-w-2xl space-y-5"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        try {
+          await salesFetch("/api/testimonials", "POST", {
+            customerName: "",
+            customerDisplayName: name,
+            organizationName: "",
+            roleTitle: "",
+            quote,
+            rating: undefined,
+            customerImageUrl: "",
+            organizationLogoUrl: "",
+            serviceType: "general",
+            portfolioProjectId: "",
+            location: "",
+            testimonialDate: "",
+            source: "direct",
+            consentConfirmed: consent,
+            featured: false,
+            status: "draft",
+            sortOrder: 0,
+          });
+          r.push("/admin/testimonials");
+        } catch (x) {
+          setError(
+            x instanceof Error ? x.message : "Unable to save testimonial",
+          );
+        }
+      }}
+    >
+      <Field label="Public display name">
+        <input
+          className={inputClass}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </Field>
+      <Field label="Quote">
+        <textarea
+          className={inputClass}
+          rows={5}
+          value={quote}
+          onChange={(e) => setQuote(e.target.value)}
+          required
+        />
+      </Field>
+      <label className="flex gap-2">
+        <input
+          type="checkbox"
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+        />{" "}
+        Customer consent confirmed
+      </label>
+      {error && <p className="text-red-700">{error}</p>}
+      <button className={buttonClass}>Save draft</button>
+    </form>
+  );
+}

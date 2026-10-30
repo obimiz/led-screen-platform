@@ -1,1 +1,12 @@
-export const galleryMediaTypes=["image","video"] as const; export const galleryStatuses=["draft","published","archived"] as const; export const galleryServices=["led-sales","led-rental","led-installation","led-maintenance","led-accessories","bell-alarm","general","other"] as const;
+export const galleryMediaTypes = ["image", "video"] as const;
+export const galleryStatuses = ["draft", "published", "archived"] as const;
+export const galleryServices = [
+  "led-sales",
+  "led-rental",
+  "led-installation",
+  "led-maintenance",
+  "led-accessories",
+  "bell-alarm",
+  "general",
+  "other",
+] as const;

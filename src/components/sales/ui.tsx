@@ -64,7 +64,7 @@ export function SalesHeading({
   return (
     <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <p className="mb-2 text-xs font-bold tracking-widest text-brand-700 uppercase">
+        <p className="text-brand-700 mb-2 text-xs font-bold tracking-widest uppercase">
           Sales
         </p>
         <h1 className="text-3xl font-bold">{title}</h1>

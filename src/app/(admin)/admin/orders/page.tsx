@@ -1,3 +1,45 @@
-import Link from "next/link"; import {requireSalesAdmin} from "@/lib/sales/access"; import {getOrders,formatOrderMoney} from "@/services/orders";
-export const dynamic="force-dynamic";
-export default async function Page(){await requireSalesAdmin();const rows=await getOrders();return <main className="p-6"><h1 className="text-3xl font-black">Orders</h1><div className="mt-8 overflow-x-auto rounded-xl border"><table className="w-full text-left text-sm"><thead><tr className="border-b bg-slate-50"><th className="p-3">Order</th><th className="p-3">Customer</th><th className="p-3">Total</th><th className="p-3">Payment</th><th className="p-3">Status</th></tr></thead><tbody>{rows.map((o:any)=><tr key={o.id} className="border-b"><td className="p-3"><Link className="font-bold text-brand-700" href={`/admin/orders/${o.id}`}>{o.orderNumber}</Link></td><td className="p-3">{o.customerName}</td><td className="p-3">{formatOrderMoney(o.total,o.currency)}</td><td className="p-3">{o.paymentStatus}</td><td className="p-3">{o.orderStatus}</td></tr>)}</tbody></table>{!rows.length&&<p className="p-8">No orders found.</p>}</div></main>}
+import Link from "next/link";
+import { requireSalesAdmin } from "@/lib/sales/access";
+import { getOrders, formatOrderMoney } from "@/services/orders";
+export const dynamic = "force-dynamic";
+export default async function Page() {
+  await requireSalesAdmin();
+  const rows = await getOrders();
+  return (
+    <main className="p-6">
+      <h1 className="text-3xl font-black">Orders</h1>
+      <div className="mt-8 overflow-x-auto rounded-xl border">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b bg-slate-50">
+              <th className="p-3">Order</th>
+              <th className="p-3">Customer</th>
+              <th className="p-3">Total</th>
+              <th className="p-3">Payment</th>
+              <th className="p-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((o: any) => (
+              <tr key={o.id} className="border-b">
+                <td className="p-3">
+                  <Link
+                    className="text-brand-700 font-bold"
+                    href={`/admin/orders/${o.id}`}
+                  >
+                    {o.orderNumber}
+                  </Link>
+                </td>
+                <td className="p-3">{o.customerName}</td>
+                <td className="p-3">{formatOrderMoney(o.total, o.currency)}</td>
+                <td className="p-3">{o.paymentStatus}</td>
+                <td className="p-3">{o.orderStatus}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!rows.length && <p className="p-8">No orders found.</p>}
+      </div>
+    </main>
+  );
+}

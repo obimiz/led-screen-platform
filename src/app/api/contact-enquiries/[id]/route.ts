@@ -1,3 +1,28 @@
-import {apiSuccess,apiNotFound} from "@/lib/api/responses"; import {salesApi,salesBody} from "@/lib/sales/api"; import {getContactEnquiryById,updateContactEnquiry} from "@/services/contact-enquiries";
-export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){return salesApi(async()=>{const d=await getContactEnquiryById((await params).id);return d?apiSuccess("Enquiry loaded",d):apiNotFound();});}
-export async function PATCH(req:Request,{params}:{params:Promise<{id:string}>}){return salesApi(async admin=>{const d=await updateContactEnquiry((await params).id,await salesBody(req),admin.id);return d?apiSuccess("Enquiry updated",d):apiNotFound();});}
+import { apiSuccess, apiNotFound } from "@/lib/api/responses";
+import { salesApi, salesBody } from "@/lib/sales/api";
+import {
+  getContactEnquiryById,
+  updateContactEnquiry,
+} from "@/services/contact-enquiries";
+export async function GET(
+  _: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  return salesApi(async () => {
+    const d = await getContactEnquiryById((await params).id);
+    return d ? apiSuccess("Enquiry loaded", d) : apiNotFound();
+  });
+}
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  return salesApi(async (admin) => {
+    const d = await updateContactEnquiry(
+      (await params).id,
+      await salesBody(req),
+      admin.id,
+    );
+    return d ? apiSuccess("Enquiry updated", d) : apiNotFound();
+  });
+}

@@ -1,3 +1,27 @@
 "use client";
-import Link from "next/link"; import {Bell} from "lucide-react"; import {useEffect,useState} from "react";
-export function NotificationBell(){const [count,setCount]=useState(0);useEffect(()=>{fetch("/api/notifications").then(r=>r.json()).then(d=>setCount(d.data?.unreadCount||0)).catch(()=>{});},[]);return <Link href="/admin/notifications" aria-label={`Notifications${count?`, ${count} unread`:""}`} className="relative grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-700"><Bell size={18}/>{count>0&&<span className="absolute -top-1 -right-1 min-w-5 rounded-full bg-red-600 px-1 text-center text-[11px] font-bold text-white">{count>99?"99+":count}</span>}</Link>}
+import Link from "next/link";
+import { Bell } from "lucide-react";
+import { useEffect, useState } from "react";
+export function NotificationBell() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    fetch("/api/notifications")
+      .then((r) => r.json())
+      .then((d) => setCount(d.data?.unreadCount || 0))
+      .catch(() => {});
+  }, []);
+  return (
+    <Link
+      href="/admin/notifications"
+      aria-label={`Notifications${count ? `, ${count} unread` : ""}`}
+      className="relative grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-700"
+    >
+      <Bell size={18} />
+      {count > 0 && (
+        <span className="absolute -top-1 -right-1 min-w-5 rounded-full bg-red-600 px-1 text-center text-[11px] font-bold text-white">
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
+    </Link>
+  );
+}

@@ -12,10 +12,10 @@ export default async function BusinessSettingsPage() {
   return (
     <section className="mx-auto max-w-6xl">
       <div className="mb-8">
-        <p className="text-sm font-bold tracking-widest text-brand-700 uppercase">
+        <p className="text-brand-700 text-sm font-bold tracking-widest uppercase">
           Settings
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-brand-900">
+        <h1 className="text-brand-900 mt-2 text-3xl font-black tracking-tight">
           Business profile
         </h1>
         <p className="mt-3 max-w-3xl leading-7 text-slate-600">

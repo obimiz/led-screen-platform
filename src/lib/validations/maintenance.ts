@@ -1,7 +1,202 @@
-import {z} from "zod"; import {objectIdSchema} from "./common"; import {salesCurrencies} from "@/lib/sales/constants"; import {maintenanceRequestStatuses,maintenanceJobStatuses,maintenanceServiceTypes,maintenanceIssueCategories,maintenanceOperationalStatuses,maintenanceUrgencies,equipmentSources,warrantyStatuses} from "@/lib/maintenance/constants";
-const s=(n:number)=>z.string().trim().max(n).default(""); const req=(n:number,m:string)=>z.string().trim().min(2,m).max(n); const phone=z.string().trim().max(40).refine(v=>!v||(/^[+\d ()-]+$/.test(v)&&v.replace(/\D/g,"").length>=7&&v.replace(/\D/g,"").length<=15),"Enter a valid phone number").default(""); const email=z.string().trim().toLowerCase().pipe(z.union([z.literal(""),z.string().email().max(254)])).default(""); const date=z.union([z.literal(""),z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).default(""); const idOrEmpty=z.union([objectIdSchema,z.literal("")]).default("");
-export const maintenanceRequestSchema=z.object({customerName:req(100,"Enter your name"),companyName:s(160),customerEmail:email,customerPhone:phone,whatsappNumber:phone,customerType:s(60),equipmentSource:z.enum(equipmentSources).default("unknown"),installationProjectId:idOrEmpty,productId:idOrEmpty,screenBrand:s(100),screenModel:s(100),pixelPitch:s(80),indoorOutdoor:z.enum(["","indoor","outdoor","both","not-sure"]).default(""),screenWidth:z.number().positive().max(100000).optional(),screenHeight:z.number().positive().max(100000).optional(),sizeUnit:z.enum(["m","ft"]).default("m"),approximateInstallationDate:date,serviceType:z.enum(maintenanceServiceTypes).default("repair"),issueCategory:z.enum(maintenanceIssueCategories).default("unknown"),issueTitle:s(180),issueDescription:s(5000),symptoms:s(3000),whenIssueStarted:s(160),equipmentOperationalStatus:z.enum(maintenanceOperationalStatuses).default("unknown"),urgency:z.enum(maintenanceUrgencies).default("normal"),venueName:s(180),address:s(500),city:s(100),state:s(100),country:s(100),imageUrls:z.array(z.string().url()).max(20).default([]),videoUrl:z.union([z.literal(""),z.string().url()]).default(""),warrantyClaimed:z.boolean().default(false),preferredServiceDate:date,preferredContactMethod:z.enum(["phone","whatsapp","email"]).default("phone"),source:z.enum(["website","product-page","whatsapp","referral","admin","other"]).default("website") ,message:s(5000)}).superRefine((v,c)=>{if(!(v.customerEmail||v.customerPhone||v.whatsappNumber))c.addIssue({code:"custom",path:["customerEmail"],message:"Provide an email, phone or WhatsApp number"}); if(v.preferredContactMethod==="email"&&!v.customerEmail)c.addIssue({code:"custom",path:["preferredContactMethod"],message:"Provide an email"}); if(v.preferredContactMethod!=="email"&&!v.customerPhone&&!v.whatsappNumber)c.addIssue({code:"custom",path:["preferredContactMethod"],message:"Provide a phone number"});});
-export const updateMaintenanceRequestSchema=z.object({status:z.enum(maintenanceRequestStatuses),assignedTo:idOrEmpty,adminNotes:s(10000),warrantyStatus:z.enum(warrantyStatuses).default("unknown"),warrantyDecisionReason:s(2000),version:z.number().int().nonnegative()});
-const part=z.object({productId:idOrEmpty,sku:s(100),name:req(160,"Part name required"),quantity:z.number().positive().max(100000),unitCost:z.number().int().min(0),lineTotal:z.number().int().min(0)}); const action=z.object({description:req(1000,"Describe the action"),performedBy:idOrEmpty,performedAt:date,notes:s(2000)}); const test=z.object({name:req(160,"Test name required"),result:z.enum(["passed","failed","not-applicable"]),notes:s(1000),testedBy:idOrEmpty,testedAt:date});
-export const maintenanceJobSchema=z.object({inspectionScheduledAt:date,serviceScheduledAt:date,assignedTechnicians:z.array(objectIdSchema).default([]),leadTechnician:idOrEmpty,reportedIssue:s(5000),diagnosis:s(5000),rootCause:s(3000),diagnosticNotes:s(5000),severity:s(80),recommendedRepair:s(3000),repairActions:z.array(action).default([]),partsUsed:z.array(part).default([]),labourItems:z.array(z.object({description:req(160,"Labour description required"),quantity:z.number().positive(),unitPrice:z.number().int().min(0),lineTotal:z.number().int().min(0)})).default([]),testsPerformed:z.array(test).default([]),testingNotes:s(5000),finalOperationalStatus:z.enum(["","fully-operational","operational-with-advisory","partially-operational","requires-further-repair","beyond-economic-repair","replacement-recommended"]).default(""),warrantyStatus:z.enum(warrantyStatuses).default("unknown"),quotationTotal:z.number().int().min(0).default(0),amountPaid:z.number().int().min(0).default(0),currency:z.enum(salesCurrencies).default("NGN"),status:z.enum(maintenanceJobStatuses).default("scheduled"),completionSummary:s(5000),recommendations:s(5000),nextServiceDate:date,beforeImageUrls:z.array(z.string().url()).max(20).default([]),afterImageUrls:z.array(z.string().url()).max(20).default([]),internalNotes:s(10000),version:z.number().int().nonnegative().optional()});
-export const maintenanceStatusSchema=z.object({status:z.enum(maintenanceJobStatuses),version:z.number().int().nonnegative()}); export const maintenancePartSchema=part; export const repairActionSchema=action; export const maintenanceTestSchema=test;
+import { z } from "zod";
+import { objectIdSchema } from "./common";
+import { salesCurrencies } from "@/lib/sales/constants";
+import {
+  maintenanceRequestStatuses,
+  maintenanceJobStatuses,
+  maintenanceServiceTypes,
+  maintenanceIssueCategories,
+  maintenanceOperationalStatuses,
+  maintenanceUrgencies,
+  equipmentSources,
+  warrantyStatuses,
+} from "@/lib/maintenance/constants";
+const s = (n: number) => z.string().trim().max(n).default("");
+const req = (n: number, m: string) => z.string().trim().min(2, m).max(n);
+const phone = z
+  .string()
+  .trim()
+  .max(40)
+  .refine(
+    (v) =>
+      !v ||
+      (/^[+\d ()-]+$/.test(v) &&
+        v.replace(/\D/g, "").length >= 7 &&
+        v.replace(/\D/g, "").length <= 15),
+    "Enter a valid phone number",
+  )
+  .default("");
+const email = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.union([z.literal(""), z.string().email().max(254)]))
+  .default("");
+const date = z
+  .union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)])
+  .default("");
+const idOrEmpty = z.union([objectIdSchema, z.literal("")]).default("");
+export const maintenanceRequestSchema = z
+  .object({
+    customerName: req(100, "Enter your name"),
+    companyName: s(160),
+    customerEmail: email,
+    customerPhone: phone,
+    whatsappNumber: phone,
+    customerType: s(60),
+    equipmentSource: z.enum(equipmentSources).default("unknown"),
+    installationProjectId: idOrEmpty,
+    productId: idOrEmpty,
+    screenBrand: s(100),
+    screenModel: s(100),
+    pixelPitch: s(80),
+    indoorOutdoor: z
+      .enum(["", "indoor", "outdoor", "both", "not-sure"])
+      .default(""),
+    screenWidth: z.number().positive().max(100000).optional(),
+    screenHeight: z.number().positive().max(100000).optional(),
+    sizeUnit: z.enum(["m", "ft"]).default("m"),
+    approximateInstallationDate: date,
+    serviceType: z.enum(maintenanceServiceTypes).default("repair"),
+    issueCategory: z.enum(maintenanceIssueCategories).default("unknown"),
+    issueTitle: s(180),
+    issueDescription: s(5000),
+    symptoms: s(3000),
+    whenIssueStarted: s(160),
+    equipmentOperationalStatus: z
+      .enum(maintenanceOperationalStatuses)
+      .default("unknown"),
+    urgency: z.enum(maintenanceUrgencies).default("normal"),
+    venueName: s(180),
+    address: s(500),
+    city: s(100),
+    state: s(100),
+    country: s(100),
+    imageUrls: z.array(z.string().url()).max(20).default([]),
+    videoUrl: z.union([z.literal(""), z.string().url()]).default(""),
+    warrantyClaimed: z.boolean().default(false),
+    preferredServiceDate: date,
+    preferredContactMethod: z
+      .enum(["phone", "whatsapp", "email"])
+      .default("phone"),
+    source: z
+      .enum([
+        "website",
+        "product-page",
+        "whatsapp",
+        "referral",
+        "admin",
+        "other",
+      ])
+      .default("website"),
+    message: s(5000),
+  })
+  .superRefine((v, c) => {
+    if (!(v.customerEmail || v.customerPhone || v.whatsappNumber))
+      c.addIssue({
+        code: "custom",
+        path: ["customerEmail"],
+        message: "Provide an email, phone or WhatsApp number",
+      });
+    if (v.preferredContactMethod === "email" && !v.customerEmail)
+      c.addIssue({
+        code: "custom",
+        path: ["preferredContactMethod"],
+        message: "Provide an email",
+      });
+    if (
+      v.preferredContactMethod !== "email" &&
+      !v.customerPhone &&
+      !v.whatsappNumber
+    )
+      c.addIssue({
+        code: "custom",
+        path: ["preferredContactMethod"],
+        message: "Provide a phone number",
+      });
+  });
+export const updateMaintenanceRequestSchema = z.object({
+  status: z.enum(maintenanceRequestStatuses),
+  assignedTo: idOrEmpty,
+  adminNotes: s(10000),
+  warrantyStatus: z.enum(warrantyStatuses).default("unknown"),
+  warrantyDecisionReason: s(2000),
+  version: z.number().int().nonnegative(),
+});
+const part = z.object({
+  productId: idOrEmpty,
+  sku: s(100),
+  name: req(160, "Part name required"),
+  quantity: z.number().positive().max(100000),
+  unitCost: z.number().int().min(0),
+  lineTotal: z.number().int().min(0),
+});
+const action = z.object({
+  description: req(1000, "Describe the action"),
+  performedBy: idOrEmpty,
+  performedAt: date,
+  notes: s(2000),
+});
+const test = z.object({
+  name: req(160, "Test name required"),
+  result: z.enum(["passed", "failed", "not-applicable"]),
+  notes: s(1000),
+  testedBy: idOrEmpty,
+  testedAt: date,
+});
+export const maintenanceJobSchema = z.object({
+  inspectionScheduledAt: date,
+  serviceScheduledAt: date,
+  assignedTechnicians: z.array(objectIdSchema).default([]),
+  leadTechnician: idOrEmpty,
+  reportedIssue: s(5000),
+  diagnosis: s(5000),
+  rootCause: s(3000),
+  diagnosticNotes: s(5000),
+  severity: s(80),
+  recommendedRepair: s(3000),
+  repairActions: z.array(action).default([]),
+  partsUsed: z.array(part).default([]),
+  labourItems: z
+    .array(
+      z.object({
+        description: req(160, "Labour description required"),
+        quantity: z.number().positive(),
+        unitPrice: z.number().int().min(0),
+        lineTotal: z.number().int().min(0),
+      }),
+    )
+    .default([]),
+  testsPerformed: z.array(test).default([]),
+  testingNotes: s(5000),
+  finalOperationalStatus: z
+    .enum([
+      "",
+      "fully-operational",
+      "operational-with-advisory",
+      "partially-operational",
+      "requires-further-repair",
+      "beyond-economic-repair",
+      "replacement-recommended",
+    ])
+    .default(""),
+  warrantyStatus: z.enum(warrantyStatuses).default("unknown"),
+  quotationTotal: z.number().int().min(0).default(0),
+  amountPaid: z.number().int().min(0).default(0),
+  currency: z.enum(salesCurrencies).default("NGN"),
+  status: z.enum(maintenanceJobStatuses).default("scheduled"),
+  completionSummary: s(5000),
+  recommendations: s(5000),
+  nextServiceDate: date,
+  beforeImageUrls: z.array(z.string().url()).max(20).default([]),
+  afterImageUrls: z.array(z.string().url()).max(20).default([]),
+  internalNotes: s(10000),
+  version: z.number().int().nonnegative().optional(),
+});
+export const maintenanceStatusSchema = z.object({
+  status: z.enum(maintenanceJobStatuses),
+  version: z.number().int().nonnegative(),
+});
+export const maintenancePartSchema = part;
+export const repairActionSchema = action;
+export const maintenanceTestSchema = test;

@@ -1,1 +1,8 @@
-import "server-only"; import {redirect} from "next/navigation"; import {getCurrentAdmin} from "@/lib/auth/current-admin"; export async function requireGalleryAdmin(){const a=await getCurrentAdmin();if(!a)redirect("/admin/login");return a;}
+import "server-only";
+import { redirect } from "next/navigation";
+import { getCurrentAdmin } from "@/lib/auth/current-admin";
+export async function requireGalleryAdmin() {
+  const a = await getCurrentAdmin();
+  if (!a) redirect("/admin/login");
+  return a;
+}

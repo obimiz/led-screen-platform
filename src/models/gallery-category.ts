@@ -1,1 +1,13 @@
-import {Schema,model,models} from "mongoose"; const schema=new Schema({name:{type:String,required:true},slug:{type:String,unique:true,required:true,index:true},description:{type:String,default:""},isActive:{type:Boolean,default:true},sortOrder:{type:Number,default:0}},{timestamps:true}); export const GalleryCategory=models.GalleryCategory||model("GalleryCategory",schema);
+import { Schema, model, models } from "mongoose";
+const schema = new Schema(
+  {
+    name: { type: String, required: true },
+    slug: { type: String, unique: true, required: true, index: true },
+    description: { type: String, default: "" },
+    isActive: { type: Boolean, default: true },
+    sortOrder: { type: Number, default: 0 },
+  },
+  { timestamps: true },
+);
+export const GalleryCategory =
+  models.GalleryCategory || model("GalleryCategory", schema);

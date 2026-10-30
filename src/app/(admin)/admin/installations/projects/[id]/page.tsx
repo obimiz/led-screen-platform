@@ -1,2 +1,51 @@
-import {notFound} from "next/navigation"; import {requireInstallationAdmin} from "@/lib/installations/access"; import {getInstallationProjectById} from "@/services/installations";
-export const dynamic="force-dynamic"; export default async function Project({params}:{params:Promise<{id:string}>}){await requireInstallationAdmin();const x=await getInstallationProjectById((await params).id);if(!x)return notFound();return <main className="max-w-5xl p-6"><p className="text-sm text-slate-500">{x.projectNumber}</p><h1 className="mt-2 text-3xl font-black">{x.projectName||"Installation project"}</h1><div className="mt-6 grid gap-5 md:grid-cols-2"><section className="rounded-xl border p-5"><h2 className="font-bold">Overview</h2><p className="mt-2">{x.customerSnapshot?.name}<br/>{x.venueName}<br/>{x.address}</p><p className="mt-3">Status: {x.status} · Progress: {x.progressPercentage}%</p></section><section className="rounded-xl border p-5"><h2 className="font-bold">Commercial</h2><p className="mt-2">Total: {x.quotationTotal} {x.currency}<br/>Paid: {x.amountPaid}<br/>Balance: {x.balanceDue}</p></section></div><h2 className="mt-8 text-xl font-bold">Lifecycle</h2><p className="mt-2 text-slate-600">Planning → Scheduled → Materials → Installation → Configuration → Testing → Commissioning → Completed</p></main>}
+import { notFound } from "next/navigation";
+import { requireInstallationAdmin } from "@/lib/installations/access";
+import { getInstallationProjectById } from "@/services/installations";
+export const dynamic = "force-dynamic";
+export default async function Project({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await requireInstallationAdmin();
+  const x = await getInstallationProjectById((await params).id);
+  if (!x) return notFound();
+  return (
+    <main className="max-w-5xl p-6">
+      <p className="text-sm text-slate-500">{x.projectNumber}</p>
+      <h1 className="mt-2 text-3xl font-black">
+        {x.projectName || "Installation project"}
+      </h1>
+      <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <section className="rounded-xl border p-5">
+          <h2 className="font-bold">Overview</h2>
+          <p className="mt-2">
+            {x.customerSnapshot?.name}
+            <br />
+            {x.venueName}
+            <br />
+            {x.address}
+          </p>
+          <p className="mt-3">
+            Status: {x.status} · Progress: {x.progressPercentage}%
+          </p>
+        </section>
+        <section className="rounded-xl border p-5">
+          <h2 className="font-bold">Commercial</h2>
+          <p className="mt-2">
+            Total: {x.quotationTotal} {x.currency}
+            <br />
+            Paid: {x.amountPaid}
+            <br />
+            Balance: {x.balanceDue}
+          </p>
+        </section>
+      </div>
+      <h2 className="mt-8 text-xl font-bold">Lifecycle</h2>
+      <p className="mt-2 text-slate-600">
+        Planning → Scheduled → Materials → Installation → Configuration →
+        Testing → Commissioning → Completed
+      </p>
+    </main>
+  );
+}

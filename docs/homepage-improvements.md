@@ -91,7 +91,6 @@ No claim is made that every pre-existing module passed an end-to-end test. The n
 
 Successful playback and visual loop quality of the final real video cannot be verified until that asset is supplied. Production data, live payments and external notification delivery were not exercised. Broader regression failures must be reported rather than treated as passed.
 
-
 # Homepage content and presentation
 
 `/admin/settings/homepage` now includes an Our Services form for the section heading, introduction, four service titles/descriptions/links, and call-to-action label/link. Saving persists `homepageServices` on the primary MongoDB BusinessSettings document through the authenticated, same-origin `/api/settings/homepage` POST handler. Existing Hero and accessories settings are saved independently. Existing service copy remains the default; no migration is required.
@@ -108,7 +107,6 @@ Verification:
 - `npm run build`
 - `node --import tsx --test tests/homepage-improvements.test.ts tests/homepage-settings-model.test.ts tests/homepage.test.ts tests/catalogue-redesign.test.ts`
 - `node --import tsx tests/homepage-improvements.integration.ts` uses ephemeral MongoDB fixtures and Chrome. Covers authenticated form persistence/reload, public rendering, unchanged saved Hero wording, classification, both shared accessory URLs, six viewport widths, More navigation, keyboard handling, no-JavaScript desktop toggle and browser errors. Screenshots are written to `/private/tmp/igt-homepage-improved-*.png`.
-
 
 ## Video cards and sign-in follow-up
 

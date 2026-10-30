@@ -1,4 +1,61 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect -- callback state reflects provider verification. */
-import {useEffect,useState} from "react"; import Link from "next/link"; import {useSearchParams} from "next/navigation";
-export default function Page(){const params=useSearchParams();const [state,setState]=useState("verifying");const [message,setMessage]=useState("");useEffect(()=>{const reference=params.get("reference");if(!reference){setState("failed");setMessage("No payment reference was provided.");return;}fetch("/api/payments/verify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({reference})}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.message);setState(d.data.status==="successful"?"success":d.data.status==="pending"?"pending":"failed");setMessage(d.data.orderNumber?`Order ${d.data.orderNumber}`:"");}).catch(e=>{setState("pending");setMessage(e.message||"We could not verify this payment yet.");});},[params]);return <main className="mx-auto max-w-xl px-4 py-20 text-center"><h1 className="text-4xl font-black">{state==="success"?"Payment successful":state==="verifying"?"Verifying payment…":state==="pending"?"Payment pending":"Payment not completed"}</h1><p className="mt-4 text-slate-600">{message||"Please wait while we confirm your transaction."}</p><Link href="/" className="mt-8 inline-block rounded-lg bg-primary px-5 py-3 font-bold">Continue</Link></main>}
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+export default function Page() {
+  const params = useSearchParams();
+  const [state, setState] = useState("verifying");
+  const [message, setMessage] = useState("");
+  useEffect(() => {
+    const reference = params.get("reference");
+    if (!reference) {
+      setState("failed");
+      setMessage("No payment reference was provided.");
+      return;
+    }
+    fetch("/api/payments/verify", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ reference }),
+    })
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.message);
+        setState(
+          d.data.status === "successful"
+            ? "success"
+            : d.data.status === "pending"
+              ? "pending"
+              : "failed",
+        );
+        setMessage(d.data.orderNumber ? `Order ${d.data.orderNumber}` : "");
+      })
+      .catch((e) => {
+        setState("pending");
+        setMessage(e.message || "We could not verify this payment yet.");
+      });
+  }, [params]);
+  return (
+    <main className="mx-auto max-w-xl px-4 py-20 text-center">
+      <h1 className="text-4xl font-black">
+        {state === "success"
+          ? "Payment successful"
+          : state === "verifying"
+            ? "Verifying payment…"
+            : state === "pending"
+              ? "Payment pending"
+              : "Payment not completed"}
+      </h1>
+      <p className="mt-4 text-slate-600">
+        {message || "Please wait while we confirm your transaction."}
+      </p>
+      <Link
+        href="/"
+        className="bg-primary mt-8 inline-block rounded-lg px-5 py-3 font-bold"
+      >
+        Continue
+      </Link>
+    </main>
+  );
+}

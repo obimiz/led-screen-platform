@@ -1,2 +1,46 @@
-import {notFound} from "next/navigation"; import {requireInstallationAdmin} from "@/lib/installations/access"; import {getInstallationProjectById} from "@/services/installations";
-export const dynamic="force-dynamic"; export default async function Print({params}:{params:Promise<{id:string}>}){await requireInstallationAdmin();const x=await getInstallationProjectById((await params).id);if(!x)return notFound();return <main className="mx-auto max-w-3xl p-10 text-slate-900"><h1 className="text-3xl font-black">Installation project summary</h1><p className="mt-2">{x.projectNumber} · {x.projectName}</p><hr className="my-6"/><p><b>Customer:</b> {x.customerSnapshot?.name} {x.customerSnapshot?.companyName}</p><p><b>Location:</b> {[x.venueName,x.address,x.city,x.state,x.country].filter(Boolean).join(", ")}</p><p><b>Schedule:</b> {x.scheduledStartDate||"—"} to {x.scheduledCompletionDate||"—"}</p><p><b>Status:</b> {x.status} · {x.progressPercentage}%</p><p className="mt-6"><b>Financial summary:</b> {x.quotationTotal} {x.currency} total · {x.amountPaid} paid · {x.balanceDue} balance</p><p className="mt-6 whitespace-pre-wrap">{x.customerNotes||x.internalNotes||""}</p></main>}
+import { notFound } from "next/navigation";
+import { requireInstallationAdmin } from "@/lib/installations/access";
+import { getInstallationProjectById } from "@/services/installations";
+export const dynamic = "force-dynamic";
+export default async function Print({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await requireInstallationAdmin();
+  const x = await getInstallationProjectById((await params).id);
+  if (!x) return notFound();
+  return (
+    <main className="mx-auto max-w-3xl p-10 text-slate-900">
+      <h1 className="text-3xl font-black">Installation project summary</h1>
+      <p className="mt-2">
+        {x.projectNumber} · {x.projectName}
+      </p>
+      <hr className="my-6" />
+      <p>
+        <b>Customer:</b> {x.customerSnapshot?.name}{" "}
+        {x.customerSnapshot?.companyName}
+      </p>
+      <p>
+        <b>Location:</b>{" "}
+        {[x.venueName, x.address, x.city, x.state, x.country]
+          .filter(Boolean)
+          .join(", ")}
+      </p>
+      <p>
+        <b>Schedule:</b> {x.scheduledStartDate || "—"} to{" "}
+        {x.scheduledCompletionDate || "—"}
+      </p>
+      <p>
+        <b>Status:</b> {x.status} · {x.progressPercentage}%
+      </p>
+      <p className="mt-6">
+        <b>Financial summary:</b> {x.quotationTotal} {x.currency} total ·{" "}
+        {x.amountPaid} paid · {x.balanceDue} balance
+      </p>
+      <p className="mt-6 whitespace-pre-wrap">
+        {x.customerNotes || x.internalNotes || ""}
+      </p>
+    </main>
+  );
+}

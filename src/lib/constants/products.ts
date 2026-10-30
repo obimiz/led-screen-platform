@@ -1,4 +1,9 @@
-export const productTypes = ["led-screen", "led-accessory", "bell-alarm-system", "bell-alarm-accessory"] as const;
+export const productTypes = [
+  "led-screen",
+  "led-accessory",
+  "bell-alarm-system",
+  "bell-alarm-accessory",
+] as const;
 export type ProductType = (typeof productTypes)[number];
 export const indoorOutdoorOptions = [
   "indoor",
@@ -6,7 +11,13 @@ export const indoorOutdoorOptions = [
   "semi-outdoor",
   "not-specified",
 ] as const;
-export const priceTypes = ["fixed", "from", "per_sqm", "contact", "quote"] as const;
+export const priceTypes = [
+  "fixed",
+  "from",
+  "per_sqm",
+  "contact",
+  "quote",
+] as const;
 export const stockStatuses = [
   "in-stock",
   "low-stock",

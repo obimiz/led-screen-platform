@@ -19,11 +19,13 @@ When published accessories exist, the homepage uses their real photographs and d
 ## Files
 
 Created:
+
 - `src/app/(admin)/admin/bell-alarm/categories/page.tsx`
 - `src/components/products/accessory-type-cards.tsx`
 - `docs/bell-alarm-category-fix.md`
 
 Updated for this fix:
+
 - `src/lib/constants/navigation.ts`
 - `src/app/(admin)/admin/product-categories/page.tsx`
 - `src/app/(admin)/admin/bell-alarm/products/new/page.tsx`

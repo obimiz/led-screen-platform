@@ -65,7 +65,7 @@ export function QuoteRequestForm({
     );
     return (
       <div
-        className="rounded-2xl border border-success-200 bg-success-50 p-8"
+        className="border-success-200 bg-success-50 rounded-2xl border p-8"
         role="status"
       >
         <meta name="robots" content="noindex, nofollow" />
@@ -159,7 +159,7 @@ export function QuoteRequestForm({
     >
       <input type="hidden" {...register("productSlug")} />
       {product && (
-        <div className="rounded-xl bg-brand-50 p-5">
+        <div className="bg-brand-50 rounded-xl p-5">
           <p className="text-xs font-bold uppercase">Selected product</p>
           <h2 className="mt-1 text-xl font-bold">{product.name}</h2>
           <p className="mt-2 text-sm">{product.description}</p>

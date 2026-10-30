@@ -12,6 +12,7 @@
 Created `src/components/products/accessory-gallery.tsx`.
 
 Updated:
+
 - `src/components/products/accessory-card.tsx`
 - `src/app/(public)/led-accessories/[slug]/page.tsx`
 - `src/components/publishing/media-manager.tsx`

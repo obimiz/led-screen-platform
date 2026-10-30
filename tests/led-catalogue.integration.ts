@@ -428,7 +428,10 @@ async function main() {
     ]) {
       await page.goto(base + route);
       await page.locator(`img[src="${uploadedUrl}"]`).first().waitFor();
-      await page.locator(`img[src="${uploadedUrl}"]`).first().scrollIntoViewIfNeeded();
+      await page
+        .locator(`img[src="${uploadedUrl}"]`)
+        .first()
+        .scrollIntoViewIfNeeded();
       await page.waitForFunction(
         (url) =>
           Array.from(document.querySelectorAll<HTMLImageElement>("img")).some(

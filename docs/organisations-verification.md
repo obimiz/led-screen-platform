@@ -10,18 +10,18 @@ The filesystem directory is `public/Images/clients/`. macOS accepts its lowercas
 
 All ten saved logo URLs now use `/Images/clients/` plus these filenames:
 
-| Organisation | Filename |
-| --- | --- |
-| Divine Mercy Catholic Church, Lekki | divine-mercy-lekki.png |
+| Organisation                                  | Filename                  |
+| --------------------------------------------- | ------------------------- |
+| Divine Mercy Catholic Church, Lekki           | divine-mercy-lekki.png    |
 | Catholic Church of the Transfiguration, Lekki | transfiguration-lekki.png |
-| St. Patrick, Alaba International | st-patrick-alaba.png |
-| Holy Family Catholic Church, Festac | holy-family-festac.png |
-| Catholic Church of the Visitation, Festac | visitation-festac.png |
-| St. Mary's, Isolo | st-marys-isolo.png |
-| St. Michael Catholic Church, Okpanam | st-michael-okpanam.png |
-| Madonna University | madonna-university.png |
-| Glorious Praise | glorious-praise.png |
-| Affable Homes | affable-homes.png |
+| St. Patrick, Alaba International              | st-patrick-alaba.png      |
+| Holy Family Catholic Church, Festac           | holy-family-festac.png    |
+| Catholic Church of the Visitation, Festac     | visitation-festac.png     |
+| St. Mary's, Isolo                             | st-marys-isolo.png        |
+| St. Michael Catholic Church, Okpanam          | st-michael-okpanam.png    |
+| Madonna University                            | madonna-university.png    |
+| Glorious Praise                               | glorious-praise.png       |
+| Affable Homes                                 | affable-homes.png         |
 
 The updater compared full before/after records and verified that only logoUrl changed: IDs, names, slugs, timestamps, visibility flags, display order, and other fields were preserved. A second execution verified the same mappings without further updates.
 

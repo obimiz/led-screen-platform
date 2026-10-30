@@ -155,7 +155,9 @@ export const createQuotationSchema = z
     maintenanceRequestId: z.union([objectIdSchema, z.literal("")]).default(""),
     maintenanceJobId: z.union([objectIdSchema, z.literal("")]).default(""),
     bellAlarmRequestId: z.union([objectIdSchema, z.literal("")]).default(""),
-    quotationType: z.enum(["sales", "rental", "installation", "maintenance", "bell-alarm"]).default("sales"),
+    quotationType: z
+      .enum(["sales", "rental", "installation", "maintenance", "bell-alarm"])
+      .default("sales"),
     customer: customerSchema,
     billingAddress: optionalText(1000),
     deliveryAddress: optionalText(1000),

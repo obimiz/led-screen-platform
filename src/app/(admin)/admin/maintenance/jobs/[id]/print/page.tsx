@@ -1,1 +1,52 @@
-import {notFound} from "next/navigation"; import {requireMaintenanceAdmin} from "@/lib/maintenance/access"; import {getMaintenanceJobById} from "@/services/maintenance"; export const dynamic="force-dynamic"; export default async function Page({params}:{params:Promise<{id:string}>}){await requireMaintenanceAdmin();const x=await getMaintenanceJobById((await params).id);if(!x)return notFound();return <main className="mx-auto max-w-3xl p-10"><h1 className="text-3xl font-black">LED Service Report</h1><p className="mt-2">{x.jobNumber}</p><hr className="my-6"/><p><b>Customer:</b> {x.customerSnapshot?.name} {x.customerSnapshot?.companyName}</p><p><b>Equipment:</b> {x.equipmentSnapshot?.name||"—"}</p><p><b>Location:</b> {[x.locationSnapshot?.venueName,x.locationSnapshot?.address,x.locationSnapshot?.city].filter(Boolean).join(", ")}</p><h2 className="mt-6 font-bold">Reported problem</h2><p className="mt-2 whitespace-pre-wrap">{x.reportedIssue}</p><h2 className="mt-6 font-bold">Diagnosis</h2><p className="mt-2 whitespace-pre-wrap">{x.diagnosis||"—"}</p><h2 className="mt-6 font-bold">Repair and testing</h2><p className="mt-2">Parts used: {x.partsUsed?.length||0}. Tests recorded: {x.testsPerformed?.length||0}.</p><p className="mt-2 whitespace-pre-wrap">{x.completionSummary||"—"}</p><p className="mt-6"><b>Final status:</b> {x.finalOperationalStatus||"—"} · Warranty: {x.warrantyStatus}</p><p className="mt-4 whitespace-pre-wrap">{x.recommendations||""}</p></main>}
+import { notFound } from "next/navigation";
+import { requireMaintenanceAdmin } from "@/lib/maintenance/access";
+import { getMaintenanceJobById } from "@/services/maintenance";
+export const dynamic = "force-dynamic";
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await requireMaintenanceAdmin();
+  const x = await getMaintenanceJobById((await params).id);
+  if (!x) return notFound();
+  return (
+    <main className="mx-auto max-w-3xl p-10">
+      <h1 className="text-3xl font-black">LED Service Report</h1>
+      <p className="mt-2">{x.jobNumber}</p>
+      <hr className="my-6" />
+      <p>
+        <b>Customer:</b> {x.customerSnapshot?.name}{" "}
+        {x.customerSnapshot?.companyName}
+      </p>
+      <p>
+        <b>Equipment:</b> {x.equipmentSnapshot?.name || "—"}
+      </p>
+      <p>
+        <b>Location:</b>{" "}
+        {[
+          x.locationSnapshot?.venueName,
+          x.locationSnapshot?.address,
+          x.locationSnapshot?.city,
+        ]
+          .filter(Boolean)
+          .join(", ")}
+      </p>
+      <h2 className="mt-6 font-bold">Reported problem</h2>
+      <p className="mt-2 whitespace-pre-wrap">{x.reportedIssue}</p>
+      <h2 className="mt-6 font-bold">Diagnosis</h2>
+      <p className="mt-2 whitespace-pre-wrap">{x.diagnosis || "—"}</p>
+      <h2 className="mt-6 font-bold">Repair and testing</h2>
+      <p className="mt-2">
+        Parts used: {x.partsUsed?.length || 0}. Tests recorded:{" "}
+        {x.testsPerformed?.length || 0}.
+      </p>
+      <p className="mt-2 whitespace-pre-wrap">{x.completionSummary || "—"}</p>
+      <p className="mt-6">
+        <b>Final status:</b> {x.finalOperationalStatus || "—"} · Warranty:{" "}
+        {x.warrantyStatus}
+      </p>
+      <p className="mt-4 whitespace-pre-wrap">{x.recommendations || ""}</p>
+    </main>
+  );
+}

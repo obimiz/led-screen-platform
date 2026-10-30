@@ -1,3 +1,47 @@
-import Link from "next/link"; import {requireSalesAdmin} from "@/lib/sales/access"; import {getContactEnquiries} from "@/services/contact-enquiries";
-export const dynamic="force-dynamic";
-export default async function Page(){await requireSalesAdmin();const rows=await getContactEnquiries();return <main className="p-6"><h1 className="text-3xl font-black">Contact enquiries</h1><div className="mt-8 overflow-x-auto rounded-xl border"><table className="w-full text-left text-sm"><thead><tr className="border-b bg-slate-50"><th className="p-3">Reference</th><th className="p-3">Customer</th><th className="p-3">Subject</th><th className="p-3">Type</th><th className="p-3">Priority</th><th className="p-3">Status</th></tr></thead><tbody>{rows.map((x:any)=><tr key={x.id} className="border-b"><td className="p-3"><Link className="font-bold text-brand-700" href={`/admin/enquiries/${x.id}`}>{x.referenceNumber}</Link></td><td className="p-3">{x.name}</td><td className="p-3">{x.subject}</td><td className="p-3">{x.enquiryType}</td><td className="p-3">{x.priority}</td><td className="p-3">{x.status}</td></tr>)}</tbody></table>{!rows.length&&<p className="p-8">No contact enquiries found.</p>}</div></main>}
+import Link from "next/link";
+import { requireSalesAdmin } from "@/lib/sales/access";
+import { getContactEnquiries } from "@/services/contact-enquiries";
+export const dynamic = "force-dynamic";
+export default async function Page() {
+  await requireSalesAdmin();
+  const rows = await getContactEnquiries();
+  return (
+    <main className="p-6">
+      <h1 className="text-3xl font-black">Contact enquiries</h1>
+      <div className="mt-8 overflow-x-auto rounded-xl border">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b bg-slate-50">
+              <th className="p-3">Reference</th>
+              <th className="p-3">Customer</th>
+              <th className="p-3">Subject</th>
+              <th className="p-3">Type</th>
+              <th className="p-3">Priority</th>
+              <th className="p-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((x: any) => (
+              <tr key={x.id} className="border-b">
+                <td className="p-3">
+                  <Link
+                    className="text-brand-700 font-bold"
+                    href={`/admin/enquiries/${x.id}`}
+                  >
+                    {x.referenceNumber}
+                  </Link>
+                </td>
+                <td className="p-3">{x.name}</td>
+                <td className="p-3">{x.subject}</td>
+                <td className="p-3">{x.enquiryType}</td>
+                <td className="p-3">{x.priority}</td>
+                <td className="p-3">{x.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!rows.length && <p className="p-8">No contact enquiries found.</p>}
+      </div>
+    </main>
+  );
+}

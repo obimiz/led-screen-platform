@@ -1,8 +1,107 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect -- hydrate guest cart from localStorage once on mount. */
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-export type CartItem = { productId:string; productName:string; slug:string; productType:string; sku:string; imageUrl:string; quantity:number; displayedUnitPrice:number; currency:string; minOrderQuantity?:number; maxOrderQuantity?:number|null };
-type CartContext = { items:CartItem[]; hydrated:boolean; addItem:(item:CartItem)=>void; removeItem:(id:string)=>void; updateQuantity:(id:string,q:number)=>void; clearCart:()=>void; itemCount:number; subtotal:number };
-const C=createContext<CartContext|null>(null); const KEY="led-screen-platform-cart";
-export function CartProvider({children}:{children:ReactNode}){const [items,setItems]=useState<CartItem[]>([]);const [hydrated,setHydrated]=useState(false);useEffect(()=>{try{const raw=localStorage.getItem(KEY);const parsed=raw?JSON.parse(raw):[];if(Array.isArray(parsed))setItems(parsed.filter(x=>x&&typeof x.productId==="string"&&Number.isInteger(x.quantity)&&x.quantity>0));}catch{setItems([])}setHydrated(true)},[]);useEffect(()=>{if(hydrated)localStorage.setItem(KEY,JSON.stringify(items))},[items,hydrated]);const value=useMemo(()=>({items,hydrated,addItem:(item:CartItem)=>setItems(v=>{const found=v.find(x=>x.productId===item.productId);return found?v.map(x=>x.productId===item.productId?{...x,quantity:x.quantity+item.quantity}:x):[...v,item]}),removeItem:(id:string)=>setItems(v=>v.filter(x=>x.productId!==id)),updateQuantity:(id:string,q:number)=>setItems(v=>v.map(x=>x.productId===id?{...x,quantity:Math.max(x.minOrderQuantity||1,Math.floor(q)||1)}:x)),clearCart:()=>setItems([]),itemCount:items.reduce((n,x)=>n+x.quantity,0),subtotal:items.reduce((n,x)=>n+x.quantity*x.displayedUnitPrice,0)}),[items,hydrated]);return <C.Provider value={value}>{children}</C.Provider>}
-export function useCart(){const value=useContext(C);if(!value)throw new Error("useCart must be used within CartProvider");return value}
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+export type CartItem = {
+  productId: string;
+  productName: string;
+  slug: string;
+  productType: string;
+  sku: string;
+  imageUrl: string;
+  quantity: number;
+  displayedUnitPrice: number;
+  currency: string;
+  minOrderQuantity?: number;
+  maxOrderQuantity?: number | null;
+};
+type CartContext = {
+  items: CartItem[];
+  hydrated: boolean;
+  addItem: (item: CartItem) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, q: number) => void;
+  clearCart: () => void;
+  itemCount: number;
+  subtotal: number;
+};
+const C = createContext<CartContext | null>(null);
+const KEY = "led-screen-platform-cart";
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed))
+        setItems(
+          parsed.filter(
+            (x) =>
+              x &&
+              typeof x.productId === "string" &&
+              Number.isInteger(x.quantity) &&
+              x.quantity > 0,
+          ),
+        );
+    } catch {
+      setItems([]);
+    }
+    setHydrated(true);
+  }, []);
+  useEffect(() => {
+    if (hydrated) localStorage.setItem(KEY, JSON.stringify(items));
+  }, [items, hydrated]);
+  const value = useMemo(
+    () => ({
+      items,
+      hydrated,
+      addItem: (item: CartItem) =>
+        setItems((v) => {
+          const found = v.find((x) => x.productId === item.productId);
+          return found
+            ? v.map((x) =>
+                x.productId === item.productId
+                  ? { ...x, quantity: x.quantity + item.quantity }
+                  : x,
+              )
+            : [...v, item];
+        }),
+      removeItem: (id: string) =>
+        setItems((v) => v.filter((x) => x.productId !== id)),
+      updateQuantity: (id: string, q: number) =>
+        setItems((v) =>
+          v.map((x) =>
+            x.productId === id
+              ? {
+                  ...x,
+                  quantity: Math.max(
+                    x.minOrderQuantity || 1,
+                    Math.floor(q) || 1,
+                  ),
+                }
+              : x,
+          ),
+        ),
+      clearCart: () => setItems([]),
+      itemCount: items.reduce((n, x) => n + x.quantity, 0),
+      subtotal: items.reduce(
+        (n, x) => n + x.quantity * x.displayedUnitPrice,
+        0,
+      ),
+    }),
+    [items, hydrated],
+  );
+  return <C.Provider value={value}>{children}</C.Provider>;
+}
+export function useCart() {
+  const value = useContext(C);
+  if (!value) throw new Error("useCart must be used within CartProvider");
+  return value;
+}

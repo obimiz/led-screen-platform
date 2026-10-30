@@ -1,1 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */ import {requireMaintenanceAdmin} from "@/lib/maintenance/access"; import {getUpcomingMaintenance} from "@/services/maintenance"; export const dynamic="force-dynamic"; export default async function Page(){await requireMaintenanceAdmin();const rows=await getUpcomingMaintenance();return <main className="p-6"><h1 className="text-3xl font-black">Maintenance schedule</h1>{rows.length===0?<p className="mt-8">No upcoming maintenance scheduled.</p>:<div className="mt-6 space-y-3">{rows.map((x:any)=><div key={x.id} className="rounded-xl border p-4"><b>{x.serviceScheduledAt||"Date pending"}</b> · {x.jobNumber} · {x.customerSnapshot?.name}</div>)}</div>}</main>}
+/* eslint-disable @typescript-eslint/no-explicit-any */ import { requireMaintenanceAdmin } from "@/lib/maintenance/access";
+import { getUpcomingMaintenance } from "@/services/maintenance";
+export const dynamic = "force-dynamic";
+export default async function Page() {
+  await requireMaintenanceAdmin();
+  const rows = await getUpcomingMaintenance();
+  return (
+    <main className="p-6">
+      <h1 className="text-3xl font-black">Maintenance schedule</h1>
+      {rows.length === 0 ? (
+        <p className="mt-8">No upcoming maintenance scheduled.</p>
+      ) : (
+        <div className="mt-6 space-y-3">
+          {rows.map((x: any) => (
+            <div key={x.id} className="rounded-xl border p-4">
+              <b>{x.serviceScheduledAt || "Date pending"}</b> · {x.jobNumber} ·{" "}
+              {x.customerSnapshot?.name}
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}

@@ -1,3 +1,48 @@
-import Link from "next/link"; import {requireSalesAdmin} from "@/lib/sales/access"; import {getPayments} from "@/services/payments"; import {formatOrderMoney} from "@/services/orders";
-export const dynamic="force-dynamic";
-export default async function Page(){await requireSalesAdmin();const rows=await getPayments();return <main className="p-6"><h1 className="text-3xl font-black">Payments</h1><div className="mt-8 overflow-x-auto rounded-xl border"><table className="w-full text-left text-sm"><thead><tr className="border-b bg-slate-50"><th className="p-3">Reference</th><th className="p-3">Order</th><th className="p-3">Amount</th><th className="p-3">Provider</th><th className="p-3">Status</th></tr></thead><tbody>{rows.map((p:any)=><tr key={p.id} className="border-b"><td className="p-3"><Link className="font-bold text-brand-700" href={`/admin/payments/${p.id}`}>{p.paymentReference}</Link></td><td className="p-3">{p.orderNumber}</td><td className="p-3">{formatOrderMoney(p.amount,p.currency)}</td><td className="p-3">{p.provider}</td><td className="p-3">{p.status}</td></tr>)}</tbody></table>{!rows.length&&<p className="p-8">No payment attempts found.</p>}</div></main>}
+import Link from "next/link";
+import { requireSalesAdmin } from "@/lib/sales/access";
+import { getPayments } from "@/services/payments";
+import { formatOrderMoney } from "@/services/orders";
+export const dynamic = "force-dynamic";
+export default async function Page() {
+  await requireSalesAdmin();
+  const rows = await getPayments();
+  return (
+    <main className="p-6">
+      <h1 className="text-3xl font-black">Payments</h1>
+      <div className="mt-8 overflow-x-auto rounded-xl border">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b bg-slate-50">
+              <th className="p-3">Reference</th>
+              <th className="p-3">Order</th>
+              <th className="p-3">Amount</th>
+              <th className="p-3">Provider</th>
+              <th className="p-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((p: any) => (
+              <tr key={p.id} className="border-b">
+                <td className="p-3">
+                  <Link
+                    className="text-brand-700 font-bold"
+                    href={`/admin/payments/${p.id}`}
+                  >
+                    {p.paymentReference}
+                  </Link>
+                </td>
+                <td className="p-3">{p.orderNumber}</td>
+                <td className="p-3">
+                  {formatOrderMoney(p.amount, p.currency)}
+                </td>
+                <td className="p-3">{p.provider}</td>
+                <td className="p-3">{p.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!rows.length && <p className="p-8">No payment attempts found.</p>}
+      </div>
+    </main>
+  );
+}

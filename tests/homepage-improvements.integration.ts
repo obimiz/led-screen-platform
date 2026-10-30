@@ -574,7 +574,10 @@ async function main() {
       form.submit();
     });
     await page.waitForURL(base + "/admin/accessory-categories?saved=1");
-    await page.getByRole("status").filter({ hasText: "Category saved." }).waitFor();
+    await page
+      .getByRole("status")
+      .filter({ hasText: "Category saved." })
+      .waitFor();
     const nativeCategory = await db.collection("productcategories").findOne({
       name: "Native Video Accessories",
       productType: "led-accessory",
@@ -583,7 +586,9 @@ async function main() {
     assert.equal(nativeCategory.active, true);
     assert.equal(nativeCategory.sortOrder, 0);
     await page.goto(base + "/admin/accessory-categories?saved=1");
-    await page.getByRole("cell", { name: "Native Video Accessories" }).waitFor();
+    await page
+      .getByRole("cell", { name: "Native Video Accessories" })
+      .waitFor();
     await noJS.close();
     console.log(
       "PASS shared accessories page, saved Hero wording, no browser errors, More, Enter sign-in and native category save",

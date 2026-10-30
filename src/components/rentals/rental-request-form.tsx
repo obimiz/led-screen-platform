@@ -76,7 +76,7 @@ export function RentalRequestForm({
     );
     return (
       <div
-        className="rounded-2xl border border-success-200 bg-success-50 p-8"
+        className="border-success-200 bg-success-50 rounded-2xl border p-8"
         role="status"
       >
         <h2 className="text-2xl font-bold">
@@ -162,7 +162,7 @@ export function RentalRequestForm({
     >
       <input type="hidden" {...register("productSlug")} />
       {product && (
-        <div className="rounded-xl bg-brand-50 p-5">
+        <div className="bg-brand-50 rounded-xl p-5">
           <p className="text-xs font-bold uppercase">
             Selected rentable screen
           </p>

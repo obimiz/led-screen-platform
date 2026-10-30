@@ -219,20 +219,25 @@ Booking statuses are `draft`, `pending-confirmation`, `confirmed`, `cancelled`, 
 Browser print is available at `/admin/rentals/bookings/[id]/print` and uses Business Settings. WhatsApp, phone and email actions use existing contact utilities. There is no payment gateway, public booking acceptance, automatic inventory calendar, stock reservation transaction, email delivery, or full order system in Module 7.
 
 Rental validation and duration/availability primitives are covered by `npm run test:rentals`; database-backed rental verification should be run in the application environment with a test MongoDB database because the service layer is server-only.
+
 ## Module 8 — LED Installation
 
 Module 8 adds a permanent LED installation workflow: public installation requests (`/led-installation/request`), protected request and site-assessment management, quotation integration (`quotationType: installation`), and conversion of accepted quotations into installation projects. Requests use atomic `IR-YYYY-#####` references; assessments and projects use `SA-YYYY-#####` and `IP-YYYY-#####`.
 
 Installation projects retain customer/site/equipment snapshots, schedules, assigned staff, tasks, progress, commissioning, handover and warranty foundation fields. Admin routes are under `/admin/installations/requests`, `/admin/installations/assessments`, `/admin/installations/projects` and `/admin/installations/schedule`; APIs are under `/api/installation-requests`, `/api/site-assessments` and `/api/installation-projects`. Totals reuse the Module 6 minor-unit quotation strategy. Public requests are rate limited and selected products are verified and snapshotted. Payment, notifications, uploads and maintenance workflows remain future modules.
+
 ## Module 9 — LED Maintenance & Repairs
 
 Module 9 adds rate-limited public maintenance requests at `/led-maintenance/request` and protected admin request, job, schedule, and printable service-report routes. `MaintenanceRequest` supports screens installed by this business, external installations, and unknown equipment. Requests can be converted into snapshot-based `MaintenanceJob` records with technician assignment, diagnosis, repair actions, parts, labour, testing, warranty decisions, completion recommendations, next-service dates, and service-history queries. Maintenance quotations reuse the Module 6 quotation engine with `quotationType: maintenance` and request/job links. Payment, notifications, uploads, inventory deduction, and maintenance contracts remain future work.
+
 ## Module 10 — Electronic Bell & Alarm
 
 Module 10 extends the shared Product model with `bell-alarm-system` and `bell-alarm-accessory` types and optional system capability fields. Public catalogue and enquiry routes are `/electronic-bell-alarm`, `/electronic-bell-alarm/products`, `/electronic-bell-alarm/accessories`, and `/electronic-bell-alarm/request`. Requests use atomic `BA-YYYY-#####` references, are rate limited, snapshot selected products, and reuse the Module 6 quotation engine with `quotationType: bell-alarm`. Protected admin routes cover product listings and request management. Bell/alarm equipment can be associated with shared installation and maintenance workflows. Schedule configuration is documentation only; physical hardware programming requires technician work or a future documented device API. Payments, notifications, inventory movements, and remote hardware control are not implemented.
+
 ## Module 11 — Christian/Catholic Music & Audio
 
 Module 11 adds a curated `MusicContent`, `MusicCategory`, and `MusicArtist` catalogue with protected admin management and public discovery routes under `/music`. Content stores external source/embed URLs and metadata; YouTube and Spotify URLs are normalized only to allowlisted embeds. Owned audio requires explicit `client-owned` or `licensed` rights metadata, and no download feature is provided. Public pages include featured/latest content, browse, category, artist, detail, and official-source links. Third-party copyright remains the client’s responsibility; the platform does not scrape, re-host, or distribute copyrighted audio.
+
 ## Module 13 — Projects & Portfolio
 
 Module 13 adds public-safe portfolio case studies through `PortfolioProject` and `PortfolioCategory`. Public routes are `/projects` and `/projects/[slug]`; protected management is under `/admin/portfolio`. Projects store snapshots and never expose customer contacts, quotations, payments, admin notes, or internal IDs. External relationships to installation, rental, bell/alarm, or maintenance records are optional. Image and video fields accept URLs only, and public content is limited to published projects. Portfolio content is designed for future gallery/testimonial and SEO enhancements; no fake projects or testimonials are generated.
@@ -280,6 +285,7 @@ Configure `NEXT_PUBLIC_APP_URL` as the single canonical origin. `ALLOW_SEARCH_IN
 MongoDB Atlas selection/connect timeouts default to 5 seconds so temporary replica-set primary outages fail quickly. Set `MONGODB_SERVER_SELECTION_TIMEOUT_MS` only when a different operational timeout is required. The homepage keeps its configured marketing shell available when optional catalogue/content queries cannot reach the database; transactional and detail operations still require a healthy database.
 
 See [Module 20 route audit, architecture, privacy, media, verification and Search Console checklist](docs/module-20-seo.md) for route decisions, file responsibilities, sitemap/robots behavior, schema types, social metadata, slug/location restrictions, known limitations and developer actions. Modules 21 and 22 are not included.
+
 ## Module 21 — Security & Validation
 
 Security hardening, bounded Zod-validated mutations, authentication/session protections, payment/webhook verification, privacy-safe public DTOs, security headers, and operational guidance are documented in [docs/security.md](docs/security.md). Module 21 does not deploy the application or claim perfect security; complete the production checklist before release.

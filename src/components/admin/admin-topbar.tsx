@@ -40,7 +40,7 @@ export function AdminTopbar({ admin }: { admin: SafeAdmin }) {
         </span>
         <Link
           href="/"
-          className="hidden text-sm font-semibold text-brand-700 hover:text-brand-600 sm:inline"
+          className="text-brand-700 hover:text-brand-600 hidden text-sm font-semibold sm:inline"
         >
           View site
         </Link>

@@ -1,1 +1,73 @@
-"use client"; import {useState} from "react"; import {useRouter} from "next/navigation"; import {salesFetch} from "@/components/sales/client-api"; import {buttonClass} from "@/components/sales/ui"; export function MaintenanceActions({id,version}:{id:string;version:number}){const [busy,setBusy]=useState(false);const r=useRouter();async function go(path:string){setBusy(true);try{await salesFetch(path,"POST");r.refresh()}finally{setBusy(false)}}return <div className="flex flex-wrap gap-3"><button className={buttonClass} disabled={busy} onClick={()=>go(`/api/maintenance-requests/${id}/job`)}>Create Maintenance Job</button><button className={buttonClass} disabled={busy} onClick={()=>go(`/api/maintenance-requests/${id}/quotation`)}>Create Repair Quotation</button><select className="rounded-lg border px-3" defaultValue="new" onChange={async e=>{setBusy(true);try{await salesFetch(`/api/maintenance-requests/${id}`,"PUT",{status:e.target.value,assignedTo:"",adminNotes:"",warrantyStatus:"unknown",warrantyDecisionReason:"",version}) ;r.refresh()}finally{setBusy(false)}}}><option>new</option><option>contacted</option><option>inspection-scheduled</option><option>diagnosing</option><option>quoted</option><option>approved</option><option>in-progress</option><option>testing</option><option>completed</option><option>closed</option></select></div>}
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { salesFetch } from "@/components/sales/client-api";
+import { buttonClass } from "@/components/sales/ui";
+export function MaintenanceActions({
+  id,
+  version,
+}: {
+  id: string;
+  version: number;
+}) {
+  const [busy, setBusy] = useState(false);
+  const r = useRouter();
+  async function go(path: string) {
+    setBusy(true);
+    try {
+      await salesFetch(path, "POST");
+      r.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="flex flex-wrap gap-3">
+      <button
+        className={buttonClass}
+        disabled={busy}
+        onClick={() => go(`/api/maintenance-requests/${id}/job`)}
+      >
+        Create Maintenance Job
+      </button>
+      <button
+        className={buttonClass}
+        disabled={busy}
+        onClick={() => go(`/api/maintenance-requests/${id}/quotation`)}
+      >
+        Create Repair Quotation
+      </button>
+      <select
+        className="rounded-lg border px-3"
+        defaultValue="new"
+        onChange={async (e) => {
+          setBusy(true);
+          try {
+            await salesFetch(`/api/maintenance-requests/${id}`, "PUT", {
+              status: e.target.value,
+              assignedTo: "",
+              adminNotes: "",
+              warrantyStatus: "unknown",
+              warrantyDecisionReason: "",
+              version,
+            });
+            r.refresh();
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <option>new</option>
+        <option>contacted</option>
+        <option>inspection-scheduled</option>
+        <option>diagnosing</option>
+        <option>quoted</option>
+        <option>approved</option>
+        <option>in-progress</option>
+        <option>testing</option>
+        <option>completed</option>
+        <option>closed</option>
+      </select>
+    </div>
+  );
+}

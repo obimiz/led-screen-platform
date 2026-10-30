@@ -21,7 +21,7 @@ export function ContactForm() {
   const change = (e: any) =>
     setV((x) => ({ ...x, [e.target.name]: e.target.value }));
   return done ? (
-    <div className="rounded-xl bg-success-50 p-5">
+    <div className="bg-success-50 rounded-xl p-5">
       <meta name="robots" content="noindex, nofollow" />
       <h2 className="font-bold">Your enquiry has been received.</h2>
       <p className="mt-2">
@@ -126,7 +126,7 @@ export function ContactForm() {
       {error && <p className="text-sm text-red-700">{error}</p>}
       <button
         disabled={busy}
-        className="rounded-lg bg-primary px-5 py-3 font-bold"
+        className="bg-primary rounded-lg px-5 py-3 font-bold"
       >
         {busy ? "Sending…" : "Send Enquiry"}
       </button>

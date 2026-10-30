@@ -1,1 +1,31 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */ import Link from "next/link"; import {requireBellAlarmAdmin} from "@/lib/bell-alarm/access"; import {getBellAlarmProducts} from "@/services/bell-alarm"; export const dynamic="force-dynamic"; export default async function Page(){await requireBellAlarmAdmin();const rows=await getBellAlarmProducts("bell-alarm-accessory",true);return <main className="p-6"><h1 className="text-3xl font-black">Bell & alarm accessories</h1>{rows.length===0?<p className="mt-8">No bell/alarm accessories yet.</p>:<div className="mt-6 grid gap-4 md:grid-cols-2">{rows.map((p:any)=><Link key={p.id} href={`/admin/bell-alarm/products/${p.id}`} className="rounded-xl border p-5"><h2 className="text-xl font-bold">{p.name}</h2><p className="mt-2">{p.status} · {p.priceType}</p></Link>)}</div>}</main>}
+/* eslint-disable @typescript-eslint/no-explicit-any */ import Link from "next/link";
+import { requireBellAlarmAdmin } from "@/lib/bell-alarm/access";
+import { getBellAlarmProducts } from "@/services/bell-alarm";
+export const dynamic = "force-dynamic";
+export default async function Page() {
+  await requireBellAlarmAdmin();
+  const rows = await getBellAlarmProducts("bell-alarm-accessory", true);
+  return (
+    <main className="p-6">
+      <h1 className="text-3xl font-black">Bell & alarm accessories</h1>
+      {rows.length === 0 ? (
+        <p className="mt-8">No bell/alarm accessories yet.</p>
+      ) : (
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {rows.map((p: any) => (
+            <Link
+              key={p.id}
+              href={`/admin/bell-alarm/products/${p.id}`}
+              className="rounded-xl border p-5"
+            >
+              <h2 className="text-xl font-bold">{p.name}</h2>
+              <p className="mt-2">
+                {p.status} · {p.priceType}
+              </p>
+            </Link>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}

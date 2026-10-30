@@ -24,13 +24,11 @@ async function main() {
       .collection("productimageassets")
       .findOne({ _id: new Types.ObjectId("6ad0cabd18acf4c81cff7b2e") });
     assert.ok(asset);
-    const admin = await db
-      .collection("admins")
-      .findOne({
-        _id: asset.createdBy,
-        isActive: true,
-        role: { $in: ["owner", "admin"] },
-      });
+    const admin = await db.collection("admins").findOne({
+      _id: asset.createdBy,
+      isActive: true,
+      role: { $in: ["owner", "admin"] },
+    });
     assert.ok(admin);
     // Exercise normal server session verification with a short-lived token; no login/account mutations.
     const token = await new SignJWT({ sessionVersion: admin.sessionVersion })

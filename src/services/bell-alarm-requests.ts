@@ -1,6 +1,133 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */ import "server-only"; import {Types} from "mongoose"; import {connectToDatabase} from "@/lib/db/mongoose"; import {BellAlarmRequest} from "@/models/bell-alarm-request"; import {Product} from "@/models/product"; import {Quotation} from "@/models/quotation"; import {generateSalesNumber} from "@/services/sales"; import {SalesError} from "@/lib/sales/calculations"; import {bellAlarmRequestSchema,updateBellAlarmRequestSchema} from "@/lib/validations/bell-alarm";
-const plain=(d:any)=>{const v=d.toObject();const {_id,__v,...r}=JSON.parse(JSON.stringify(v));return {...r,id:String(_id),version:__v??0}}; const oid=(v:string)=>Types.ObjectId.isValid(v)?new Types.ObjectId(v):null;
-export async function createBellAlarmRequest(raw:unknown){const i=bellAlarmRequestSchema.parse(raw);await connectToDatabase();const p=i.selectedProductSlug?await Product.findOne({slug:i.selectedProductSlug,status:"published",productType:{$in:["bell-alarm-system","bell-alarm-accessory"]}}):null;if(i.selectedProductSlug&&!p)throw new SalesError("Selected product is not available.");const d=await BellAlarmRequest.create({...i,selectedProductId:p?._id||null,productNameSnapshot:p?.name||"",referenceNumber:await generateSalesNumber("BA")});return {referenceNumber:d.referenceNumber};}
-export async function getBellAlarmRequests(){await connectToDatabase();return (await BellAlarmRequest.find().sort({createdAt:-1}).limit(250).populate("assignedTo","name")).map(plain)} export async function getBellAlarmRequestById(id:string){await connectToDatabase();const d=await BellAlarmRequest.findById(id).populate("selectedProductId","name sku brand modelNumber");return d?plain(d):null}
-export async function updateBellAlarmRequest(id:string,raw:unknown,adminId:string){const i=updateBellAlarmRequestSchema.parse(raw);await connectToDatabase();const d=await BellAlarmRequest.findOneAndUpdate({_id:id,__v:i.version},{$set:{status:i.status,assignedTo:oid(i.assignedTo),adminNotes:i.adminNotes}},{new:true});if(!d)throw new SalesError("Request changed or not found.",409);return plain(d)}
-export async function createBellAlarmQuotation(requestId:string,adminId:string){await connectToDatabase();const r=await BellAlarmRequest.findById(requestId);if(!r)throw new SalesError("Request not found.",404);const q=await Quotation.create({quotationNumber:await generateSalesNumber("QT"),quotationType:"bell-alarm",bellAlarmRequestId:r._id,customer:{name:r.customerName,companyName:r.companyName,email:r.customerEmail,phone:r.customerPhone,whatsappNumber:r.whatsappNumber},items:[{itemType:"service",name:r.productNameSnapshot||"Electronic bell/alarm system",description:r.scheduleRequirements||"Supply, configuration and installation",quantity:1,unit:"project",unitPrice:0,discount:0,lineTotal:0}],subtotal:0,discountType:"none",discountValue:0,discountAmount:0,taxRate:0,taxAmount:0,deliveryFee:0,installationFee:0,otherCharges:0,total:0,currency:r.currency||"NGN",notes:"",terms:"",validityDays:30,validUntil:new Date(Date.now()+2592000000),status:"draft",createdBy:adminId,updatedBy:adminId});await BellAlarmRequest.findByIdAndUpdate(r._id,{quotationId:q._id,status:"quoted"});return plain(q)}
+/* eslint-disable @typescript-eslint/no-explicit-any */ import "server-only";
+import { Types } from "mongoose";
+import { connectToDatabase } from "@/lib/db/mongoose";
+import { BellAlarmRequest } from "@/models/bell-alarm-request";
+import { Product } from "@/models/product";
+import { Quotation } from "@/models/quotation";
+import { generateSalesNumber } from "@/services/sales";
+import { SalesError } from "@/lib/sales/calculations";
+import {
+  bellAlarmRequestSchema,
+  updateBellAlarmRequestSchema,
+} from "@/lib/validations/bell-alarm";
+const plain = (d: any) => {
+  const v = d.toObject();
+  const { _id, __v, ...r } = JSON.parse(JSON.stringify(v));
+  return { ...r, id: String(_id), version: __v ?? 0 };
+};
+const oid = (v: string) =>
+  Types.ObjectId.isValid(v) ? new Types.ObjectId(v) : null;
+export async function createBellAlarmRequest(raw: unknown) {
+  const i = bellAlarmRequestSchema.parse(raw);
+  await connectToDatabase();
+  const p = i.selectedProductSlug
+    ? await Product.findOne({
+        slug: i.selectedProductSlug,
+        status: "published",
+        productType: { $in: ["bell-alarm-system", "bell-alarm-accessory"] },
+      })
+    : null;
+  if (i.selectedProductSlug && !p)
+    throw new SalesError("Selected product is not available.");
+  const d = await BellAlarmRequest.create({
+    ...i,
+    selectedProductId: p?._id || null,
+    productNameSnapshot: p?.name || "",
+    referenceNumber: await generateSalesNumber("BA"),
+  });
+  return { referenceNumber: d.referenceNumber };
+}
+export async function getBellAlarmRequests() {
+  await connectToDatabase();
+  return (
+    await BellAlarmRequest.find()
+      .sort({ createdAt: -1 })
+      .limit(250)
+      .populate("assignedTo", "name")
+  ).map(plain);
+}
+export async function getBellAlarmRequestById(id: string) {
+  await connectToDatabase();
+  const d = await BellAlarmRequest.findById(id).populate(
+    "selectedProductId",
+    "name sku brand modelNumber",
+  );
+  return d ? plain(d) : null;
+}
+export async function updateBellAlarmRequest(
+  id: string,
+  raw: unknown,
+  adminId: string,
+) {
+  const i = updateBellAlarmRequestSchema.parse(raw);
+  await connectToDatabase();
+  const d = await BellAlarmRequest.findOneAndUpdate(
+    { _id: id, __v: i.version },
+    {
+      $set: {
+        status: i.status,
+        assignedTo: oid(i.assignedTo),
+        adminNotes: i.adminNotes,
+      },
+    },
+    { new: true },
+  );
+  if (!d) throw new SalesError("Request changed or not found.", 409);
+  return plain(d);
+}
+export async function createBellAlarmQuotation(
+  requestId: string,
+  adminId: string,
+) {
+  await connectToDatabase();
+  const r = await BellAlarmRequest.findById(requestId);
+  if (!r) throw new SalesError("Request not found.", 404);
+  const q = await Quotation.create({
+    quotationNumber: await generateSalesNumber("QT"),
+    quotationType: "bell-alarm",
+    bellAlarmRequestId: r._id,
+    customer: {
+      name: r.customerName,
+      companyName: r.companyName,
+      email: r.customerEmail,
+      phone: r.customerPhone,
+      whatsappNumber: r.whatsappNumber,
+    },
+    items: [
+      {
+        itemType: "service",
+        name: r.productNameSnapshot || "Electronic bell/alarm system",
+        description:
+          r.scheduleRequirements || "Supply, configuration and installation",
+        quantity: 1,
+        unit: "project",
+        unitPrice: 0,
+        discount: 0,
+        lineTotal: 0,
+      },
+    ],
+    subtotal: 0,
+    discountType: "none",
+    discountValue: 0,
+    discountAmount: 0,
+    taxRate: 0,
+    taxAmount: 0,
+    deliveryFee: 0,
+    installationFee: 0,
+    otherCharges: 0,
+    total: 0,
+    currency: r.currency || "NGN",
+    notes: "",
+    terms: "",
+    validityDays: 30,
+    validUntil: new Date(Date.now() + 2592000000),
+    status: "draft",
+    createdBy: adminId,
+    updatedBy: adminId,
+  });
+  await BellAlarmRequest.findByIdAndUpdate(r._id, {
+    quotationId: q._id,
+    status: "quoted",
+  });
+  return plain(q);
+}

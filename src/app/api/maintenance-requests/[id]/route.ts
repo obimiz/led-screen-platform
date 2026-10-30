@@ -1,2 +1,24 @@
-import {apiNotFound,apiSuccess} from "@/lib/api/responses"; import {salesApi,salesBody} from "@/lib/sales/api"; import {getMaintenanceRequestById,updateMaintenanceRequest} from "@/services/maintenance";
-export async function GET(_:Request,c:{params:Promise<{id:string}>}){return salesApi(async()=>{const d=await getMaintenanceRequestById((await c.params).id);return d?apiSuccess("Loaded",d):apiNotFound()})} export async function PUT(r:Request,c:{params:Promise<{id:string}>}){return salesApi(async a=>apiSuccess("Updated",await updateMaintenanceRequest((await c.params).id,await salesBody(r),a.id)))}
+import { apiNotFound, apiSuccess } from "@/lib/api/responses";
+import { salesApi, salesBody } from "@/lib/sales/api";
+import {
+  getMaintenanceRequestById,
+  updateMaintenanceRequest,
+} from "@/services/maintenance";
+export async function GET(_: Request, c: { params: Promise<{ id: string }> }) {
+  return salesApi(async () => {
+    const d = await getMaintenanceRequestById((await c.params).id);
+    return d ? apiSuccess("Loaded", d) : apiNotFound();
+  });
+}
+export async function PUT(r: Request, c: { params: Promise<{ id: string }> }) {
+  return salesApi(async (a) =>
+    apiSuccess(
+      "Updated",
+      await updateMaintenanceRequest(
+        (await c.params).id,
+        await salesBody(r),
+        a.id,
+      ),
+    ),
+  );
+}

@@ -5,6 +5,7 @@ The existing `/electronic-bell-alarm` page now centers published product cards i
 The redundant informational image grid beneath the cards was removed from the shared Bell page view. Its stored `imageUrls`/`imageAlts` associations remain in BusinessSettings and the admin editor. Product detail pages retain full descriptions and their additional photograph galleries. No database writes, migrations, image deletions or changes to publication queries, SEO metadata, public routes or authentication were needed.
 
 Files changed for this request:
+
 - `src/components/content/bell-page-view.tsx`
 - `tests/catalogue-redesign.integration.ts`
 - `docs/bell-page-layout.md`

@@ -1,1 +1,66 @@
-import {notFound} from "next/navigation"; import {requireMaintenanceAdmin} from "@/lib/maintenance/access"; import {getMaintenanceRequestById} from "@/services/maintenance"; import {MaintenanceActions} from "@/components/maintenance/admin-actions"; export const dynamic="force-dynamic"; export default async function Page({params}:{params:Promise<{id:string}>}){await requireMaintenanceAdmin();const x=await getMaintenanceRequestById((await params).id);if(!x)return notFound();return <main className="max-w-5xl p-6"><p className="text-sm text-slate-500">{x.referenceNumber}</p><h1 className="mt-2 text-3xl font-black">{x.issueTitle||"Maintenance request"}</h1><div className="mt-6 grid gap-5 md:grid-cols-2"><section className="rounded-xl border p-5"><h2 className="font-bold">Customer</h2><p className="mt-2">{x.customerName}<br/>{x.companyName}<br/>{x.customerEmail}<br/>{x.customerPhone||x.whatsappNumber}</p></section><section className="rounded-xl border p-5"><h2 className="font-bold">Equipment</h2><p className="mt-2">{x.productNameSnapshot||x.screenBrand||"External/unknown equipment"}<br/>{x.equipmentSource}<br/>{x.screenWidth||"?"} × {x.screenHeight||"?"} {x.sizeUnit}</p></section><section className="rounded-xl border p-5 md:col-span-2"><h2 className="font-bold">Issue and location</h2><p className="mt-2 whitespace-pre-wrap">{x.issueDescription||x.message}</p><p className="mt-3">{[x.venueName,x.address,x.city,x.state,x.country].filter(Boolean).join(", ")}</p><p className="mt-3">Warranty claimed: {x.warrantyClaimed?"Yes":"No"} · status: {x.warrantyStatus}</p></section></div><div className="mt-6"><MaintenanceActions id={x.id} version={x.version}/></div></main>}
+import { notFound } from "next/navigation";
+import { requireMaintenanceAdmin } from "@/lib/maintenance/access";
+import { getMaintenanceRequestById } from "@/services/maintenance";
+import { MaintenanceActions } from "@/components/maintenance/admin-actions";
+export const dynamic = "force-dynamic";
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await requireMaintenanceAdmin();
+  const x = await getMaintenanceRequestById((await params).id);
+  if (!x) return notFound();
+  return (
+    <main className="max-w-5xl p-6">
+      <p className="text-sm text-slate-500">{x.referenceNumber}</p>
+      <h1 className="mt-2 text-3xl font-black">
+        {x.issueTitle || "Maintenance request"}
+      </h1>
+      <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <section className="rounded-xl border p-5">
+          <h2 className="font-bold">Customer</h2>
+          <p className="mt-2">
+            {x.customerName}
+            <br />
+            {x.companyName}
+            <br />
+            {x.customerEmail}
+            <br />
+            {x.customerPhone || x.whatsappNumber}
+          </p>
+        </section>
+        <section className="rounded-xl border p-5">
+          <h2 className="font-bold">Equipment</h2>
+          <p className="mt-2">
+            {x.productNameSnapshot ||
+              x.screenBrand ||
+              "External/unknown equipment"}
+            <br />
+            {x.equipmentSource}
+            <br />
+            {x.screenWidth || "?"} × {x.screenHeight || "?"} {x.sizeUnit}
+          </p>
+        </section>
+        <section className="rounded-xl border p-5 md:col-span-2">
+          <h2 className="font-bold">Issue and location</h2>
+          <p className="mt-2 whitespace-pre-wrap">
+            {x.issueDescription || x.message}
+          </p>
+          <p className="mt-3">
+            {[x.venueName, x.address, x.city, x.state, x.country]
+              .filter(Boolean)
+              .join(", ")}
+          </p>
+          <p className="mt-3">
+            Warranty claimed: {x.warrantyClaimed ? "Yes" : "No"} · status:{" "}
+            {x.warrantyStatus}
+          </p>
+        </section>
+      </div>
+      <div className="mt-6">
+        <MaintenanceActions id={x.id} version={x.version} />
+      </div>
+    </main>
+  );
+}

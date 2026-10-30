@@ -69,7 +69,7 @@ function TextField({
         placeholder={placeholder}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : helper ? helperId : undefined}
-        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+        className="focus:border-brand-600 focus:ring-brand-100 mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-2"
       />
       {helper && !error && (
         <p id={helperId} className="mt-1.5 text-xs leading-5 text-slate-500">
@@ -156,7 +156,7 @@ export function BusinessSettingsForm({
           aria-live="polite"
           className={
             notice.kind === "success"
-              ? "rounded-lg border border-success-200 bg-success-50 p-3 text-sm text-success-800"
+              ? "border-success-200 bg-success-50 text-success-800 rounded-lg border p-3 text-sm"
               : "rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
           }
         >
@@ -201,7 +201,7 @@ export function BusinessSettingsForm({
               aria-describedby={
                 errors.description ? "description-error" : undefined
               }
-              className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+              className="focus:border-brand-600 focus:ring-brand-100 mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-2"
             />
             {errors.description && (
               <p
@@ -360,7 +360,7 @@ export function BusinessSettingsForm({
           aria-describedby={
             errors.businessHours ? "business-hours-error" : undefined
           }
-          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+          className="focus:border-brand-600 focus:ring-brand-100 mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-2"
         />
         {errors.businessHours && (
           <p
@@ -471,7 +471,7 @@ export function BusinessSettingsForm({
         <button
           type="submit"
           disabled={isSubmitting || !isDirty}
-          className="ml-auto inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 font-bold text-white hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-primary hover:bg-primary-hover focus-visible:outline-brand-600 ml-auto inline-flex items-center gap-2 rounded-lg px-5 py-3 font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? (
             <LoaderCircle size={18} className="animate-spin" />

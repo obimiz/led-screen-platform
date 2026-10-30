@@ -1,1 +1,97 @@
-import {Schema,model,models} from "mongoose"; import {maintenanceRequestStatuses,maintenanceServiceTypes,maintenanceIssueCategories,maintenanceOperationalStatuses,maintenanceUrgencies,equipmentSources,warrantyStatuses} from "@/lib/maintenance/constants"; const t={type:String,default:"",trim:true}; const schema=new Schema({referenceNumber:{type:String,unique:true,required:true},customerName:{type:String,required:true,trim:true},companyName:t,customerEmail:t,customerPhone:t,whatsappNumber:t,customerType:t,equipmentSource:{type:String,enum:equipmentSources,default:"unknown"},installationProjectId:{type:Schema.Types.ObjectId,ref:"InstallationProject",default:null},productId:{type:Schema.Types.ObjectId,ref:"Product",default:null},productNameSnapshot:t,screenBrand:t,screenModel:t,pixelPitch:t,indoorOutdoor:t,screenWidth:Number,screenHeight:Number,sizeUnit:t,approximateInstallationDate:t,serviceType:{type:String,enum:maintenanceServiceTypes,default:"repair"},issueCategory:{type:String,enum:maintenanceIssueCategories,default:"unknown"},issueTitle:t,issueDescription:t,symptoms:t,whenIssueStarted:t,equipmentOperationalStatus:{type:String,enum:maintenanceOperationalStatuses,default:"unknown"},urgency:{type:String,enum:maintenanceUrgencies,default:"normal"},venueName:t,address:t,city:t,state:t,country:t,imageUrls:[String],videoUrl:t,warrantyClaimed:Boolean,warrantyStatus:{type:String,enum:warrantyStatuses,default:"unknown"},warrantyDecisionReason:t,warrantyApprovedBy:{type:Schema.Types.ObjectId,ref:"Admin",default:null},warrantyDecisionDate:Date,quotationId:{type:Schema.Types.ObjectId,ref:"Quotation",default:null},preferredServiceDate:t,preferredContactMethod:t,source:t,status:{type:String,enum:maintenanceRequestStatuses,default:"new"},assignedTo:{type:Schema.Types.ObjectId,ref:"Admin",default:null},adminNotes:t},{timestamps:true,optimisticConcurrency:true}); schema.index({status:1,urgency:1,createdAt:-1}); export const MaintenanceRequest=models.MaintenanceRequest||model("MaintenanceRequest",schema);
+import { Schema, model, models } from "mongoose";
+import {
+  maintenanceRequestStatuses,
+  maintenanceServiceTypes,
+  maintenanceIssueCategories,
+  maintenanceOperationalStatuses,
+  maintenanceUrgencies,
+  equipmentSources,
+  warrantyStatuses,
+} from "@/lib/maintenance/constants";
+const t = { type: String, default: "", trim: true };
+const schema = new Schema(
+  {
+    referenceNumber: { type: String, unique: true, required: true },
+    customerName: { type: String, required: true, trim: true },
+    companyName: t,
+    customerEmail: t,
+    customerPhone: t,
+    whatsappNumber: t,
+    customerType: t,
+    equipmentSource: {
+      type: String,
+      enum: equipmentSources,
+      default: "unknown",
+    },
+    installationProjectId: {
+      type: Schema.Types.ObjectId,
+      ref: "InstallationProject",
+      default: null,
+    },
+    productId: { type: Schema.Types.ObjectId, ref: "Product", default: null },
+    productNameSnapshot: t,
+    screenBrand: t,
+    screenModel: t,
+    pixelPitch: t,
+    indoorOutdoor: t,
+    screenWidth: Number,
+    screenHeight: Number,
+    sizeUnit: t,
+    approximateInstallationDate: t,
+    serviceType: {
+      type: String,
+      enum: maintenanceServiceTypes,
+      default: "repair",
+    },
+    issueCategory: {
+      type: String,
+      enum: maintenanceIssueCategories,
+      default: "unknown",
+    },
+    issueTitle: t,
+    issueDescription: t,
+    symptoms: t,
+    whenIssueStarted: t,
+    equipmentOperationalStatus: {
+      type: String,
+      enum: maintenanceOperationalStatuses,
+      default: "unknown",
+    },
+    urgency: { type: String, enum: maintenanceUrgencies, default: "normal" },
+    venueName: t,
+    address: t,
+    city: t,
+    state: t,
+    country: t,
+    imageUrls: [String],
+    videoUrl: t,
+    warrantyClaimed: Boolean,
+    warrantyStatus: {
+      type: String,
+      enum: warrantyStatuses,
+      default: "unknown",
+    },
+    warrantyDecisionReason: t,
+    warrantyApprovedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "Admin",
+      default: null,
+    },
+    warrantyDecisionDate: Date,
+    quotationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Quotation",
+      default: null,
+    },
+    preferredServiceDate: t,
+    preferredContactMethod: t,
+    source: t,
+    status: { type: String, enum: maintenanceRequestStatuses, default: "new" },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "Admin", default: null },
+    adminNotes: t,
+  },
+  { timestamps: true, optimisticConcurrency: true },
+);
+schema.index({ status: 1, urgency: 1, createdAt: -1 });
+export const MaintenanceRequest =
+  models.MaintenanceRequest || model("MaintenanceRequest", schema);

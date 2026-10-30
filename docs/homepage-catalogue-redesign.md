@@ -19,17 +19,17 @@ The working tree already contained Blog & Projects implementation changes when t
 
 ## Administration routes
 
-| Route | Purpose |
-| --- | --- |
-| `/admin/accessories` | Existing accessory and camera list |
-| `/admin/accessories/new` | Extended product form; select accessory or camera classification |
-| `/admin/accessories/[id]/edit` | Edit existing accessory/camera |
-| `/admin/electronic-bell` | New page content editor, unsaved preview, draft save, publish and discard |
-| `/admin/electronic-bell/preview` | Authenticated saved draft preview, excluded from indexing |
-| `/admin/bell-alarm/products/new` | Extended bell product form |
-| `/admin/bell-alarm/products/[id]/edit` | Load and update existing bell product |
-| `/admin/product-categories?productType=bell-alarm-system` | Existing category manager extended to select a product classification |
-| `/admin/accessory-categories` | Existing manageable accessory/camera categories |
+| Route                                                     | Purpose                                                                   |
+| --------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `/admin/accessories`                                      | Existing accessory and camera list                                        |
+| `/admin/accessories/new`                                  | Extended product form; select accessory or camera classification          |
+| `/admin/accessories/[id]/edit`                            | Edit existing accessory/camera                                            |
+| `/admin/electronic-bell`                                  | New page content editor, unsaved preview, draft save, publish and discard |
+| `/admin/electronic-bell/preview`                          | Authenticated saved draft preview, excluded from indexing                 |
+| `/admin/bell-alarm/products/new`                          | Extended bell product form                                                |
+| `/admin/bell-alarm/products/[id]/edit`                    | Load and update existing bell product                                     |
+| `/admin/product-categories?productType=bell-alarm-system` | Existing category manager extended to select a product classification     |
+| `/admin/accessory-categories`                             | Existing manageable accessory/camera categories                           |
 
 The dashboard navigation links to the new page editor. New bell product administration links to category management.
 
@@ -45,12 +45,12 @@ The dashboard navigation links to the new page editor. New bell product administ
 
 Added optional/defaulted fields on the existing Product schema:
 
-| Field | Default / role |
-| --- | --- |
-| `promotionalPrice` | `null`; discounted regular fixed price |
-| `imageAlt` | Empty string; primary photograph description |
-| `imageAlts` | Empty list; ordered additional photograph descriptions |
-| `showcase` | `accessory`; optional `camera` classification |
+| Field              | Default / role                                         |
+| ------------------ | ------------------------------------------------------ |
+| `promotionalPrice` | `null`; discounted regular fixed price                 |
+| `imageAlt`         | Empty string; primary photograph description           |
+| `imageAlts`        | Empty list; ordered additional photograph descriptions |
+| `showcase`         | `accessory`; optional `camera` classification          |
 
 The existing Product `slug`, `featured`, `status`, `category`, price and stock fields continue to serve every product type. Legacy accessories without a classification still qualify as accessories. No new indexes or collections are needed.
 
@@ -84,15 +84,15 @@ Before the first publication, the page uses descriptions derived from the previo
 
 ## Homepage selection rules
 
-| Section | Rule |
-| --- | --- |
-| LED screens | Published, existing `featured` flag; up to six |
-| Digital bell | Published bell system with `featured` and an available image reference; most recently updated, then ID |
-| Cameras | Published featured accessories classified as camera; most recently updated, then ID; maximum three |
+| Section         | Rule                                                                                                                        |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| LED screens     | Published, existing `featured` flag; up to six                                                                              |
+| Digital bell    | Published bell system with `featured` and an available image reference; most recently updated, then ID                      |
+| Cameras         | Published featured accessories classified as camera; most recently updated, then ID; maximum three                          |
 | LED accessories | Published featured accessories excluding camera classification; missing legacy classifications remain eligible; maximum six |
-| Projects | Existing published featured project query and administrative ordering |
-| News & Insights | Published articles; featured first, then publication date, creation date and ID; maximum three |
-| Clients/gallery | Existing featured/public organisation and gallery queries |
+| Projects        | Existing published featured project query and administrative ordering                                                       |
+| News & Insights | Published articles; featured first, then publication date, creation date and ID; maximum three                              |
+| Clients/gallery | Existing featured/public organisation and gallery queries                                                                   |
 
 There is one existing product `featured` flag. Changing it or publishing a qualifying product requires no source-code edit. Bell and camera headings and enquiry links remain visible even when their product lists are empty; the accessory showcase remains conditional. No empty showcase invents business records.
 

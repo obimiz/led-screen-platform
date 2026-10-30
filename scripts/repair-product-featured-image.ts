@@ -31,17 +31,15 @@ async function main() {
     );
     return;
   }
-  const result = await db
-    .collection("products")
-    .updateOne(
-      {
-        _id: id,
-        featuredImageUrl: "",
-        imageUrls: url,
-        updatedAt: before.updatedAt,
-      },
-      { $set: { featuredImageUrl: url } },
-    );
+  const result = await db.collection("products").updateOne(
+    {
+      _id: id,
+      featuredImageUrl: "",
+      imageUrls: url,
+      updatedAt: before.updatedAt,
+    },
+    { $set: { featuredImageUrl: url } },
+  );
   assert.equal(result.modifiedCount, 1);
   const after = await db.collection("products").findOne({ _id: id });
   assert.ok(after);

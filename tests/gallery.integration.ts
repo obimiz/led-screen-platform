@@ -276,16 +276,14 @@ async function main() {
       } catch (error) {
         console.log(
           "Image diagnostics",
-          await page
-            .locator("main article img")
-            .evaluateAll((images) =>
-              images.map((i) => ({
-                src: (i as HTMLImageElement).currentSrc,
-                complete: (i as HTMLImageElement).complete,
-                width: (i as HTMLImageElement).naturalWidth,
-                box: i.getBoundingClientRect().toJSON(),
-              })),
-            ),
+          await page.locator("main article img").evaluateAll((images) =>
+            images.map((i) => ({
+              src: (i as HTMLImageElement).currentSrc,
+              complete: (i as HTMLImageElement).complete,
+              width: (i as HTMLImageElement).naturalWidth,
+              box: i.getBoundingClientRect().toJSON(),
+            })),
+          ),
         );
         const imageSource = await page
           .locator("main article img")

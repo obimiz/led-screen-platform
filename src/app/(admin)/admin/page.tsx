@@ -8,10 +8,10 @@ export default async function AdminFoundationPage() {
 
   return (
     <section className="mx-auto max-w-5xl">
-      <p className="text-sm font-bold tracking-widest text-brand-700 uppercase">
+      <p className="text-brand-700 text-sm font-bold tracking-widest uppercase">
         Secure admin area
       </p>
-      <h1 className="mt-2 text-3xl font-black tracking-tight text-brand-900">
+      <h1 className="text-brand-900 mt-2 text-3xl font-black tracking-tight">
         Welcome, {admin.name}
       </h1>
       <p className="mt-4 max-w-2xl leading-7 text-slate-600">

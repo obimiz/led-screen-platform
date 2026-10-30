@@ -18,7 +18,7 @@ export default async function AccessoryDetailPage({
     <article className="mx-auto max-w-6xl">
       <div className="flex flex-wrap justify-between gap-4">
         <div>
-          <p className="text-sm font-bold tracking-wider text-brand-700 uppercase">
+          <p className="text-brand-700 text-sm font-bold tracking-wider uppercase">
             {item.category.name}
           </p>
           <h1 className="mt-2 text-3xl font-black">{item.name}</h1>
@@ -31,7 +31,7 @@ export default async function AccessoryDetailPage({
         <div className="flex items-center gap-3">
           <Link
             href={`/admin/accessories/${item.id}/edit`}
-            className="rounded-lg bg-primary px-4 py-2.5 font-bold"
+            className="bg-primary rounded-lg px-4 py-2.5 font-bold"
           >
             Edit
           </Link>

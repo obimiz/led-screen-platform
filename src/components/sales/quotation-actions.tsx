@@ -67,7 +67,29 @@ export function QuotationActions({ quotation: q }: { quotation: Quotation }) {
           </button>
         )}
         {q.quotationType === "installation" && q.status === "accepted" && (
-          <button className={buttonClass} disabled={busy} onClick={async () => { setBusy(true); setMessage(""); try { const result = await salesFetch<{id:string}>(`/api/quotations/${q.id}/installation-project`, "POST"); router.push(`/admin/installations/projects/${result.id}`); } catch (e) { setMessage(e instanceof Error ? e.message : "Unable to create installation project."); } finally { setBusy(false); } }}>
+          <button
+            className={buttonClass}
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setMessage("");
+              try {
+                const result = await salesFetch<{ id: string }>(
+                  `/api/quotations/${q.id}/installation-project`,
+                  "POST",
+                );
+                router.push(`/admin/installations/projects/${result.id}`);
+              } catch (e) {
+                setMessage(
+                  e instanceof Error
+                    ? e.message
+                    : "Unable to create installation project.",
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
             Convert to Installation Project
           </button>
         )}

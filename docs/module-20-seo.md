@@ -4,31 +4,31 @@
 
 The existing application uses `src/app/(public)` with shared Business Settings, header/footer, server components, Mongoose public lookups, and client forms. Administrative pages use `(admin)/admin`; authentication uses `(auth)/admin`. Route groups do not appear in URLs. All existing public pages, shared media/navigation, metadata, service publication filters, order/payment routes, quotation APIs and admin/auth layouts were reviewed before implementation.
 
-| Routes | Classification and SEO behavior |
-| --- | --- |
-| `/`, `/about`, `/contact`, `/services` | Indexable marketing; unique metadata, canonical, one main/H1 |
-| `/led-screens`, `/led-accessories` | Indexable base catalogues; query filters/search and pagination are noindex, follow |
-| `/led-screens/[slug]`, `/led-accessories/[slug]` | Published products only; metadata, product schema and breadcrumbs |
-| `/rent-led-screen`, `/led-installation`, `/led-maintenance` | Indexable services; factual Service schema and related links |
-| Service `/request` routes | Public transactional forms; noindex, nofollow at layout level, excluded from sitemap |
-| `/electronic-bell-alarm` | Indexable service overview |
-| `/electronic-bell-alarm/products`, `/electronic-bell-alarm/accessories` | Indexable product collections |
-| Bell `/products/[slug]`, `/accessories/[slug]` | Published, matching product type only; cross-type URL returns 404 |
-| `/music`, `/music/browse` | Indexable music collections; cards without embedded players |
-| `/music/[slug]` | Published content; title/artist/category context, cover, external-provider wording |
-| `/music/artists` | Added small directory of published artists; linked from music hub |
-| `/music/artists/[slug]`, `/music/category/[slug]` | Actual published artist / active category data; missing/inactive returns 404 |
-| `/projects`, `/projects/[slug]` | Published portfolio; privacy-safe metadata, CreativeWork and breadcrumbs |
-| `/gallery`, `/gallery/[slug]` | Published media; admin alt text, thumbnails in listing, linked details |
-| `/testimonials` | Published and consent-confirmed feedback, public display names only; no rating/review schema |
-| `/request-quote` | Indexable conversion page; selected-product query variant noindex; client confirmation state emits noindex |
-| `/contact` submitted state | Client-only reference; emits noindex. Reference is never encoded in a canonical or sitemap |
-| `/cart`, `/checkout` | Noindex, follow; excluded from sitemap |
-| `/orders/[token]` | Token-protected transaction; noindex, nofollow; no canonical containing token |
-| `/payment/callback` | Transactional status; noindex, nofollow through server layout |
-| `/admin/**` including login/forgot/reset | Noindex, nofollow through both layouts and HTTP headers; existing authentication remains |
-| `/api/**` including health, payments, webhooks, orders/public token and internal reminders | API/internal; `X-Robots-Tag: noindex, nofollow`, robots exclusion, no sitemap entries |
-| `/quotation/**`, `/quotations/**` | No public quotation-token page currently exists. Existing quotation APIs/admin pages remain private. Reserved robots exclusions; future public token UI must use a noindex layout |
+| Routes                                                                                     | Classification and SEO behavior                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`, `/about`, `/contact`, `/services`                                                     | Indexable marketing; unique metadata, canonical, one main/H1                                                                                                                      |
+| `/led-screens`, `/led-accessories`                                                         | Indexable base catalogues; query filters/search and pagination are noindex, follow                                                                                                |
+| `/led-screens/[slug]`, `/led-accessories/[slug]`                                           | Published products only; metadata, product schema and breadcrumbs                                                                                                                 |
+| `/rent-led-screen`, `/led-installation`, `/led-maintenance`                                | Indexable services; factual Service schema and related links                                                                                                                      |
+| Service `/request` routes                                                                  | Public transactional forms; noindex, nofollow at layout level, excluded from sitemap                                                                                              |
+| `/electronic-bell-alarm`                                                                   | Indexable service overview                                                                                                                                                        |
+| `/electronic-bell-alarm/products`, `/electronic-bell-alarm/accessories`                    | Indexable product collections                                                                                                                                                     |
+| Bell `/products/[slug]`, `/accessories/[slug]`                                             | Published, matching product type only; cross-type URL returns 404                                                                                                                 |
+| `/music`, `/music/browse`                                                                  | Indexable music collections; cards without embedded players                                                                                                                       |
+| `/music/[slug]`                                                                            | Published content; title/artist/category context, cover, external-provider wording                                                                                                |
+| `/music/artists`                                                                           | Added small directory of published artists; linked from music hub                                                                                                                 |
+| `/music/artists/[slug]`, `/music/category/[slug]`                                          | Actual published artist / active category data; missing/inactive returns 404                                                                                                      |
+| `/projects`, `/projects/[slug]`                                                            | Published portfolio; privacy-safe metadata, CreativeWork and breadcrumbs                                                                                                          |
+| `/gallery`, `/gallery/[slug]`                                                              | Published media; admin alt text, thumbnails in listing, linked details                                                                                                            |
+| `/testimonials`                                                                            | Published and consent-confirmed feedback, public display names only; no rating/review schema                                                                                      |
+| `/request-quote`                                                                           | Indexable conversion page; selected-product query variant noindex; client confirmation state emits noindex                                                                        |
+| `/contact` submitted state                                                                 | Client-only reference; emits noindex. Reference is never encoded in a canonical or sitemap                                                                                        |
+| `/cart`, `/checkout`                                                                       | Noindex, follow; excluded from sitemap                                                                                                                                            |
+| `/orders/[token]`                                                                          | Token-protected transaction; noindex, nofollow; no canonical containing token                                                                                                     |
+| `/payment/callback`                                                                        | Transactional status; noindex, nofollow through server layout                                                                                                                     |
+| `/admin/**` including login/forgot/reset                                                   | Noindex, nofollow through both layouts and HTTP headers; existing authentication remains                                                                                          |
+| `/api/**` including health, payments, webhooks, orders/public token and internal reminders | API/internal; `X-Robots-Tag: noindex, nofollow`, robots exclusion, no sitemap entries                                                                                             |
+| `/quotation/**`, `/quotations/**`                                                          | No public quotation-token page currently exists. Existing quotation APIs/admin pages remain private. Reserved robots exclusions; future public token UI must use a noindex layout |
 
 LED categories currently use catalogue query filters. Portfolio categories have no public category route. Neither was expanded into thin category pages. Existing music categories are preserved. No location/doorway pages, speculative redirects, analytics or tracking cookies were introduced.
 
