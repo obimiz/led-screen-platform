@@ -30,7 +30,32 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${business.businessName}`,
     },
     applicationName: business.businessName,
-    ...(icon ? { icons: { icon } } : {}),
+    icons: {
+      icon: [
+        ...(icon ? [{ url: icon }] : []),
+        { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+        {
+          url: "/branding/favicon-32x32.png",
+          sizes: "32x32",
+          type: "image/png",
+        },
+        {
+          url: "/branding/favicon-16x16.png",
+          sizes: "16x16",
+          type: "image/png",
+        },
+        { url: "/branding/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/branding/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      shortcut: [icon || "/favicon.ico"],
+      apple: [
+        {
+          url: "/branding/apple-touch-icon.png",
+          sizes: "180x180",
+          type: "image/png",
+        },
+      ],
+    },
     verification: {
       ...(business.googleSiteVerification
         ? { google: business.googleSiteVerification }
