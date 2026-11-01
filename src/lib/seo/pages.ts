@@ -70,10 +70,6 @@ export const publicPages = {
     "Projects and portfolio",
     "Explore published LED display, event and technology projects, including their challenges, solutions and outcomes.",
   ],
-  "/gallery": [
-    "Project and event gallery",
-    "View photographs and videos of installations, events, products and service work.",
-  ],
   "/testimonials": [
     "Customer testimonials",
     "Read customer feedback shared with permission about our products, projects and services.",

@@ -32,7 +32,6 @@ export const morePublicNavigation: NavigationItem[] = [
   { label: "LED Maintenance", href: "/led-maintenance" },
   { label: "Music", href: "/music" },
   { label: "Projects", href: "/projects" },
-  { label: "Gallery", href: "/gallery" },
   { label: "Solutions", href: "/services" },
 ];
 

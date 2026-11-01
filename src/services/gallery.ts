@@ -125,8 +125,7 @@ export async function updateGalleryItem(
   return d ? plain(d) : null;
 }
 function refreshGallery() {
-  for (const path of ["/", "/gallery", "/admin/gallery"]) revalidatePath(path);
-  revalidatePath("/gallery/[slug]", "page");
+  for (const path of ["/", "/admin/gallery"]) revalidatePath(path);
 }
 async function validateGalleryReferences(
   i: { categoryId: string; productId: string },

@@ -7,7 +7,6 @@ import {
 } from "@/lib/constants/homepage";
 import { getHomepageTextSettings } from "@/services/homepage-accessories";
 import { defaultHomepageAccessorySettings } from "@/lib/constants/homepage-accessories";
-import Image from "next/image";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
   buildOrganizationJsonLd,
@@ -42,7 +41,6 @@ import {
 } from "@/services/products";
 
 import { getBellAlarmProducts } from "@/services/bell-alarm";
-import { getFeaturedGalleryItems } from "@/services/gallery";
 import { createWhatsAppUrl } from "@/lib/utils/contact";
 import { HeroMedia } from "@/components/home/hero-media";
 import { OrganisationMarquee } from "@/components/organisations/organisation-marquee";
@@ -63,7 +61,6 @@ export default async function Home() {
     getFeaturedContent(4, "project"),
     getHomepageArticles(),
     getOrganisations(true),
-    getFeaturedGalleryItems(6),
     getHomepageTextSettings(),
     getHomepageAccessories(3, true),
   ]);
@@ -75,19 +72,18 @@ export default async function Home() {
     cameras = value(results[3], []),
     projects = value(results[4], []),
     articles = value(results[5], []),
-    organisations = value(results[6], []),
-    gallery = value(results[7], []);
+    organisations = value(results[6], []);
   const bell = bells.find((p) => p.featured);
   const {
     accessories: accessorySettings,
     hero: heroSettings,
     services: servicesSettings,
-  } = value(results[8], {
+  } = value(results[7], {
     accessories: defaultHomepageAccessorySettings,
     hero: defaultHomepageHeroSettings,
     services: defaultHomepageServicesSettings,
   });
-  const videoAccessories = value(results[9], []);
+  const videoAccessories = value(results[8], []);
   const leadCamera = cameras[0];
   const bellContent = homepageProductContent("bell", bell);
   const cameraContent = homepageProductContent("camera", leadCamera);
@@ -420,53 +416,6 @@ export default async function Home() {
         </Container>
       </section>
       <OrganisationMarquee items={organisations} />
-      {gallery.length > 0 && (
-        <section className="bg-slate-50 py-20">
-          <Container>
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="text-brand-700 text-sm font-bold tracking-widest uppercase">
-                  Our work
-                </p>
-                <h2 className="mt-2 text-3xl font-black">Featured gallery</h2>
-              </div>
-              <Link href="/gallery" className="text-brand-700 font-bold">
-                View Full Gallery
-              </Link>
-            </div>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {gallery.map((item: any) => (
-                <Link
-                  key={item.id}
-                  href={item.slug ? `/gallery/${item.slug}` : "/gallery"}
-                  className="overflow-hidden rounded-2xl border bg-white"
-                >
-                  <div className="relative aspect-[4/3] bg-slate-200">
-                    <Image
-                      src={item.thumbnailUrl || item.imageUrl}
-                      alt={item.altText || item.title}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      unoptimized={
-                        !(item.thumbnailUrl || item.imageUrl).startsWith("/")
-                      }
-                      className={
-                        item.productId ? "object-contain" : "object-cover"
-                      }
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold">{item.title}</h3>
-                    <p className="mt-1 text-sm text-slate-600">
-                      {item.caption || item.city || item.category}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
       <section className="bg-brand-50 py-16">
         <Container>
           <h2 className="text-brand-900 text-3xl font-black">

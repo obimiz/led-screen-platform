@@ -7,7 +7,6 @@ import { PortfolioProject } from "@/models/portfolio-project";
 import { MusicContent } from "@/models/music-content";
 import { MusicArtist } from "@/models/music-artist";
 import { MusicCategory } from "@/models/music-category";
-import { GalleryItem } from "@/models/gallery-item";
 import { buildCanonicalUrl } from "@/lib/seo/urls";
 import { productPath } from "@/lib/seo/metadata";
 
@@ -88,15 +87,6 @@ export async function getDynamicSitemapEntries(): Promise<MetadataRoute.Sitemap>
           entries(
             rows as unknown as SitemapRecord[],
             (row) => `/music/category/${encodeURIComponent(row.slug)}`,
-          ),
-        ),
-      GalleryItem.find({ status: "published" })
-        .select("slug updatedAt -_id")
-        .lean()
-        .then((rows) =>
-          entries(
-            rows as unknown as SitemapRecord[],
-            (row) => `/gallery/${encodeURIComponent(row.slug)}`,
           ),
         ),
     ]);
