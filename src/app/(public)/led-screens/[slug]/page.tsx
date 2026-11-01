@@ -65,6 +65,7 @@ export default async function LedProductPage({ params }: Props) {
               name={product.name}
               fit={product.imageFit}
               neutralFallback
+              sizes="(max-width: 1024px) 100vw, 55vw"
               className="aspect-video rounded-2xl"
             />
             {gallery.length > 1 && (
@@ -76,6 +77,7 @@ export default async function LedProductPage({ params }: Props) {
                     name={`${product.name} gallery image ${index + 2}`}
                     fit={product.imageFit}
                     neutralFallback
+                    sizes="(max-width: 640px) 25vw, 160px"
                     className="aspect-square rounded-lg"
                   />
                 ))}

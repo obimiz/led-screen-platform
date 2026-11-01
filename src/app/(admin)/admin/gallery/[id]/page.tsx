@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ProductImage } from "@/components/products/product-media";
 import { requireGalleryAdmin } from "@/lib/gallery/access";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
 import { getGalleryItemById } from "@/services/gallery";
 export const dynamic = "force-dynamic";
 export default async function Page({
@@ -18,10 +20,13 @@ export default async function Page({
       </p>
       <h1 className="mt-2 text-3xl font-black">{x.title}</h1>
       {x.imageUrl && (
-        <img
-          src={x.imageUrl}
-          alt={x.altText || x.title}
-          className="mt-6 max-w-2xl rounded-xl"
+        <ProductImage
+          url={normalizePublicImageUrl(x.imageUrl)}
+          name={x.altText || x.title}
+          fit="contain"
+          neutralFallback
+          sizes="(max-width: 768px) 100vw, 672px"
+          className="mt-6 aspect-video max-w-2xl rounded-xl"
         />
       )}
       <div className="mt-6">

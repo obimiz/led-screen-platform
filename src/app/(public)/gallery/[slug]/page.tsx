@@ -1,4 +1,6 @@
 import { PageHero } from "@/components/layout/page-hero";
+import { ProductImage } from "@/components/products/product-media";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { getPublicBusinessSettings } from "@/services/business-settings";
@@ -53,10 +55,14 @@ export default async function GalleryDetail({
               referrerPolicy="strict-origin-when-cross-origin"
             />
           ) : item.mediaType === "image" && item.imageUrl ? (
-            <img
-              src={item.imageUrl}
-              alt={item.altText || item.title}
-              className="max-h-[70vh] w-full object-contain"
+            <ProductImage
+              url={normalizePublicImageUrl(item.imageUrl)}
+              name={item.altText || item.title}
+              fit="contain"
+              priority
+              neutralFallback
+              sizes="(max-width: 1280px) 100vw, 1200px"
+              className="aspect-video max-h-[70vh] w-full"
             />
           ) : (
             <p className="p-8 text-slate-500">This media is unavailable.</p>

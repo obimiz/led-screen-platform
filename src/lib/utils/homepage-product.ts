@@ -2,6 +2,7 @@ import {
   homepageSectionDefaults,
   homepageSectionFallbacks,
 } from "@/lib/constants/homepage";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
 
 type HomepageProduct = {
   name?: string;
@@ -19,12 +20,13 @@ export function homepageProductContent(
   const heading =
     product?.name ||
     homepageSectionDefaults[kind === "bell" ? "bellHeading" : "cameraHeading"];
-  const imageUrl =
+  const rawImageUrl =
     product?.featuredImageUrl || product?.imageUrls?.find(Boolean) || "";
+  const imageUrl = normalizePublicImageUrl(rawImageUrl);
   const imageAlt =
     (product?.featuredImageUrl
       ? product.imageAlt
-      : product?.imageAlts?.[product?.imageUrls?.indexOf(imageUrl) ?? -1]) ||
+      : product?.imageAlts?.[product?.imageUrls?.indexOf(rawImageUrl) ?? -1]) ||
     heading;
   return {
     heading,
@@ -33,3 +35,4 @@ export function homepageProductContent(
     imageAlt,
   };
 }
+

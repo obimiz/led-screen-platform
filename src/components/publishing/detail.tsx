@@ -2,6 +2,7 @@ import { PageHero } from "@/components/layout/page-hero";
 import Image from "next/image";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
 import { RichContent } from "./rich-content";
 import { ProjectPhotos } from "./photo-gallery";
 import { ContentCard, type PublishingEntry } from "./card";
@@ -99,11 +100,17 @@ export function PublishingDetail({
       {item.coverImageUrl && (
         <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-2xl bg-slate-50">
           <Image
-            src={item.coverImageUrl}
+            src={normalizePublicImageUrl(item.coverImageUrl)}
+            overrideSrc={normalizePublicImageUrl(item.coverImageUrl)}
             alt={item.coverAlt || item.title}
             fill
             sizes="(max-width:768px) 100vw,1000px"
-            unoptimized={!item.coverImageUrl.startsWith("/")}
+            unoptimized={
+              !normalizePublicImageUrl(item.coverImageUrl).startsWith("/") ||
+              normalizePublicImageUrl(item.coverImageUrl)
+                .toLowerCase()
+                .endsWith(".svg")
+            }
             className="object-cover"
           />
         </div>

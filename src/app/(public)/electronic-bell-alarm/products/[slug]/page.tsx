@@ -51,7 +51,7 @@ export default async function Page({
           />
         ) : (
           <BellAlarmProductImage
-            url={p.featuredImageUrl}
+            url={getProductDisplayImages(p)[0] || ""}
             name={p.imageAlt || p.name}
             priority
           />

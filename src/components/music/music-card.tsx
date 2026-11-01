@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
 import { MusicPlayer } from "./audio-player";
 export type MusicCardItem = {
   id: string;
@@ -19,17 +20,22 @@ export type MusicCardItem = {
 export function MusicCard({ item }: { item: MusicCardItem }) {
   const category =
     typeof item.categoryId === "object" ? item.categoryId?.name : "";
+  const coverImageUrl = normalizePublicImageUrl(item.coverImageUrl);
   return (
     <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="from-brand-950 via-brand-900 text-brand-200 relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br to-slate-950 text-4xl">
-        {item.coverImageUrl ? (
+        {coverImageUrl ? (
           <Image
-            src={item.coverImageUrl}
+            src={coverImageUrl}
+            overrideSrc={coverImageUrl}
             alt={`${item.title} cover`}
             fill
             sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
             className="object-cover"
-            unoptimized={!item.coverImageUrl.startsWith("/")}
+            unoptimized={
+              !coverImageUrl.startsWith("/") ||
+              coverImageUrl.toLowerCase().endsWith(".svg")
+            }
           />
         ) : (
           <span aria-hidden="true">♫</span>

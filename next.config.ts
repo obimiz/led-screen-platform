@@ -8,6 +8,24 @@ const localDevelopmentOrigins = Object.values(networkInterfaces())
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["localhost", "127.0.0.1", ...localDevelopmentOrigins],
+  images: {
+    formats: ["image/webp"],
+    minimumCacheTTL: 2678400,
+    maximumDiskCacheSize: 100 * 1024 * 1024,
+    maximumResponseBody: 10_000_000,
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/images/led-screens/:path*",
+        destination: "/Images/products/led-screens/:path*",
+      },
+      {
+        source: "/images/:path*",
+        destination: "/Images/:path*",
+      },
+    ];
+  },
   async headers() {
     const isDevelopment = process.env.NODE_ENV === "development";
     const productionHttps =
@@ -36,6 +54,24 @@ const nextConfig: NextConfig = {
       {
         source: "/admin/:path*",
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        source: "/Images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=2592000",
+          },
+        ],
+      },
+      {
+        source: "/branding/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=2592000",
+          },
+        ],
       },
       {
         source: "/(.*)",

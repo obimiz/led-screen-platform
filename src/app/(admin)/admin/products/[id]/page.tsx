@@ -59,6 +59,7 @@ export default async function AdminProductDetail({
           url={getProductDisplayImages(product)[0] || ""}
           name={product.name}
           fit={product.imageFit}
+          sizes="(max-width: 1024px) 100vw, 50vw"
           className="aspect-video rounded-2xl"
         />
         <div className="rounded-2xl border bg-white p-6">

@@ -1,5 +1,11 @@
 "use client";
+import Image from "next/image";
 import { useCallback, useState } from "react";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
+
+const DEFAULT_PRODUCT_IMAGE_SIZES =
+  "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
+
 export function ProductImage({
   url,
   name,
@@ -7,6 +13,7 @@ export function ProductImage({
   priority = false,
   fit = "cover",
   neutralFallback = false,
+  sizes = DEFAULT_PRODUCT_IMAGE_SIZES,
 }: {
   url: string;
   name: string;
@@ -14,30 +21,46 @@ export function ProductImage({
   priority?: boolean;
   fit?: "cover" | "contain";
   neutralFallback?: boolean;
+  sizes?: string;
 }) {
+  const normalizedUrl = normalizePublicImageUrl(url);
   const [failed, setFailed] = useState("");
   const checkImage = useCallback(
     (image: HTMLImageElement | null) => {
-      if (image?.complete && !image.naturalWidth && url) setFailed(url);
+      if (!image || !normalizedUrl) return;
+      if (image.complete && !image.naturalWidth) {
+        setFailed(normalizedUrl);
+        return;
+      }
+      image.addEventListener("error", () => setFailed(normalizedUrl), {
+        once: true,
+      });
     },
-    [url],
+    [normalizedUrl],
   );
-  return url && failed !== url ? (
+  const unoptimized =
+    !normalizedUrl.startsWith("/") ||
+    normalizedUrl.toLowerCase().endsWith(".svg");
+
+  return normalizedUrl && failed !== normalizedUrl ? (
     <span
       className={`relative block overflow-hidden bg-slate-100 ${className}`}
     >
-      <img
+      <Image
         ref={checkImage}
-        src={url}
-        onError={() => setFailed(url)}
+        src={normalizedUrl}
+        overrideSrc={normalizedUrl}
+        onLoad={(event) => checkImage(event.currentTarget)}
         alt={name}
+        fill
+        sizes={sizes}
+        preload={priority}
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : undefined}
         decoding="async"
-        width={960}
-        height={600}
+        unoptimized={unoptimized}
         style={{ objectFit: fit, objectPosition: "center" }}
-        className={`absolute inset-0 h-full w-full ${fit === "contain" ? "p-4" : ""}`}
+        className={fit === "contain" ? "p-4" : undefined}
       />
     </span>
   ) : neutralFallback ? (
@@ -57,3 +80,4 @@ export function ProductImage({
     </span>
   );
 }
+

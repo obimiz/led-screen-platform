@@ -1,4 +1,5 @@
 import { effectiveProductPrice } from "@/lib/utils/product-price";
+import { getPrimaryProductImage } from "@/lib/media/product-primary-image";
 import Link from "next/link";
 import { PriceDisplay } from "@/components/products/price-display";
 import { AccessoryGallery } from "@/components/products/accessory-gallery";
@@ -81,7 +82,7 @@ export function AccessoryCard({
                     slug: item.slug,
                     productType: item.productType,
                     sku: item.sku,
-                    imageUrl: item.featuredImageUrl,
+                    imageUrl: getPrimaryProductImage(item),
                     quantity: item.minOrderQuantity || 1,
                     displayedUnitPrice:
                       effectiveProductPrice(item) ?? item.price,

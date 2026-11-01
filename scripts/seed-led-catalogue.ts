@@ -151,8 +151,8 @@ async function main() {
     assert.ok(category);
     let imageUrl = "";
     try {
-      await access(`public/images/products/led-screens/${item.image}`);
-      imageUrl = `/images/products/led-screens/${item.image}`;
+      await access(`public/Images/products/led-screens/${item.image}`);
+      imageUrl = `/Images/products/led-screens/${item.image}`;
     } catch {
       /* Keep the neutral fallback until the real asset is supplied. */
     }

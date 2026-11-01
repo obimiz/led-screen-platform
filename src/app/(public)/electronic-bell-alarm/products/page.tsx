@@ -1,5 +1,6 @@
 import { PageHero } from "@/components/layout/page-hero";
 import { BellAlarmProductImage } from "@/components/bell-alarm/product-image";
+import { getPrimaryProductImage } from "@/lib/media/product-primary-image";
 import { staticPageMetadata } from "@/lib/seo/pages";
 import type { SearchValues } from "@/lib/seo/metadata";
 import Link from "next/link";
@@ -29,7 +30,10 @@ export default async function Page() {
               href={`/electronic-bell-alarm/products/${p.slug}`}
               className="flex h-full min-w-0 flex-col overflow-hidden rounded-xl border bg-white"
             >
-              <BellAlarmProductImage url={p.featuredImageUrl} name={p.name} />
+              <BellAlarmProductImage
+                url={getPrimaryProductImage(p)}
+                name={p.name}
+              />
               <div className="flex flex-1 flex-col p-5">
                 <h2 className="min-h-[3.5rem] text-xl font-bold break-words">
                   {p.name}

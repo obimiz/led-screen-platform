@@ -4,6 +4,7 @@ import { ArchiveProductButton } from "@/components/products/archive-product-butt
 import { PriceDisplay } from "@/components/products/price-display";
 import { ProductImage } from "@/components/products/product-media";
 import { getCurrentAdmin } from "@/lib/auth/current-admin";
+import { getPrimaryProductImage } from "@/lib/media/product-primary-image";
 import {
   priceTypes,
   productStatuses,
@@ -139,8 +140,9 @@ export default async function AccessoriesPage({
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <ProductImage
-                      url={item.featuredImageUrl}
+                      url={getPrimaryProductImage(item)}
                       name={item.name}
+                      sizes="48px"
                       className="size-12 rounded-lg"
                     />
                     <div>

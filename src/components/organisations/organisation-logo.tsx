@@ -1,5 +1,8 @@
 "use client";
+import Image from "next/image";
 import { useCallback, useState } from "react";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
+
 export function OrganisationLogo({
   name,
   url,
@@ -7,33 +10,47 @@ export function OrganisationLogo({
   name: string;
   url: string | null;
 }) {
+  const normalizedUrl = normalizePublicImageUrl(url);
   const [failed, setFailed] = useState("");
   const [wideUrl, setWideUrl] = useState("");
   const measureLogo = useCallback(
     (image: HTMLImageElement | null) => {
-      if (image?.complete && url) {
-        if (image.naturalWidth === 0) setFailed(url);
-        else
-          setWideUrl(image.naturalWidth / image.naturalHeight >= 2 ? url : "");
+      if (!image || !normalizedUrl) return;
+      if (!image.complete) {
+        image.addEventListener("error", () => setFailed(normalizedUrl), {
+          once: true,
+        });
+        return;
       }
+      if (image.naturalWidth === 0) setFailed(normalizedUrl);
+      else
+        setWideUrl(
+          image.naturalWidth / image.naturalHeight >= 2 ? normalizedUrl : "",
+        );
     },
-    [url],
+    [normalizedUrl],
   );
+  const unoptimized =
+    !normalizedUrl.startsWith("/") ||
+    normalizedUrl.toLowerCase().endsWith(".svg");
+
   return (
     <div
-      className={`organisation-logo ${url && wideUrl === url ? "organisation-logo-wide" : ""}`}
+      className={`organisation-logo ${normalizedUrl && wideUrl === normalizedUrl ? "organisation-logo-wide" : ""}`}
     >
-      {url && failed !== url ? (
-        <img
-          src={url}
+      {normalizedUrl && failed !== normalizedUrl ? (
+        <Image
+          src={normalizedUrl}
+          overrideSrc={normalizedUrl}
           alt={`${name} logo`}
           loading="eager"
           decoding="async"
           width={110}
           height={80}
+          sizes="110px"
+          unoptimized={unoptimized}
           ref={measureLogo}
           onLoad={(event) => measureLogo(event.currentTarget)}
-          onError={() => setFailed(url)}
         />
       ) : (
         <span aria-hidden="true" className="text-brand-700 text-2xl font-bold">
@@ -48,3 +65,4 @@ export function OrganisationLogo({
     </div>
   );
 }
+

@@ -17,11 +17,7 @@ export async function GET() {
     );
   try {
     const images: { url: string; name: string }[] = [];
-    for (const directory of [
-      "images/led-screens",
-      "images/products/led-screens",
-      "Images/products/led-screens",
-    ]) {
+    for (const directory of ["Images/products/led-screens"]) {
       const entries = await readdir(
         path.join(process.cwd(), "public", directory),
         { withFileTypes: true },

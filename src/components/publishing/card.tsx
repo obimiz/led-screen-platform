@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
 export type PublishingEntry = {
   id: string;
   title: string;
@@ -42,16 +43,21 @@ export function ContentCard({ item }: { item: PublishingEntry }) {
     path = `/${article ? "blog" : "projects"}/${item.slug}`,
     category = typeof item.categoryId === "object" ? item.categoryId?.name : "";
   const date = item.publishedAt || item.createdAt;
+  const coverImageUrl = normalizePublicImageUrl(item.coverImageUrl);
   return (
     <article className="min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm">
       <Link href={path} className="bg-brand-50 relative block aspect-[16/10]">
-        {item.coverImageUrl ? (
+        {coverImageUrl ? (
           <Image
-            src={item.coverImageUrl}
+            src={coverImageUrl}
+            overrideSrc={coverImageUrl}
             alt={item.coverAlt || item.title}
             fill
             sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
-            unoptimized={!item.coverImageUrl.startsWith("/")}
+            unoptimized={
+              !coverImageUrl.startsWith("/") ||
+              coverImageUrl.toLowerCase().endsWith(".svg")
+            }
             className="object-cover"
           />
         ) : (

@@ -1,6 +1,7 @@
 import { PageHero } from "@/components/layout/page-hero";
 import { PriceDisplay } from "@/components/products/price-display";
 import { ProductImage } from "@/components/products/product-media";
+import { getPrimaryProductImage } from "@/lib/media/product-primary-image";
 import { buildProductJsonLd } from "@/lib/seo/structured-data";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildProductMetadata } from "@/lib/seo/metadata";
@@ -35,11 +36,12 @@ export default async function Page({
         Bell/alarm accessory
       </p>
       <PageHero title={<>{p.name}</>} />
-      {p.featuredImageUrl && (
+      {getPrimaryProductImage(p) && (
         <ProductImage
-          url={p.featuredImageUrl}
+          url={getPrimaryProductImage(p)}
           name={p.name}
           priority
+          sizes="(max-width: 1024px) 100vw, 896px"
           className="mt-6 aspect-video rounded-xl"
         />
       )}

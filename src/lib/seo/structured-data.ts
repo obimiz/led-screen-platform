@@ -1,3 +1,7 @@
+import {
+  getPrimaryProductImage,
+  normalizePublicImageUrl,
+} from "@/lib/media/product-primary-image";
 import type { PublicBusinessSettings } from "@/types/business-settings";
 import { absoluteUrl, buildCanonicalUrl, getSiteUrl } from "./urls";
 import { productPath, type SeoProduct, type SeoPortfolio } from "./metadata";
@@ -60,7 +64,7 @@ export function buildBreadcrumbJsonLd(items: Breadcrumb[]): JsonLdData {
 }
 export function buildProductJsonLd(product: SeoProduct): JsonLdData | null {
   if (product.status !== "published") return null;
-  const image = absoluteUrl(product.featuredImageUrl || "");
+  const image = absoluteUrl(getPrimaryProductImage(product));
   const availability: Record<string, string> = {
     "in-stock": "InStock",
     "low-stock": "InStock",
@@ -116,7 +120,7 @@ export function buildServiceJsonLd(
   };
 }
 export function buildPortfolioJsonLd(project: SeoPortfolio): JsonLdData {
-  const image = absoluteUrl(project.coverImageUrl || "");
+  const image = absoluteUrl(normalizePublicImageUrl(project.coverImageUrl || ""));
   return {
     "@context": "https://schema.org",
     "@type": "CreativeWork",

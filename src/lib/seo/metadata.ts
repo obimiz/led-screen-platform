@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config/site";
+import {
+  getPrimaryProductImage,
+  normalizePublicImageUrl,
+} from "@/lib/media/product-primary-image";
 import type { PublicBusinessSettings } from "@/types/business-settings";
 import {
   absoluteUrl,
@@ -38,8 +42,8 @@ export function buildPageMetadata(
     siteConfig.description;
   const url = buildCanonicalUrl(input.path, input.page);
   const image =
-    absoluteUrl(input.image || "") ||
-    absoluteUrl(business.ogImageUrl || "") ||
+    absoluteUrl(normalizePublicImageUrl(input.image || "")) ||
+    absoluteUrl(normalizePublicImageUrl(business.ogImageUrl || "")) ||
     absoluteUrl("/branding/image-grant-technology-logo.jpeg");
   const shareTitle =
     title === business.businessName
@@ -77,6 +81,7 @@ export type SeoProduct = {
   seoDescription?: string;
   shortDescription?: string;
   featuredImageUrl?: string;
+  imageUrls?: string[];
   sku?: string;
   brand?: string;
   priceType?: string;
@@ -109,7 +114,7 @@ export function buildProductMetadata(
         product.shortDescription ||
         `Explore ${product.name} and enquire about its suitability for your requirements.`,
       path: productPath(product),
-      image: product.featuredImageUrl,
+      image: getPrimaryProductImage(product),
       index: product.status === "published",
     },
     business,

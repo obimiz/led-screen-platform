@@ -56,8 +56,11 @@ test("upload origin accepts HTTPS reverse proxies and rejects other sites", asyn
 });
 
 test("product display uses additional images when no featured image is selected and deduplicates thumbnails", async () => {
-  const { getProductDisplayImages } =
-    await import("../src/lib/media/product-primary-image");
+  const {
+    getProductDisplayImages,
+    getPrimaryProductImage,
+    normalizePublicImageUrl,
+  } = await import("../src/lib/media/product-primary-image");
   assert.deepEqual(
     getProductDisplayImages({
       featuredImageUrl: "",
@@ -73,6 +76,43 @@ test("product display uses additional images when no featured image is selected 
     ["/second.png", "/first.png"],
   );
   assert.deepEqual(getProductDisplayImages({}), []);
+  assert.equal(
+    normalizePublicImageUrl(
+      "/images/products/led-screens/Indoor-outdoorled-modules-size-320x160mm.png",
+    ),
+    "/Images/products/led-screens/Indoor-outdoorled-modules-size-320x160mm.png",
+  );
+  assert.equal(
+    normalizePublicImageUrl(
+      "/images/products/led-screens/led-cabinet-indoor-rental-500x1000.png",
+    ),
+    "/Images/products/led-screens/led-cabinet-indoor-rental-500x1000.png",
+  );
+  assert.equal(
+    normalizePublicImageUrl("/images/led-screens/event-stage-led-screen.png"),
+    "/Images/products/led-screens/event-stage-led-screen.png",
+  );
+  assert.deepEqual(
+    getProductDisplayImages({
+      featuredImageUrl: "",
+      imageUrls: [
+        "/images/products/led-screens/Indoor-outdoorled-modules-size-320x160mm.png",
+        "/Images/products/led-screens/Indoor-outdoorled-modules-size-320x160mm.png",
+      ],
+    }),
+    [
+      "/Images/products/led-screens/Indoor-outdoorled-modules-size-320x160mm.png",
+    ],
+  );
+  assert.equal(
+    getPrimaryProductImage({
+      featuredImageUrl: "",
+      imageUrls: [
+        "/images/products/led-screens/led-cabinet-indoor-rental-500x1000.png",
+      ],
+    }),
+    "/Images/products/led-screens/led-cabinet-indoor-rental-500x1000.png",
+  );
 });
 
 test("Sharp pixel validation accepts valid images and rejects corrupt or truncated pixel streams with low memory", async () => {

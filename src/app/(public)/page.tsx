@@ -220,6 +220,7 @@ export default async function Home() {
               name={bellContent.imageAlt}
               neutralFallback
               fit="contain"
+              sizes="(max-width: 768px) 100vw, 45vw"
               className="aspect-[4/3] rounded-xl"
             />
           ) : (
@@ -262,6 +263,7 @@ export default async function Home() {
                 name={cameraContent.imageAlt}
                 neutralFallback
                 fit="contain"
+                sizes="(max-width: 768px) 100vw, 45vw"
                 className="aspect-[4/3] rounded-xl"
               />
             ) : (

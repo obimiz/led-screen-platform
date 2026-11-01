@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useState } from "react";
+import { normalizePublicImageUrl } from "@/lib/media/product-primary-image";
 import styles from "./product-image.module.css";
 
 export function BellAlarmProductImage({
@@ -12,35 +14,49 @@ export function BellAlarmProductImage({
   name: string;
   priority?: boolean;
 }) {
+  const normalizedUrl = normalizePublicImageUrl(url);
   const [failed, setFailed] = useState("");
   const measureImage = useCallback(
     (image: HTMLImageElement | null) => {
-      if (!image?.complete || !url) return;
+      if (!image || !normalizedUrl) return;
+      if (!image.complete) {
+        image.addEventListener("error", () => setFailed(normalizedUrl), {
+          once: true,
+        });
+        return;
+      }
       if (!image.naturalWidth) {
-        setFailed(url);
+        setFailed(normalizedUrl);
         return;
       }
       // Contain large sources, but never upscale a small source beyond its pixels.
       image.style.maxWidth = `min(86%, ${image.naturalWidth}px)`;
       image.style.maxHeight = `min(86%, ${image.naturalHeight}px)`;
     },
-    [url],
+    [normalizedUrl],
   );
+  const unoptimized =
+    !normalizedUrl.startsWith("/") ||
+    normalizedUrl.toLowerCase().endsWith(".svg");
 
   return (
     <div className={styles.frame} data-bell-product-image>
-      {url && failed !== url ? (
-        <img
+      {normalizedUrl && failed !== normalizedUrl ? (
+        <Image
           ref={measureImage}
-          src={url}
+          src={normalizedUrl}
+          overrideSrc={normalizedUrl}
           alt={name}
           width={240}
           height={240}
+          sizes="(max-width: 768px) 86vw, 340px"
+          preload={priority}
           loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : undefined}
           decoding="async"
+          unoptimized={unoptimized}
           className={styles.image}
           onLoad={(event) => measureImage(event.currentTarget)}
-          onError={() => setFailed(url)}
         />
       ) : (
         <span className={styles.placeholder}>Image coming soon</span>
@@ -48,3 +64,4 @@ export function BellAlarmProductImage({
     </div>
   );
 }
+

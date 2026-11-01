@@ -21,13 +21,25 @@ export function AccessoryGallery({
 }) {
   const images = getProductDisplayImages({ featuredImageUrl, imageUrls });
   const [selected, setSelected] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const swiped = useRef(false);
   const index = Math.min(selected, Math.max(images.length - 1, 0));
   const url = images[index] || "";
+  const normalizedFeatured = getProductDisplayImages({
+    featuredImageUrl,
+    imageUrls: [],
+  })[0];
+  const normalizedGallery = imageUrls.map(
+    (item) =>
+      getProductDisplayImages({ featuredImageUrl: item, imageUrls: [] })[0] ||
+      "",
+  );
   const alt = (src: string) =>
-    (src === featuredImageUrl ? imageAlt : imageAlts[imageUrls.indexOf(src)]) ||
+    (src === normalizedFeatured
+      ? imageAlt
+      : imageAlts[normalizedGallery.indexOf(src)]) ||
     `${name}, image ${images.indexOf(src) + 1}`;
   const move = (step: number) => {
     if (images.length > 1)
@@ -95,6 +107,7 @@ export function AccessoryGallery({
               swiped.current = false;
               return;
             }
+            setIsOpen(true);
             dialog.current?.showModal();
           }}
           aria-label="Enlarge product image"
@@ -110,6 +123,11 @@ export function AccessoryGallery({
             fit="contain"
             neutralFallback
             priority={!compact}
+            sizes={
+              compact
+                ? "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                : "(max-width: 1024px) 100vw, 55vw"
+            }
             className={`aspect-[4/3] ${compact ? "" : "rounded-2xl"}`}
           />
         </button>
@@ -166,6 +184,7 @@ export function AccessoryGallery({
                 name={alt(src)}
                 fit="contain"
                 neutralFallback
+                sizes="120px"
                 className="aspect-[4/3]"
               />
             </button>
@@ -176,6 +195,7 @@ export function AccessoryGallery({
         ref={dialog}
         onClose={() => {
           swiped.current = false;
+          setIsOpen(false);
         }}
         aria-label={`${name} enlarged image`}
         className="m-auto max-h-[95dvh] w-[95vw] max-w-6xl overflow-auto rounded-xl bg-white p-4 backdrop:bg-black/80"
@@ -199,15 +219,18 @@ export function AccessoryGallery({
           onTouchEnd={touchEnd}
           style={{ touchAction: "pan-y pinch-zoom" }}
         >
-          <ProductImage
-            key={url}
-            url={url}
-            name={alt(url)}
-            fit="contain"
-            neutralFallback
-            priority
-            className="h-[65dvh] w-full rounded-lg"
-          />
+          {isOpen && (
+            <ProductImage
+              key={url}
+              url={url}
+              name={alt(url)}
+              fit="contain"
+              neutralFallback
+              priority
+              sizes="95vw"
+              className="h-[65dvh] w-full rounded-lg"
+            />
+          )}
         </div>
         {controls()}
       </dialog>

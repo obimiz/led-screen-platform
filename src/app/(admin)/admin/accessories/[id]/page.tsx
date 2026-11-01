@@ -4,6 +4,7 @@ import { ArchiveProductButton } from "@/components/products/archive-product-butt
 import { PriceDisplay } from "@/components/products/price-display";
 import { ProductImage } from "@/components/products/product-media";
 import { getCurrentAdmin } from "@/lib/auth/current-admin";
+import { getPrimaryProductImage } from "@/lib/media/product-primary-image";
 import { getAccessoryById } from "@/services/products";
 export const dynamic = "force-dynamic";
 export default async function AccessoryDetailPage({
@@ -44,8 +45,9 @@ export default async function AccessoryDetailPage({
       </div>
       <div className="mt-7 grid gap-7 lg:grid-cols-2">
         <ProductImage
-          url={item.featuredImageUrl}
+          url={getPrimaryProductImage(item)}
           name={item.name}
+          sizes="(max-width: 1024px) 100vw, 50vw"
           className="aspect-video rounded-2xl"
         />
         <div className="rounded-2xl border bg-white p-6">
